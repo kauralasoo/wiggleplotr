@@ -1,0 +1,11 @@
+Package: wiggleplotr
+Title: What the package does (short line)
+Version: 0.1
+Authors@R: "First Last <first.last@example.com> [aut, cre]"
+Description: What the package does (paragraph)
+Depends:
+    R (>= 3.0.2)
+Imports:
+	plyr
+License: What license is it under?
+LazyData: true
