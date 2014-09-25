@@ -129,7 +129,8 @@ wiggleplotr <- function(exons, sample_data, new_intron_length = 50, plot_fractio
   coverage_df = plyr::ldply(shrunken_coverage_list, data.frame, .id = "sample_id")
   coverage_df = plyr::join(coverage_df, sample_data, by = "sample_id")
   coverage_df = dplyr::mutate(coverage_df, coverage = coverage/library_size)
-  print(head(head(coverage_df)))
+
+  
   #Make plots
   limits = c(0,n_total)
   tx_structure = plotTranscriptStructure(exons_df, limits)
