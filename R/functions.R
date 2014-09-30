@@ -107,8 +107,9 @@ wiggleplotr <- function(exons, sample_data, new_intron_length = 50, plot_fractio
   new_exon_ranges = lapply(exon_ranges, translateExonCoordinates, old_introns, new_introns)
   
   #Convert exons list to data frame
-  exons_df = plyr::ldply(new_exon_ranges, data.frame, .id = "transcript_id")
-  exons_df = dplyr::mutate(exons_df, transcript_rank = as.numeric(exons_df$transcript_id), type = "isoforms")
+  exons_df = plyr::ldply(new_exon_ranges, data.frame)
+  colnames(exons_df)[colnames(exons_df) == ".id"] = "transcript_id"
+  exons_df = dplyr::mutate(exons_df, transcript_rank = as.numeric(factor(exons_df$transcript_id)), type = "isoforms")
   
   #Read coverage tracks from BigWig file
   sample_list = as.list(sample_data$bigWig)
@@ -126,7 +127,8 @@ wiggleplotr <- function(exons, sample_data, new_intron_length = 50, plot_fractio
   shrunken_coverage_list = lapply(shrunken_coverage_list, function(x) {x[points,]} )
   
   #Covert to data frame and plot
-  coverage_df = plyr::ldply(shrunken_coverage_list, data.frame, .id = "sample_id")
+  coverage_df = plyr::ldply(shrunken_coverage_list, data.frame)
+  colnames(coverage_df)[colnames(coverage_df) == ".id"] = "sample_id"
   coverage_df = plyr::join(coverage_df, sample_data, by = "sample_id")
   coverage_df = dplyr::mutate(coverage_df, coverage = coverage/library_size)
 

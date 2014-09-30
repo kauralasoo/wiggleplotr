@@ -9,4 +9,5 @@
 #' @import rtracklayer
 #' @import grid
 #' @import dplyr
+#' @import gridExtra
 NULL
