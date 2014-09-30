@@ -1,14 +1,18 @@
-plotTranscriptStructure <- function(exons_df, limits){
+plotTranscriptStructure <- function(exons_df, limits = NA){
   #Create a plot of transcript structure
   plot = ggplot(exons_df, aes(xmin = start, xmax = end,
                               ymax = transcript_rank + 0.3, ymin = transcript_rank - 0.3,
-                              x = start, y = transcript_rank, group = transcript_rank)) + 
+                              x = start, y = transcript_rank, group = transcript_rank, 
+                              fill = feature_type, color = feature_type)) + 
     geom_line() +
-    geom_rect(fill = "white", color = 1) + 
-    theme(plot.margin=unit(c(0,1,1,1),"line"), axis.title.y = element_blank()) +
-    scale_x_continuous(limits = limits) +
+    geom_rect() + 
+    theme(plot.margin=unit(c(0,1,1,1),"line"), axis.title.y = element_blank(),
+          legend.position="none") +
     xlab("Distance from gene start (bp)") +
     facet_grid(type~.)
+  if(all(!is.na(limits))){
+    plot = plot + scale_x_continuous(limits = limits)
+  }
   return(plot)
 }
 

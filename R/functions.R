@@ -1,70 +1,3 @@
-shortenIntrons <- function(introns, intron_length){
-  #Shorten introns from a fixed length to a variable length
-  
-  #Calculate neccesary parameters
-  exons = gaps(introns)
-  n_introns = length(introns)
-  n_exons = length(exons)
-  
-  #Calculate cumulative with of introns
-  intron_cum_width = seq(intron_length,(n_introns-1)*intron_length,intron_length)
-  #Calculate new exon starts ignoring introns
-  new_intron_starts = c(1,start(introns)[2:n_introns] - (end(introns)[1:n_introns-1] - intron_cum_width))
-  #Add exon widths to the introns
-  new_intron_starts = new_intron_starts + c(0,cumsum(width(exons)) - width(exons))
-  
-  new_introns = IRanges(start = new_intron_starts, width = rep(intron_length, n_introns))
-  return(new_introns)
-}
-
-shrinkIntronsCoverage <- function(coverage, old_introns, new_introns){
-  
-  #Covert coverage vector from Rle to normal vector
-  coverage = IRanges::as.vector(coverage)  
-
-  #Calculate full annotations
-  old_annot = sort(c(old_introns, gaps(old_introns)))
-  new_annot = sort(c(new_introns, gaps(new_introns)))
-  
-  #Calculate the width of each annotation bin
-  bin_width = ceiling(width(old_annot)/width(new_annot))
-  
-  #Build summarisation groups
-  s_coord = start(new_annot)
-  e_coord = end(new_annot)
-  w_old = width(old_annot)
-  
-  bins = c()
-  for (i in 1:length(new_annot)){
-    bin_id = rep(c(s_coord[i]:e_coord[i]),each = bin_width[i])[1:w_old[i]]
-    bins = c(bins, bin_id)
-  }
-  
-  #Calculate mean coverage in bins
-  df = data.frame(coverage, bins)
-  new_coverage = dplyr::summarize(dplyr::group_by(df, bins), coverage = mean(coverage))
-  return(new_coverage)
-}
-
-translateExonCoordinates <- function(exons, old_introns, new_introns){
-  #Tranlate exon coordinates by shortening introns
-  old_exon_starts = start(exons)
-  old_intron_ends = end(old_introns)
-  new_intron_ends = end(new_introns)
-  
-  #Translate old exon coordinates to new exon coordinates
-  new_exon_starts = rep(0,length(old_exon_starts))
-  for (i in 1:length(old_exon_starts)){
-    #Find the nearest upstream intron for the current gene
-    nearest_intron_number = max(which(old_exon_starts[i] > old_intron_ends))
-    new_exon_starts[i] = old_exon_starts[i] - old_intron_ends[nearest_intron_number] + new_intron_ends[nearest_intron_number]
-  }
-  
-  #Create new exon coordinates
-  new_exons = IRanges(start = new_exon_starts, width = width(exons))
-  return(new_exons)
-}
-
 readCoverageFromBigWig <- function(bigwig_path, joint_exons, flanking = 50){
   #Read coverage over a region from a bigWig file
   chromosome = IRanges::as.vector(seqnames(joint_exons))[1]
@@ -76,10 +9,8 @@ readCoverageFromBigWig <- function(bigwig_path, joint_exons, flanking = 50){
   coverage_rle = coverage_rle[(min(start(joint_exons))-flanking):(max(end(joint_exons))+flanking)] #Keep the region of interest
 }
 
-wiggleplotr <- function(exons, sample_data, new_intron_length = 50, plot_fraction = 0.1){
-  #Plot read coverage over exons
-  transcript_ids = names(exons)
-  exon_ranges = lapply(exons, ranges)
+joinExons <- function(exons) {
+  #Join a list of exons into one GRanges object
   
   #Test that all transcripts are on the same chromosome
   chrs = unlist(lapply(exons, function(x) IRanges::as.vector(seqnames(x)[1])))
@@ -88,6 +19,7 @@ wiggleplotr <- function(exons, sample_data, new_intron_length = 50, plot_fractio
   }
   
   #Join all exons together
+  transcript_ids = names(exons)
   joint_exons = c()
   for(tx_id in transcript_ids){
     tx = exons[[tx_id]]
@@ -99,6 +31,16 @@ wiggleplotr <- function(exons, sample_data, new_intron_length = 50, plot_fractio
     }
   }
   joint_exons = reduce(joint_exons)
+  return(joint_exons)
+}
+
+wiggleplotr <- function(exons, cdss, sample_data, new_intron_length = 50, plot_fraction = 0.1){
+  #Plot read coverage over exons
+  transcript_ids = names(exons)
+  exon_ranges = lapply(exons, ranges)
+  
+  #Join exons together into single GRanges object
+  joint_exons = joinExons(exons)
   joint_ranges = ranges(joint_exons)
   
   #Shorten introns and translate exons into the new exons
@@ -110,6 +52,19 @@ wiggleplotr <- function(exons, sample_data, new_intron_length = 50, plot_fractio
   exons_df = plyr::ldply(new_exon_ranges, data.frame)
   colnames(exons_df)[colnames(exons_df) == ".id"] = "transcript_id"
   exons_df = dplyr::mutate(exons_df, transcript_rank = as.numeric(factor(exons_df$transcript_id)), type = "isoforms")
+  transcript_rank = unique(exons_df[,c("transcript_id", "transcript_rank", "type")])
+  
+  #Translate cds coordinates
+  cds_ranges = lapply(cdss, ranges)
+  new_cds_ranges = lapply(cds_ranges, translateExonCoordinates, old_introns, new_introns)
+  cds_df = plyr::ldply(new_cds_ranges, data.frame)
+  colnames(cds_df)[colnames(cds_df) == ".id"] = "transcript_id"
+  cds_df = plyr::join(cds_df, transcript_rank, by = "transcript_id") #Add matching transcript rank
+  
+  #Join exons and cdss together
+  exons_df = dplyr::mutate(exons_df, feature_type = "exon")
+  cds_df = dplyr::mutate(cds_df, feature_type = "cds")
+  transcript_struct = rbind(exons_df, cds_df)
   
   #Read coverage tracks from BigWig file
   sample_list = as.list(sample_data$bigWig)
@@ -135,7 +90,7 @@ wiggleplotr <- function(exons, sample_data, new_intron_length = 50, plot_fractio
   
   #Make plots
   limits = c(0,n_total)
-  tx_structure = plotTranscriptStructure(exons_df, limits)
+  tx_structure = plotTranscriptStructure(transcript_struct, limits)
   coverage_plot = plotCoverage(coverage_df, limits)
   plot = arrangeGrob(coverage_plot, tx_structure, heights = c(0.80, 0.20), ncol = 1, nrow = 2)
   return(plot)
