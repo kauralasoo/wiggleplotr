@@ -34,7 +34,7 @@ joinExons <- function(exons) {
   return(joint_exons)
 }
 
-wiggleplotr <- function(exons, cdss, sample_data, new_intron_length = 50, plot_fraction = 0.1){
+wiggleplotr <- function(exons, cdss, sample_data, transcript_annotations, new_intron_length = 50, plot_fraction = 0.1){
   #Plot read coverage over exons
   transcript_ids = names(exons)
   exon_ranges = lapply(exons, ranges)
@@ -65,6 +65,7 @@ wiggleplotr <- function(exons, cdss, sample_data, new_intron_length = 50, plot_f
   exons_df = dplyr::mutate(exons_df, feature_type = "exon")
   cds_df = dplyr::mutate(cds_df, feature_type = "cds")
   transcript_struct = rbind(exons_df, cds_df)
+  transcript_struct = dplyr::left_join(transcript_struct, transcript_annotations, by = "transcript_id") #Add gene name
   
   #Read coverage tracks from BigWig file
   sample_list = as.list(sample_data$bigWig)
@@ -87,12 +88,11 @@ wiggleplotr <- function(exons, cdss, sample_data, new_intron_length = 50, plot_f
   coverage_df = plyr::join(coverage_df, sample_data, by = "sample_id")
   coverage_df = dplyr::mutate(coverage_df, coverage = coverage/library_size)
 
-  
   #Make plots
   limits = c(0,n_total)
   tx_structure = plotTranscriptStructure(transcript_struct, limits)
   coverage_plot = plotCoverage(coverage_df, limits)
-  plot = arrangeGrob(coverage_plot, tx_structure, heights = c(0.80, 0.20), ncol = 1, nrow = 2)
+  plot = arrangeGrob(coverage_plot, tx_structure, heights = c(0.75, 0.25), ncol = 1, nrow = 2)
   return(plot)
 }
 
