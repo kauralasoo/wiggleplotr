@@ -92,10 +92,32 @@ wiggleplotr <- function(exons, cdss, sample_data, transcript_annotations, new_in
   limits = c(0,n_total)
   tx_structure = plotTranscriptStructure(transcript_struct, limits)
   coverage_plot = plotCoverage(coverage_df, limits)
-  plot = arrangeGrob(coverage_plot, tx_structure, heights = c(0.75, 0.25), ncol = 1, nrow = 2)
+  plot = gridExtra::arrangeGrob(coverage_plot, tx_structure, heights = c(0.75, 0.25), ncol = 1, nrow = 2)
   return(plot)
 }
 
+plotGenesCoverage <- function(transcript_list, tx_annot, exons, cdss, sample_data){
+  gene_names = names(transcript_list)
+  results = list()
+  for (gene in gene_names){
+    print(gene)
+    transcripts = transcript_list[[gene]]
+    gene_exons = exons[intersect(transcripts, names(exons))]
+    gene_cdss = cdss[intersect(transcripts, names(cdss))]
+    coverage_plot = wiggleplotr(gene_exons, gene_cdss, sample_data, tx_annot, new_intron_length = 50, plot_fraction = 0.2)
+    results[[gene]] = coverage_plot
+  }
+  return(results)
+}
+
+saveCoveragePlots <- function(plot_list, path, width, height){
+  #Save a list of plots into the folder specified by path
+  gene_names = names(plot_list)
+  for (gene in gene_names){
+    file_name = file.path(path, paste(gene, ".pdf", sep = ""))
+    ggsave(file_name, plot_list[[gene]], width = width, height = height)
+  }
+}
 
 
 
