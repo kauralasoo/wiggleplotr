@@ -34,10 +34,14 @@ joinExons <- function(exons) {
   return(joint_exons)
 }
 
-wiggleplotr <- function(exons, cdss, sample_data, transcript_annotations, new_intron_length = 50, plot_fraction = 0.1){
+wiggleplotr <- function(exons, cdss, sample_data, transcript_annotations, new_intron_length = 50, plot_fraction = 0.1, heights = c(0.75, 0.25)){
   #Plot read coverage over exons
   transcript_ids = names(exons)
   exon_ranges = lapply(exons, ranges)
+  
+  #Extract transcript strand from the exons GRanges object
+  tx_strand = unlist(lapply(exons, function(x){as.vector(strand(x))[1]}))
+  tx_strand_df = data.frame(transcript_id = transcript_ids, strand = tx_strand)
   
   #Join exons together into single GRanges object
   joint_exons = joinExons(exons)
@@ -65,7 +69,10 @@ wiggleplotr <- function(exons, cdss, sample_data, transcript_annotations, new_in
   exons_df = dplyr::mutate(exons_df, feature_type = "exon")
   cds_df = dplyr::mutate(cds_df, feature_type = "cds")
   transcript_struct = rbind(exons_df, cds_df)
-  transcript_struct = dplyr::left_join(transcript_struct, transcript_annotations, by = "transcript_id") #Add gene name
+  transcript_struct = dplyr::left_join(transcript_struct, transcript_annotations, by = "transcript_id") %>% #Add gene name
+    dplyr::left_join(tx_strand_df, by = "transcript_id") %>% #Add transcript strand
+    dplyr::mutate(transcript_label = ifelse(strand == "+", paste(paste(gene_name, transcript_id, sep = ":")," >",sep =""), 
+                                 paste("< ",paste(gene_name, transcript_id, sep = ":"),sep =""))) #Construct a label for each transcript
   
   #Read coverage tracks from BigWig file
   sample_list = as.list(sample_data$bigWig)
@@ -92,7 +99,7 @@ wiggleplotr <- function(exons, cdss, sample_data, transcript_annotations, new_in
   limits = c(0,n_total)
   tx_structure = plotTranscriptStructure(transcript_struct, limits)
   coverage_plot = plotCoverage(coverage_df, limits)
-  plot = gridExtra::arrangeGrob(coverage_plot, tx_structure, heights = c(0.75, 0.25), ncol = 1, nrow = 2)
+  plot = gridExtra::arrangeGrob(coverage_plot, tx_structure, heights = heights, ncol = 1, nrow = 2)
   return(plot)
 }
 
