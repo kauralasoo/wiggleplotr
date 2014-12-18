@@ -63,7 +63,7 @@ wiggleplotr <- function(exons, cdss, sample_data, transcript_annotations, new_in
   new_cds_ranges = lapply(cds_ranges, translateExonCoordinates, old_introns, new_introns)
   cds_df = plyr::ldply(new_cds_ranges, data.frame)
   colnames(cds_df)[colnames(cds_df) == ".id"] = "transcript_id"
-  cds_df = plyr::join(cds_df, transcript_rank, by = "transcript_id") #Add matching transcript rank
+  cds_df = dplyr::left_join(cds_df, transcript_rank, by = "transcript_id") #Add matching transcript rank
   
   #Join exons and cdss together
   exons_df = dplyr::mutate(exons_df, feature_type = "exon")
@@ -92,8 +92,8 @@ wiggleplotr <- function(exons, cdss, sample_data, transcript_annotations, new_in
   #Covert to data frame and plot
   coverage_df = plyr::ldply(shrunken_coverage_list, data.frame)
   colnames(coverage_df)[colnames(coverage_df) == ".id"] = "sample_id"
-  coverage_df = plyr::join(coverage_df, sample_data, by = "sample_id")
-  coverage_df = dplyr::mutate(coverage_df, coverage = coverage/library_size)
+  coverage_df = dplyr::left_join(coverage_df, sample_data, by = "sample_id") %>%
+    dplyr::mutate(coverage = coverage/library_size) #Normalize by library size
 
   #Make plots
   limits = c(0,n_total)
