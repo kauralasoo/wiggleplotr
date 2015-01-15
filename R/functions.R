@@ -103,7 +103,7 @@ wiggleplotr <- function(exons, cdss, sample_data, transcript_annotations, new_in
   return(plot)
 }
 
-plotGenesCoverage <- function(transcript_list, tx_annot, exons, cdss, sample_data){
+plotGenesCoverage <- function(transcript_list, tx_annot, exons, cdss, sample_data, heights = c(0.75, 0.25)){
   gene_names = names(transcript_list)
   results = list()
   for (gene in gene_names){
@@ -111,7 +111,7 @@ plotGenesCoverage <- function(transcript_list, tx_annot, exons, cdss, sample_dat
     transcripts = transcript_list[[gene]]
     gene_exons = exons[intersect(transcripts, names(exons))]
     gene_cdss = cdss[intersect(transcripts, names(cdss))]
-    coverage_plot = wiggleplotr(gene_exons, gene_cdss, sample_data, tx_annot, new_intron_length = 50, plot_fraction = 0.2)
+    coverage_plot = wiggleplotr(gene_exons, gene_cdss, sample_data, tx_annot, plot_fraction = 0.2, heights = heights)
     results[[gene]] = coverage_plot
   }
   return(results)
