@@ -64,3 +64,24 @@ translateExonCoordinates <- function(exons, old_introns, new_introns){
   new_exons = IRanges(start = new_exon_starts, width = width(exons))
   return(new_exons)
 }
+
+rescaleIntrons <- function(exons, cdss, joint_exons, new_intron_length){
+
+  #Join exons together into single GRanges object
+  joint_ranges = ranges(joint_exons)
+  
+  #Convert exons and cds objects to ranges
+  exon_ranges = lapply(exons, ranges)
+  cds_ranges = lapply(cdss, ranges)
+  
+  #Shorten introns and translate exons into the new exons
+  old_introns = gaps(joint_ranges, 
+                start = min(start(joint_ranges)) - new_intron_length, 
+                end = max(end(joint_ranges)) + new_intron_length)
+  new_introns = shortenIntrons(old_introns,new_intron_length)
+  new_exon_ranges = lapply(exon_ranges, translateExonCoordinates, old_introns, new_introns)
+  new_cds_ranges = lapply(cds_ranges, translateExonCoordinates, old_introns, new_introns)
+  
+  return(list(exon_ranges = new_exon_ranges, cds_ranges = new_cds_ranges, 
+              old_introns = old_introns, new_introns = new_introns))
+}

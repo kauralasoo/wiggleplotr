@@ -34,70 +34,56 @@ joinExons <- function(exons) {
   return(joint_exons)
 }
 
-wiggleplotr <- function(exons, cdss, sample_data, transcript_annotations, new_intron_length = 50, plot_fraction = 0.1, heights = c(0.75, 0.25)){
-  #Plot read coverage over exons
-  transcript_ids = names(exons)
-  exon_ranges = lapply(exons, ranges)
+wiggleplotr <- function(exons, cdss, sample_data, transcript_annotations, rescale_introns = TRUE,
+                        new_intron_length = 50, plot_fraction = 0.1, heights = c(0.75, 0.25)){
+  #transcript_annotations is a data.frame with 3 columns: transcript_id, gene_id, gene_name.
   
-  #Extract transcript strand from the exons GRanges object
-  tx_strand = unlist(lapply(exons, function(x){as.vector(strand(x))[1]}))
-  tx_strand_df = data.frame(transcript_id = transcript_ids, strand = tx_strand)
-  
-  #Join exons together into single GRanges object
+  #Join exons together
   joint_exons = joinExons(exons)
-  joint_ranges = ranges(joint_exons)
-  
-  #Shorten introns and translate exons into the new exons
-  old_introns = gaps(joint_ranges, start = min(start(joint_ranges)) - new_intron_length, end = max(end(joint_ranges)) + new_intron_length)
-  new_introns = shortenIntrons(old_introns,new_intron_length)
-  new_exon_ranges = lapply(exon_ranges, translateExonCoordinates, old_introns, new_introns)
-  
-  #Convert exons list to data frame
-  exons_df = plyr::ldply(new_exon_ranges, data.frame)
-  colnames(exons_df)[colnames(exons_df) == ".id"] = "transcript_id"
-  exons_df = dplyr::mutate(exons_df, transcript_rank = as.numeric(factor(exons_df$transcript_id)), type = "isoforms")
-  transcript_rank = unique(exons_df[,c("transcript_id", "transcript_rank", "type")])
-  
-  #Translate cds coordinates
-  cds_ranges = lapply(cdss, ranges)
-  new_cds_ranges = lapply(cds_ranges, translateExonCoordinates, old_introns, new_introns)
-  cds_df = plyr::ldply(new_cds_ranges, data.frame)
-  colnames(cds_df)[colnames(cds_df) == ".id"] = "transcript_id"
-  cds_df = dplyr::left_join(cds_df, transcript_rank, by = "transcript_id") #Add matching transcript rank
-  
-  #Join exons and cdss together
-  exons_df = dplyr::mutate(exons_df, feature_type = "exon")
-  cds_df = dplyr::mutate(cds_df, feature_type = "cds")
-  transcript_struct = rbind(exons_df, cds_df)
-  transcript_struct = dplyr::left_join(transcript_struct, transcript_annotations, by = "transcript_id") %>% #Add gene name
-    dplyr::left_join(tx_strand_df, by = "transcript_id") %>% #Add transcript strand
-    dplyr::mutate(transcript_label = ifelse(strand == "+", paste(paste(gene_name, transcript_id, sep = ":")," >",sep =""), 
-                                 paste("< ",paste(gene_name, transcript_id, sep = ":"),sep =""))) #Construct a label for each transcript
   
   #Read coverage tracks from BigWig file
   sample_list = as.list(sample_data$bigWig)
   names(sample_list) = sample_data$sample_id
-  coverage_list = lapply(sample_list, readCoverageFromBigWig, joint_exons, new_intron_length)
-  shrunken_coverage_list = lapply(coverage_list, shrinkIntronsCoverage, old_introns, new_introns)
+  coverage_list = lapply(sample_list, readCoverageFromBigWig, joint_exons, flanking = new_intron_length)
+  
+  #Shorten introns and translate exons into the new introns
+  if(rescale_introns){
+    #Recale transcript annotations
+    tx_annotations = rescaleIntrons(exons, cdss, joint_exons, new_intron_length = new_intron_length)
+    #Rescale read coverage vectors
+    coverage_list = lapply(coverage_list, shrinkIntronsCoverage, 
+                                    tx_annotations$old_introns, tx_annotations$new_introns)  
+  }
+  else{
+    #TODO: this behaviour not yet implemented
+    tx_annotations = list(exon_ranges = lapply(exons, ranges), cds_ranges = lapply(cdss, ranges))
+    coverage_list = coverage_list #TODO:fix this
+  }
   
   #Take a subsample of points that's easier to plot
-  n_total = nrow(shrunken_coverage_list[[1]])
+  n_total = nrow(coverage_list[[1]])
   points = sample(n_total, floor(n_total*plot_fraction))
-  points = unique(sort(c(points, start(new_exon_ranges), end(new_exon_ranges), 
-                         start(new_exon_ranges) -3, start(new_exon_ranges) +3, 
-                         end(new_exon_ranges) + 3, end(new_exon_ranges) -3)))
+  exon_starts = unique(unlist(lapply(tx_annotations$exon_ranges, start)))
+  exon_ends = unique(unlist(lapply(tx_annotations$exon_ranges, end)))
+  points = unique(sort(c(points, exon_starts, exon_ends, 
+                         exon_starts -3, exon_starts +3, 
+                         exon_ends + 3, exon_ends -3)))
   points = points[points >= 0]
-  shrunken_coverage_list = lapply(shrunken_coverage_list, function(x) {x[points,]} )
+  coverage_list = lapply(coverage_list, function(x) {x[points,]} )
   
   #Covert to data frame and plot
-  coverage_df = plyr::ldply(shrunken_coverage_list, data.frame)
+  coverage_df = plyr::ldply(coverage_list, data.frame)
   colnames(coverage_df)[colnames(coverage_df) == ".id"] = "sample_id"
   coverage_df = dplyr::left_join(coverage_df, sample_data, by = "sample_id") %>%
     dplyr::mutate(coverage = coverage/library_size) #Normalize by library size
 
   #Make plots
   limits = c(0,n_total)
+  #Construct transcript structure data.frame from ranges lists
+  transcript_struct = prepareTranscriptStructureForPlotting(tx_annotations$exon_ranges, 
+                                                            tx_annotations$cds_ranges, transcript_annotations)
   tx_structure = plotTranscriptStructure(transcript_struct, limits)
+  
   coverage_plot = plotCoverage(coverage_df, limits)
   plot = gridExtra::arrangeGrob(coverage_plot, tx_structure, heights = heights, ncol = 1, nrow = 2)
   return(plot)
@@ -126,5 +112,51 @@ saveCoveragePlots <- function(plot_list, path, width, height){
   }
 }
 
+prepareTranscriptStructureForPlotting <- function(exon_ranges, cds_ranges, transcript_annotations){
+  #Combine exon_ranges and cds_ranges into a single data.frame that also contains transcript rank
+  
+  #Convert exon ranges into data.frame and add transcript rank
+  exons_df = plyr::ldply(exon_ranges, data.frame)
+  colnames(exons_df)[colnames(exons_df) == ".id"] = "transcript_id"
+  exons_df = dplyr::mutate(exons_df, transcript_rank = as.numeric(factor(exons_df$transcript_id)), type = "isoforms")
+  transcript_rank = unique(exons_df[,c("transcript_id", "transcript_rank", "type")])
+  
+  #Convert CDS ranges into a data.frame
+  cds_df = plyr::ldply(cds_ranges, data.frame)
+  colnames(cds_df)[colnames(cds_df) == ".id"] = "transcript_id"
+  cds_df = dplyr::left_join(cds_df, transcript_rank, by = "transcript_id") #Add matching transcript rank
+  
+  #Join exons and cdss together
+  exons_df = dplyr::mutate(exons_df, feature_type = "exon")
+  cds_df = dplyr::mutate(cds_df, feature_type = "cds")
+  transcript_struct = rbind(exons_df, cds_df)
+  
+  #Add additional metadata
+  transcript_struct = dplyr::left_join(transcript_struct, transcript_annotations, by = "transcript_id") %>% #Add gene name
+    #Construct a label for each transcript
+    dplyr::mutate(transcript_label = ifelse(strand == "+", 
+                    paste(paste(gene_name, transcript_id, sep = ":")," >",sep =""), 
+                    paste("< ",paste(gene_name, transcript_id, sep = ":"),sep =""))) 
+  
+  return(transcript_struct)
+}
 
-
+plotTranscripts <- function(exons, cdss, annotations, rescale_introns = TRUE, new_intron_length = 50){
+  #Function to quickly plot transcript structure without any read coverage
+  # annotations: data.frame with 4 columns: transcript_id, gene_id, gene_name, strand
+  
+  #Join exons together
+  joint_exons = joinExons(exons)
+  
+  #Rescale introns
+  if (rescale_introns){
+    tx_annotations = rescaleIntrons(exons, cdss, joint_exons, new_intron_length = new_intron_length)
+  } else {
+    tx_annotations = list(exon_ranges = lapply(exons, ranges), cds_ranges = lapply(cdss, ranges))
+  }
+  
+  plot = prepareTranscriptStructureForPlotting(tx_annotations$exon_ranges, 
+                                               tx_annotations$cds_ranges, annotations) %>%
+    plotTranscriptStructure()
+  return(plot)
+}
