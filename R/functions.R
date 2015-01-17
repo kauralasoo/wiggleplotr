@@ -1,12 +1,10 @@
-readCoverageFromBigWig <- function(bigwig_path, joint_exons, flanking = 50){
+readCoverageFromBigWig <- function(bigwig_path, gene_range, flanking = 50){
   #Read coverage over a region from a bigWig file
-  chromosome = IRanges::as.vector(seqnames(joint_exons))[1]
-  seqlevels(joint_exons) = chromosome
-  sel = BigWigSelection(joint_exons)
+  sel = BigWigSelection(gene_range)
   coverage_ranges = rtracklayer::import.bw(bigwig_path, selection = sel)
-  seqlevels(coverage_ranges) = chromosome
+  seqlevels(coverage_ranges) = IRanges::as.vector(seqnames(gene_range))
   coverage_rle = coverage(coverage_ranges, weight = score(coverage_ranges))[[1]]
-  coverage_rle = coverage_rle[(min(start(joint_exons))-flanking):(max(end(joint_exons))+flanking)] #Keep the region of interest
+  coverage_rle = coverage_rle[(start(gene_range)-flanking):(end(gene_range)+flanking)] #Keep the region of interest
 }
 
 joinExons <- function(exons) {
@@ -44,7 +42,9 @@ wiggleplotr <- function(exons, cdss, sample_data, transcript_annotations, rescal
   #Read coverage tracks from BigWig file
   sample_list = as.list(sample_data$bigWig)
   names(sample_list) = sample_data$sample_id
-  coverage_list = lapply(sample_list, readCoverageFromBigWig, joint_exons, flanking = new_intron_length)
+  gene_range = reduce(c(joint_exons,gaps(joint_exons, start = NA, end = NA)))
+  seqlevels(gene_range) = IRanges::as.vector(seqnames(gene_range))[1]
+  coverage_list = lapply(sample_list, readCoverageFromBigWig, gene_range, flanking = new_intron_length)
   
   #Shorten introns and translate exons into the new introns
   if(rescale_introns){
