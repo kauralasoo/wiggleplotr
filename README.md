@@ -15,7 +15,7 @@ The **plotTranscripts** function has four parameters:
 * **rescale_introns** - Specifies if the introns should be scaled to fixed length or not. (default: TRUE)
 * **new_intron_length** - length (bp) of introns after scaling. (default: 50)
 
-The *gene_exons* and *gene_cdss* lists as well as *plotting_annotations* data frame can all be constructed manually. However, an easier option is to download all of the necessary data from Ensembl biomart. Detailed instructions together with code are given here. 
+The **gene_exons** and **gene_cdss** lists as well as **plotting_annotations** data frame can all be constructed manually. However, an easier option is to download all of the necessary data from Ensembl biomart. Detailed instructions together with code are given here. 
 
 ### Plotting RNA-Seq read coverage
 The **wiggleplotr** command works similarly to plotTranscripts, but it requires an additional data frame that describes where the bigWig files containing the read coverage are located and how to the data should be plotted. If you do not have bigWig files yet, then you can learn how to create them here.
