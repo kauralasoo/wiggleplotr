@@ -5,7 +5,7 @@ Wiggleplotr is an R package to plot alternative transcript structures of a gene 
 Wiggleplotr R package can we installed from GitHub.
 
 ## Usage
-Wiggleplotr has two main functions: *plotTranscripts* that can be used to plot alternative transcripts of a gene, and *wiggleplotr* to plot RNA-Seq read coverage together with alternative transcripts.
+Wiggleplotr has two main functions: **plotTranscripts** that can be used to plot alternative transcripts of a gene, and **wiggleplotr** to plot RNA-Seq read coverage together with alternative transcripts.
 
 ### Plotting alternative transcripts
 The plotTranscripts function has four parameters:
@@ -15,7 +15,7 @@ The plotTranscripts function has four parameters:
 * *rescale_introns* - Specifies if the introns should be scaled to fixed length or not. (default: TRUE)
 * *new_intron_length* - length (bp) of introns after scaling. (default: 50)
 
-The *gene_exons* and *gene_cdss* lists as well as *plotting_annotations* data frame can all be constructed manually. However, an easier option is to download all of the necessary data from Ensembl biomart. Detailed instructions together with code are are given here. 
+The *gene_exons* and *gene_cdss* lists as well as *plotting_annotations* data frame can all be constructed manually. However, an easier option is to download all of the necessary data from Ensembl biomart. Detailed instructions together with code are given here. 
 
 ### Plotting RNA-Seq read coverage
 The wiggleplotr command works similarly to plotTranscripts, but it requires an additional data frame that describes where the bigWig files containing the read coverage are located and how to the data should be plotted. If you do not have bigWig files yet, then you can learn how to create them here.
