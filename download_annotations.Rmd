@@ -16,8 +16,7 @@ First, we need to load all neccessary R packages.
 
 ```{r}
 library("biomaRt")
-#library("GenomicFeatures")
-#ibrary("dplyr")
+library("dplyr")
 ```
 
 ## Downloading transcript metadata
@@ -42,8 +41,36 @@ data = getBM(attributes = selected_attributes, mart = ensembl_dataset)
 head(data)
 ```
 
+Finally, we need to rename the columns
+```{r}
+data = dplyr::rename(data, transcript_id = ensembl_transcript_id, gene_id = ensembl_gene_id, gene_name = external_gene_name)
+head(data)
+```
+
+We can now save the metadata into a file to avoid downloading it every time we need to use it.
+```{r}
+saveRDS(data, "transcript_metadata.rds")
+```
+
+Next time that we need to access the data we can load it directly from disk.
+```{r}
+transcript_metadata = readRDS("transcript_metadata.rds")
+head(transcript_metadata)
+```
+
+
+## Downloading transcript and exon coordinates
+We use the [GenomicFeatures] packages to download the transcript and exon coordinates directly from biomaRt.
+```{r}
+library("GenomicFeatures")
+```
+
+
+
 
 ## References
 1. [biomaRt vignette]
+2. [GenomicFeatures]
 
 [biomaRt vignette]:http://www.bioconductor.org/packages/release/bioc/vignettes/biomaRt/inst/doc/biomaRt.pdf
+[GenomicFeatures]:http://www.bioconductor.org/packages/release/bioc/html/GenomicFeatures.html

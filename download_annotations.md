@@ -9,8 +9,7 @@ First, we need to load all neccessary R packages.
 
 ```r
 library("biomaRt")
-#library("GenomicFeatures")
-#ibrary("dplyr")
+library("dplyr")
 ```
 
 ## Downloading transcript metadata
@@ -64,8 +63,60 @@ head(data)
 ## 6       ENST00000449391 ENSG00000231948         HS1BP3-IT1     -1
 ```
 
+Finally, we need to rename the columns
+
+```r
+data = dplyr::rename(data, transcript_id = ensembl_transcript_id, gene_id = ensembl_gene_id, gene_name = external_gene_name)
+head(data)
+```
+
+```
+##     transcript_id         gene_id     gene_name strand
+## 1 ENST00000508957 ENSG00000197468 RP11-747H12.1      1
+## 2 ENST00000435337 ENSG00000231049       OR52B5P      1
+## 3 ENST00000618935 ENSG00000276385  RP5-859I17.3     -1
+## 4 ENST00000614589 ENSG00000275151  RP11-42L13.2      1
+## 5 ENST00000432676 ENSG00000228913           UBD     -1
+## 6 ENST00000449391 ENSG00000231948    HS1BP3-IT1     -1
+```
+
+We can now save the metadata into a file to avoid downloading it every time we need to use it.
+
+```r
+saveRDS(data, "transcript_metadata.rds")
+```
+
+Next time that we need to access the data we can load it directly from disk.
+
+```r
+transcript_metadata = readRDS("transcript_metadata.rds")
+head(transcript_metadata)
+```
+
+```
+##     transcript_id         gene_id     gene_name strand
+## 1 ENST00000508957 ENSG00000197468 RP11-747H12.1      1
+## 2 ENST00000435337 ENSG00000231049       OR52B5P      1
+## 3 ENST00000618935 ENSG00000276385  RP5-859I17.3     -1
+## 4 ENST00000614589 ENSG00000275151  RP11-42L13.2      1
+## 5 ENST00000432676 ENSG00000228913           UBD     -1
+## 6 ENST00000449391 ENSG00000231948    HS1BP3-IT1     -1
+```
+
+
+## Downloading transcript and exon coordinates
+We use the [GenomicFeatures] packages to download the transcript and exon coordinates directly from biomaRt.
+
+```r
+library("GenomicFeatures")
+```
+
+
+
 
 ## References
 1. [biomaRt vignette]
+2. [GenomicFeatures]
 
 [biomaRt vignette]:http://www.bioconductor.org/packages/release/bioc/vignettes/biomaRt/inst/doc/biomaRt.pdf
+[GenomicFeatures]:http://www.bioconductor.org/packages/release/bioc/html/GenomicFeatures.html
