@@ -1,20 +1,49 @@
----
-title: "download_annotations.Rmd"
-output: html_document
----
+```{r echo=FALSE}
+# This chunk contains some setup which we do not want to display in the final
+# document, hence `echo=FALSE` is used.
+# When you’re reading this document, it may be easier to ignore this chunk for
+# now, and continue with the document below, starting at “Introduction”
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+# Make library loading silent
+library = function (...) suppressMessages(base::library(...))
+```
+Using biomart to download genomic annotations in R
+===================================================
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+This is document provides instructions on how to download Ensembl gene annotations from [biomart](http://www.ensembl.org/biomart/) using R. 
+
+First, we need to load all neccessary R packages.
 
 ```{r}
-summary(cars)
+library("biomaRt")
+#library("GenomicFeatures")
+#ibrary("dplyr")
 ```
 
-You can also embed plots, for example:
+## Downloading transcript metadata
+First, let's define which mart and dataset we want to use. 
+```{r}
+ensembl_mart = useMart("ENSEMBL_MART_ENSEMBL", host = "dec2014.archive.ensembl.org")
+ensembl_dataset = useDataset("hsapiens_gene_ensembl",mart=ensembl_mart)
+ensembl_dataset
+```
+The `host` helps to make sure that we get the annotations from a specific ensembl version. For example, Ensembl 78 correseponds to `host="dec2014.archive.ensembl.org"`. You can use the Ensembl Archives [website](http://www.ensembl.org/info/website/archives/index.html) to check which host name corresponds to desired Ensembl version. More information using specific ensembl versions with biomaRt can be found in the [biomaRt vignette].
 
-```{r, echo=FALSE}
-plot(cars)
+We can see all available attributes with the `listAttributes` command. 
+```{r}
+attributes = listAttributes(ensembl_dataset)
+head(attributes)
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+Now, let's select gene id, gene name, transcript_id and strand from the biomart and download the corresponding columns.
+```{r}
+selected_attributes = c("ensembl_transcript_id", "ensembl_gene_id", "external_gene_name", "strand")
+data = getBM(attributes = selected_attributes, mart = ensembl_dataset)
+head(data)
+```
+
+
+## References
+1. [biomaRt vignette]
+
+[biomaRt vignette]:http://www.bioconductor.org/packages/release/bioc/vignettes/biomaRt/inst/doc/biomaRt.pdf
