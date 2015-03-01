@@ -79,7 +79,7 @@ prepareTranscriptStructureForPlotting <- function(exon_ranges, cds_ranges, trans
   #Add additional metadata
   transcript_struct = dplyr::left_join(transcript_struct, transcript_annotations, by = "transcript_id") %>% #Add gene name
     #Construct a label for each transcript
-    dplyr::mutate(transcript_label = ifelse(strand == "+", 
+    dplyr::mutate(transcript_label = ifelse(strand == 1, 
                     paste(paste(gene_name, transcript_id, sep = ":")," >",sep =""), 
                     paste("< ",paste(gene_name, transcript_id, sep = ":"),sep =""))) 
   
