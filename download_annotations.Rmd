@@ -39,7 +39,7 @@ head(attributes)
 
 Now, let's select gene id, gene name, transcript_id and strand from the biomart and download the corresponding columns.
 ```{r}
-selected_attributes = c("ensembl_transcript_id", "ensembl_gene_id", "external_gene_name", "strand")
+selected_attributes = c("ensembl_transcript_id", "ensembl_gene_id", "external_gene_name", "strand", "gene_biotype", "transcript_biotype")
 data = getBM(attributes = selected_attributes, mart = ensembl_dataset)
 head(data)
 ```
