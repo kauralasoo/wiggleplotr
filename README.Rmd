@@ -27,7 +27,7 @@ The **plotTranscripts** function has four parameters:
 
 The `gene_exons` and `gene_cdss` lists as well as `plotting_annotations` data frame can all be constructed manually. However, an easier option is to download all of the necessary data from Ensembl biomart. Detailed instructions together with code are given here. 
 
-#### Example: plot protein coding transcripts of the NCOA7 gene
+#### Example: plot protein coding transcripts of the TLR4 gene
 First, you need to download Ensembl transcript annotations and metadata by following this [tutorial](https://github.com/kauralasoo/wiggleplotr/blob/master/download_annotations.md). Once the annotations have been downloaded, we can load them into R.
 
 ```{r}
