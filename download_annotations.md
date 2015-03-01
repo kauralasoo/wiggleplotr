@@ -1,4 +1,5 @@
 
+
 Using biomart to download genomic annotations in R
 ===================================================
 
@@ -105,18 +106,66 @@ head(transcript_metadata)
 
 
 ## Downloading transcript and exon coordinates
-We use the [GenomicFeatures] packages to download the transcript and exon coordinates directly from biomaRt.
+First, we load the [GenomicFeatures] packages to download transcript and exon coordinates directly from biomaRt.
 
 ```r
 library("GenomicFeatures")
 ```
+Next, we use the `makeTranscriptDbFromBiomart` function to download a sepcifc version of the the Ensembl annotations, in this case Ensembl 78. Please note that as the database is quite big this can take at least a couple of minutes.
 
+```r
+txdb78 = makeTranscriptDbFromBiomart(biomart = "ENSEMBL_MART_ENSEMBL", dataset = "hsapiens_gene_ensembl", host="dec2014.archive.ensembl.org")
+```
+We can also save the database to disk to avoid re-downloading it every time we want to use it.
 
+```r
+saveDb(txdb78, "TranscriptDb_GRCh38_78.db")
+txdb78 = loadDb("TranscriptDb_GRCh38_78.db")
+```
+Finally, we can extract exon coordinates for all annotated transcripts from the database. This command will produce a a list of [GRanges] objects, each one containing the exons of a single transcript.
 
+```r
+exons = exonsBy(txdb78, by = "tx", use.names = TRUE)
+exons[["ENST00000392477"]]
+```
+
+```
+## GRanges object with 16 ranges and 3 metadata columns:
+##        seqnames                 ranges strand   |   exon_id
+##           <Rle>              <IRanges>  <Rle>   | <integer>
+##    [1]        6 [125790763, 125791067]      +   |    261067
+##    [2]        6 [125815291, 125815404]      +   |    261074
+##    [3]        6 [125855020, 125855240]      +   |    261076
+##    [4]        6 [125874889, 125874968]      +   |    261080
+##    [5]        6 [125878263, 125878370]      +   |    261083
+##    ...      ...                    ...    ... ...       ...
+##   [12]        6 [125920943, 125921068]      +   |    261096
+##   [13]        6 [125922682, 125922834]      +   |    261098
+##   [14]        6 [125927663, 125927758]      +   |    261100
+##   [15]        6 [125928174, 125928247]      +   |    261101
+##   [16]        6 [125928636, 125932030]      +   |    261105
+##              exon_name exon_rank
+##            <character> <integer>
+##    [1] ENSE00001617948         1
+##    [2] ENSE00003634530         2
+##    [3] ENSE00003586300         3
+##    [4] ENSE00003504190         4
+##    [5] ENSE00002453865         5
+##    ...             ...       ...
+##   [12] ENSE00003754534        12
+##   [13] ENSE00003730044        13
+##   [14] ENSE00003645935        14
+##   [15] ENSE00002494782        15
+##   [16] ENSE00002498964        16
+##   -------
+##   seqinfo: 802 sequences from an unspecified genome; no seqlengths
+```
 
 ## References
 1. [biomaRt vignette]
 2. [GenomicFeatures]
+3. [GRanges]
 
 [biomaRt vignette]:http://www.bioconductor.org/packages/release/bioc/vignettes/biomaRt/inst/doc/biomaRt.pdf
 [GenomicFeatures]:http://www.bioconductor.org/packages/release/bioc/html/GenomicFeatures.html
+[GRanges]:http://bioconductor.org/packages/release/bioc/html/GenomicRanges.html

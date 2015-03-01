@@ -1,3 +1,6 @@
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(cache=TRUE)
+```
 ```{r echo=FALSE}
 # This chunk contains some setup which we do not want to display in the final
 # document, hence `echo=FALSE` is used.
@@ -60,17 +63,30 @@ head(transcript_metadata)
 
 
 ## Downloading transcript and exon coordinates
-We use the [GenomicFeatures] packages to download the transcript and exon coordinates directly from biomaRt.
+First, we load the [GenomicFeatures] packages to download transcript and exon coordinates directly from biomaRt.
 ```{r}
 library("GenomicFeatures")
 ```
-
-
-
+Next, we use the `makeTranscriptDbFromBiomart` function to download a sepcifc version of the the Ensembl annotations, in this case Ensembl 78. Please note that as the database is quite big this can take at least a couple of minutes.
+```{r}
+#txdb78 = makeTranscriptDbFromBiomart(biomart = "ENSEMBL_MART_ENSEMBL", dataset = "hsapiens_gene_ensembl", host="dec2014.archive.ensembl.org")
+```
+We can also save the database to disk to avoid re-downloading it every time we want to use it.
+```{r}
+#saveDb(txdb78, "TranscriptDb_GRCh38_78.db")
+txdb78 = loadDb("TranscriptDb_GRCh38_78.db")
+```
+Finally, we can extract exon coordinates for all annotated transcripts from the database. This command will produce a a list of [GRanges] objects, each one containing the exons of a single transcript.
+```{r}
+exons = exonsBy(txdb78, by = "tx", use.names = TRUE)
+exons[["ENST00000392477"]]
+```
 
 ## References
 1. [biomaRt vignette]
 2. [GenomicFeatures]
+3. [GRanges]
 
 [biomaRt vignette]:http://www.bioconductor.org/packages/release/bioc/vignettes/biomaRt/inst/doc/biomaRt.pdf
 [GenomicFeatures]:http://www.bioconductor.org/packages/release/bioc/html/GenomicFeatures.html
+[GRanges]:http://bioconductor.org/packages/release/bioc/html/GenomicRanges.html
