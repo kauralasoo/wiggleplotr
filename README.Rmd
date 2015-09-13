@@ -34,7 +34,7 @@ First, you need to download Ensembl transcript annotations and metadata by follo
 library("devtools")
 library("GenomicFeatures")
 library("dplyr")
-load_all("../wiggleplotr/")
+#load_all("../wiggleplotr/")
 transcript_metadata = readRDS("transcript_metadata.rds")
 txdb79 = loadDb("data/TranscriptDb_GRCh38_79.db")
 ```
@@ -60,7 +60,11 @@ The **wiggleplotr** command works similarly to plotTranscripts, but it requires 
 The **wiggleplotr** function has eight parameters:
 * `exons` - list of GRanges objects, each object containing exons for one transcript. The list must have names that correspond to transcript IDs.
 * `cdss` (optional) - list of GRanges objects, each object containing the coding regions (CDS) of a single transcript. The list must have names that correspond to transcript IDs. If specified then coding and non-coding regions will be plotted in a different colour.
-* `sample_data` - data frame with the metadata for the bigWig read coverage files. Must contain the following columns: `sample_id` (unique id for each sample, if multiple bigWig files have the same sample id they will be overlayed on the same plot, will be used as facet label on the right), `bigWig` (path to the bigWig file), `library_size` (normalisation factor for each sample, useful if different samples sequences to different depth and bigWig files not normalised for that), `tissue` (additional column to group samples into, is used as the colour of the coverage track)
+* `sample_data` - data frame with the metadata for the bigWig read coverage files. Must contain the following columns: 
+  * `sample_id` - unique id for each sample, if multiple bigWig files have the same sample id they will be overlayed on the same plot, will be used as facet label on the right.
+  * `bigWig` - path to the bigWig file.
+  * `library_size` - normalisation factor for each sample, useful if different samples sequenced to different depth and bigWig files not normalised for that.
+  * `tissue` - additional column to group samples into, is used as the colour of the coverage track
 * `transcript_annotations` - data frame with the following four columns: `transcript_id`, `gene_id`, `gene_name`, and `strand`. All of the transcripts in the exons and cdss lists must have a matching transcript ID in the transcript_id column. This data frame is used to add gene name and strand to the transcript structure plot.
 * `rescale_introns` - Specifies if the introns should be scaled to fixed length or not. (default: TRUE)
 * `new_intron_length` - length (bp) of introns after scaling. (default: 50)
