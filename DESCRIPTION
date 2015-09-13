@@ -6,6 +6,10 @@ Description: What the package does (paragraph)
 Depends:
     R (>= 3.0.2)
 Imports:
-    plyr
+    plyr,
+    dplyr,
+    gridExtra,
+    ggplot2,
+    GenomicRanges
 License: What license is it under?
 LazyData: true

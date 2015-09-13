@@ -12,10 +12,12 @@ library = function (...) suppressMessages(base::library(...))
 Wiggleplotr is an R package to plot alternative transcript structures of a gene and RNA-Seq read coverage across them. A key feature of wiggleplotr is that it allows to scale introns to a fixed length. This feature greatly improves visualisation of alternative transcription events such as alternative promoter usage, alternative splicing and alternative 3’ end usage, because alternative exons are shown immediately adjacent to each other.
 
 ## Installation
-Wiggleplotr R package can we installed from GitHub. It requires the following R packages to be installed: girdExtra, ggplot2.
+Wiggleplotr R package can we installed from GitHub. It requires the following R packages to be installed: plyr, dplyr, GenomicRanges, girdExtra and ggplot2.
 
 ## Usage
-Wiggleplotr has two main functions: **plotTranscripts** that can be used to plot alternative transcripts of a gene, and **wiggleplotr** to plot RNA-Seq read coverage together with alternative transcripts.
+Wiggleplotr has two main functions: **plotTranscripts** that can be used to plot alternative transcripts of a gene, and **wiggleplotr** to plot RNA-Seq read coverage together with alternative transcripts. 
+
+If you use this software for research, please cite the following paper in which it was first described: [Transcriptional profiling of macrophages derived from monocytes and iPS cells identifies a conserved response to LPS and novel alternative transcription (Alasoo et al, 2015)](http://www.nature.com/articles/srep12524)
 
 ### Plotting alternative transcripts
 The **plotTranscripts** function has four parameters:
