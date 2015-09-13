@@ -59,10 +59,14 @@ The **wiggleplotr** command works similarly to plotTranscripts, but it requires 
 
 The **wiggleplotr** function has eight parameters:
 * `exons` - list of GRanges objects, each object containing exons for one transcript. The list must have names that correspond to transcript IDs.
-* `sample_data` - data frame with the metadata for the bigWig read coverage files. Must contain the following columns: `sample_id` (unique id for each sample, if multiple bigWig files have the same sample id they will be overlayed on the same plot, will be used as facet label on the right), `bigWig` (path to the bigWig file), `library_size` (normalisation factor for each sample, useful if different samples sequences to different depth and bigWig files not normalised for that), `tissue` (additional column to group samples into, is used as the colour of the coverage track)
 * `cdss` (optional) - list of GRanges objects, each object containing the coding regions (CDS) of a single transcript. The list must have names that correspond to transcript IDs. If specified then coding and non-coding regions will be plotted in a different colour.
+* `sample_data` - data frame with the metadata for the bigWig read coverage files. Must contain the following columns: `sample_id` (unique id for each sample, if multiple bigWig files have the same sample id they will be overlayed on the same plot, will be used as facet label on the right), `bigWig` (path to the bigWig file), `library_size` (normalisation factor for each sample, useful if different samples sequences to different depth and bigWig files not normalised for that), `tissue` (additional column to group samples into, is used as the colour of the coverage track)
 * `transcript_annotations` - data frame with the following four columns: `transcript_id`, `gene_id`, `gene_name`, and `strand`. All of the transcripts in the exons and cdss lists must have a matching transcript ID in the transcript_id column. This data frame is used to add gene name and strand to the transcript structure plot.
 * `rescale_introns` - Specifies if the introns should be scaled to fixed length or not. (default: TRUE)
 * `new_intron_length` - length (bp) of introns after scaling. (default: 50)
+* `plot_fraction` - Size of the random sub-sample of points used to plot coverage (between 0 and 1). Smaller values make plotting significantly faster. (default: 0.1)
+* `heights` - Specifies the proportion of the vertical height that is dedicated to coverage plots (first value) relative to the transcript annotations (second value). (default: c(0.75,0.25))
+
+
 
 
