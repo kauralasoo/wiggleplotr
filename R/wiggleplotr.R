@@ -20,20 +20,22 @@ plotTranscripts <- function(exons, cdss, annotations, rescale_introns = TRUE, ne
   return(plot)
 }
 
-wiggleplotr <- function(exons, cdss, sample_data, transcript_annotations, rescale_introns = TRUE,
-                        new_intron_length = 50, plot_fraction = 0.1, heights = c(0.75, 0.25),
-                        flanking_length = c(50,50)){
+wiggleplotr <- function(exons, cdss, track_data, transcript_annotations, rescale_introns = TRUE,
+                        new_intron_length = 50, flanking_length = c(50,50),
+                        plot_fraction = 0.1, heights = c(0.75, 0.25), alpha = 1,
+                        fill_palette = c("#1b9e77","#7570b3")){
   #transcript_annotations is a data.frame with 3 columns: transcript_id, gene_id, gene_name.
   
   #Join exons together
   joint_exons = joinExons(exons)
   
   #Read coverage tracks from BigWig file
-  sample_list = as.list(sample_data$bigWig)
-  names(sample_list) = sample_data$sample_id
+  sample_list = as.list(track_data$bigWig)
+  names(sample_list) = track_data$sample_id
   gene_range = reduce(c(joint_exons,gaps(joint_exons, start = NA, end = NA)))
   seqlevels(gene_range) = IRanges::as.vector(seqnames(gene_range))[1]
-  coverage_list = lapply(sample_list, readCoverageFromBigWig, gene_range, flanking_length = flanking_length)
+  coverage_list = lapply(sample_list, readCoverageFromBigWig, 
+                         gene_range, flanking_length = flanking_length)
   
   #Shorten introns and translate exons into the new introns
   if(rescale_introns){
@@ -72,16 +74,16 @@ wiggleplotr <- function(exons, cdss, sample_data, transcript_annotations, rescal
   #Covert to data frame and plot
   coverage_df = plyr::ldply(coverage_list, data.frame)
   colnames(coverage_df)[colnames(coverage_df) == ".id"] = "sample_id"
-  coverage_df = dplyr::left_join(coverage_df, sample_data, by = "sample_id") %>%
-    dplyr::mutate(coverage = coverage/library_size) #Normalize by library size
+  coverage_df = dplyr::left_join(coverage_df, track_data, by = "sample_id") %>%
+    dplyr::mutate(coverage = coverage/scaling_factor) #Normalize by library size
   
   #Make plots
   #Construct transcript structure data.frame from ranges lists
   transcript_struct = prepareTranscriptStructureForPlotting(tx_annotations$exon_ranges, 
-                                                            tx_annotations$cds_ranges, transcript_annotations)
+                      tx_annotations$cds_ranges, transcript_annotations)
   tx_structure = plotTranscriptStructure(transcript_struct, limits)
   
-  coverage_plot = plotCoverage(coverage_df, limits)
+  coverage_plot = plotCoverage(coverage_df, limits, alpha, fill_palette)
   plot = gridExtra::arrangeGrob(coverage_plot, tx_structure, heights = heights, ncol = 1, nrow = 2)
   return(plot)
 }

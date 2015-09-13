@@ -28,10 +28,10 @@ plotTranscriptStructure <- function(exons_df, limits = NA){
   return(plot)
 }
 
-plotCoverage <- function(coverage_df, limits){
+plotCoverage <- function(coverage_df, limits, alpha, fill_palette){
   #Plot coverage over a region
-  coverage_plot = ggplot(coverage_df, aes(bins, coverage, group = sample_id, fill = tissue)) + 
-    geom_area(alpha = 0.5, position = "identity") + 
+  coverage_plot = ggplot(coverage_df, aes(bins, coverage, group = sample_id, fill = colour_group)) + 
+    geom_area(alpha = alpha, position = "identity") + 
     facet_grid(track_id~.) +
     theme(axis.text.x = element_blank(), 
           axis.title.x = element_blank(), 
@@ -44,6 +44,6 @@ plotCoverage <- function(coverage_df, limits){
           panel.background = element_blank()) +
     scale_x_continuous(limits = limits, expand = c(0,0)) +
     scale_y_continuous(expand = c(0,0)) +
-    scale_fill_manual(values = c("#1b9e77","#7570b3"))
+    scale_fill_manual(values = fill_palette)
   return(coverage_plot)
 }
