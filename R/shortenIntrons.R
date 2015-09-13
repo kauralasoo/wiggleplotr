@@ -26,24 +26,33 @@ shrinkIntronsCoverage <- function(coverage, old_introns, new_introns){
   old_annot = sort(c(old_introns, gaps(old_introns)))
   new_annot = sort(c(new_introns, gaps(new_introns)))
   
-  #Calculate the width of each annotation bin
-  bin_width = ceiling(width(old_annot)/width(new_annot))
-  
-  #Build summarisation groups
-  s_coord = start(new_annot)
-  e_coord = end(new_annot)
-  w_old = width(old_annot)
-  
-  bins = c()
-  for (i in 1:length(new_annot)){
-    bin_id = rep(c(s_coord[i]:e_coord[i]),each = bin_width[i])[1:w_old[i]]
-    bins = c(bins, bin_id)
+  #If new and old annotations are identical then return coverage as data frame
+  if(all(width(old_annot) == width(new_annot))){
+    bins = seq(min(start(new_annot)), max(end(new_annot)))
+    new_coverage = dplyr::data_frame(bins = bins, coverage = coverage)
+    return(new_coverage)
+    
+  } else{ #Otherwise shrink intron converage
+    
+    #Calculate the width of each annotation bin
+    bin_width = ceiling(width(old_annot)/width(new_annot))
+    
+    #Build summarisation groups
+    s_coord = start(new_annot)
+    e_coord = end(new_annot)
+    w_old = width(old_annot)
+    
+    bins = c()
+    for (i in 1:length(new_annot)){
+      bin_id = rep(c(s_coord[i]:e_coord[i]),each = bin_width[i])[1:w_old[i]]
+      bins = c(bins, bin_id)
+    }
+    
+    #Calculate mean coverage in bins
+    df = data.frame(coverage, bins)
+    new_coverage = dplyr::summarize(dplyr::group_by(df, bins), coverage = mean(coverage))
+    return(new_coverage)
   }
-  
-  #Calculate mean coverage in bins
-  df = data.frame(coverage, bins)
-  new_coverage = dplyr::summarize(dplyr::group_by(df, bins), coverage = mean(coverage))
-  return(new_coverage)
 }
 
 translateExonCoordinates <- function(exons, old_introns, new_introns){
@@ -65,19 +74,14 @@ translateExonCoordinates <- function(exons, old_introns, new_introns){
   return(new_exons)
 }
 
-rescaleIntrons <- function(exons, cdss, joint_exons, new_intron_length){
-
-  #Join exons together into single GRanges object
-  joint_ranges = ranges(joint_exons)
+rescaleIntrons <- function(exons, cdss, joint_exons, new_intron_length, flanking_length){
   
   #Convert exons and cds objects to ranges
   exon_ranges = lapply(exons, ranges)
   cds_ranges = lapply(cdss, ranges)
   
   #Shorten introns and translate exons into the new exons
-  old_introns = gaps(joint_ranges, 
-                start = min(start(joint_ranges)) - new_intron_length, 
-                end = max(end(joint_ranges)) + new_intron_length)
+  old_introns = intronsFromJointExonRanges(ranges(joint_exons), flanking_length = flanking_length)
   new_introns = shortenIntrons(old_introns,new_intron_length)
   new_exon_ranges = lapply(exon_ranges, translateExonCoordinates, old_introns, new_introns)
   new_cds_ranges = lapply(cds_ranges, translateExonCoordinates, old_introns, new_introns)

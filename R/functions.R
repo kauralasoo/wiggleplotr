@@ -1,12 +1,12 @@
 #Helper function to make wiggle plots
 
-readCoverageFromBigWig <- function(bigwig_path, gene_range, flanking = 50){
+readCoverageFromBigWig <- function(bigwig_path, gene_range, flanking_length){
   #Read coverage over a region from a bigWig file
   sel = BigWigSelection(gene_range)
   coverage_ranges = rtracklayer::import.bw(bigwig_path, selection = sel)
   seqlevels(coverage_ranges) = IRanges::as.vector(seqnames(gene_range))
   coverage_rle = coverage(coverage_ranges, weight = score(coverage_ranges))[[1]]
-  coverage_rle = coverage_rle[(start(gene_range)-flanking):(end(gene_range)+flanking)] #Keep the region of interest
+  coverage_rle = coverage_rle[(start(gene_range)-flanking_length[1]):(end(gene_range)+flanking_length[2])] #Keep the region of interest
 }
 
 joinExons <- function(exons) {
@@ -84,4 +84,12 @@ prepareTranscriptStructureForPlotting <- function(exon_ranges, cds_ranges, trans
                     paste("< ",paste(gene_name, transcript_id, sep = ":"),sep =""))) 
   
   return(transcript_struct)
+}
+
+intronsFromJointExonRanges <- function(joint_exon_ranges, flanking_length){
+  #Construct intron ranges from joint exon ranges
+  introns = gaps(joint_exon_ranges, 
+                     start = min(start(joint_exon_ranges)) - flanking_length[1], 
+                     end = max(end(joint_exon_ranges)) + flanking_length[2])
+  return(introns)
 }
