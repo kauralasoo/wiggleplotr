@@ -1,3 +1,8 @@
+---
+output:
+  html_document:
+    keep_md: yes
+---
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(cache=TRUE)
 ```
@@ -74,7 +79,7 @@ Next, we use the `makeTranscriptDbFromBiomart` function to download a sepcifc ve
 We can also save the database to disk to avoid re-downloading it every time we want to use it.
 ```{r}
 #saveDb(txdb78, "TranscriptDb_GRCh38_78.db")
-txdb78 = loadDb("TranscriptDb_GRCh38_78.db")
+txdb78 = loadDb("data/TranscriptDb_GRCh38_79.db")
 ```
 Finally, we can extract exon coordinates for all annotated transcripts from the database. This command will produce a a list of [GRanges] objects, each one containing the exons of a single transcript.
 ```{r}

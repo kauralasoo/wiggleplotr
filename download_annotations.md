@@ -49,7 +49,7 @@ head(attributes)
 Now, let's select gene id, gene name, transcript_id and strand from the biomart and download the corresponding columns.
 
 ```r
-selected_attributes = c("ensembl_transcript_id", "ensembl_gene_id", "external_gene_name", "strand")
+selected_attributes = c("ensembl_transcript_id", "ensembl_gene_id", "external_gene_name", "strand","gene_biotype", "transcript_biotype")
 data = getBM(attributes = selected_attributes, mart = ensembl_dataset)
 head(data)
 ```
@@ -62,6 +62,13 @@ head(data)
 ## 4       ENST00000614589 ENSG00000275151       RP11-42L13.2      1
 ## 5       ENST00000432676 ENSG00000228913                UBD     -1
 ## 6       ENST00000449391 ENSG00000231948         HS1BP3-IT1     -1
+##             gene_biotype     transcript_biotype
+## 1 unprocessed_pseudogene unprocessed_pseudogene
+## 2 unprocessed_pseudogene unprocessed_pseudogene
+## 3   processed_pseudogene   processed_pseudogene
+## 4   processed_pseudogene   processed_pseudogene
+## 5         protein_coding         protein_coding
+## 6         sense_intronic         sense_intronic
 ```
 
 Finally, we need to rename the columns
@@ -79,6 +86,13 @@ head(data)
 ## 4 ENST00000614589 ENSG00000275151  RP11-42L13.2      1
 ## 5 ENST00000432676 ENSG00000228913           UBD     -1
 ## 6 ENST00000449391 ENSG00000231948    HS1BP3-IT1     -1
+##             gene_biotype     transcript_biotype
+## 1 unprocessed_pseudogene unprocessed_pseudogene
+## 2 unprocessed_pseudogene unprocessed_pseudogene
+## 3   processed_pseudogene   processed_pseudogene
+## 4   processed_pseudogene   processed_pseudogene
+## 5         protein_coding         protein_coding
+## 6         sense_intronic         sense_intronic
 ```
 
 We can now save the metadata into a file to avoid downloading it every time we need to use it.
@@ -102,6 +116,13 @@ head(transcript_metadata)
 ## 4 ENST00000614589 ENSG00000275151  RP11-42L13.2      1
 ## 5 ENST00000432676 ENSG00000228913           UBD     -1
 ## 6 ENST00000449391 ENSG00000231948    HS1BP3-IT1     -1
+##             gene_biotype     transcript_biotype
+## 1 unprocessed_pseudogene unprocessed_pseudogene
+## 2 unprocessed_pseudogene unprocessed_pseudogene
+## 3   processed_pseudogene   processed_pseudogene
+## 4   processed_pseudogene   processed_pseudogene
+## 5         protein_coding         protein_coding
+## 6         sense_intronic         sense_intronic
 ```
 
 
@@ -114,13 +135,13 @@ library("GenomicFeatures")
 Next, we use the `makeTranscriptDbFromBiomart` function to download a sepcifc version of the the Ensembl annotations, in this case Ensembl 78. Please note that as the database is quite big this can take at least a couple of minutes.
 
 ```r
-txdb78 = makeTranscriptDbFromBiomart(biomart = "ENSEMBL_MART_ENSEMBL", dataset = "hsapiens_gene_ensembl", host="dec2014.archive.ensembl.org")
+#txdb78 = makeTranscriptDbFromBiomart(biomart = "ENSEMBL_MART_ENSEMBL", dataset = "hsapiens_gene_ensembl", host="dec2014.archive.ensembl.org")
 ```
 We can also save the database to disk to avoid re-downloading it every time we want to use it.
 
 ```r
-saveDb(txdb78, "TranscriptDb_GRCh38_78.db")
-txdb78 = loadDb("TranscriptDb_GRCh38_78.db")
+#saveDb(txdb78, "TranscriptDb_GRCh38_78.db")
+txdb78 = loadDb("data/TranscriptDb_GRCh38_79.db")
 ```
 Finally, we can extract exon coordinates for all annotated transcripts from the database. This command will produce a a list of [GRanges] objects, each one containing the exons of a single transcript.
 
@@ -133,17 +154,17 @@ exons[["ENST00000392477"]]
 ## GRanges object with 16 ranges and 3 metadata columns:
 ##        seqnames                 ranges strand   |   exon_id
 ##           <Rle>              <IRanges>  <Rle>   | <integer>
-##    [1]        6 [125790763, 125791067]      +   |    261067
-##    [2]        6 [125815291, 125815404]      +   |    261074
-##    [3]        6 [125855020, 125855240]      +   |    261076
-##    [4]        6 [125874889, 125874968]      +   |    261080
-##    [5]        6 [125878263, 125878370]      +   |    261083
+##    [1]        6 [125790763, 125791067]      +   |    272039
+##    [2]        6 [125815291, 125815404]      +   |    272046
+##    [3]        6 [125855020, 125855240]      +   |    272048
+##    [4]        6 [125874889, 125874968]      +   |    272052
+##    [5]        6 [125878263, 125878370]      +   |    272055
 ##    ...      ...                    ...    ... ...       ...
-##   [12]        6 [125920943, 125921068]      +   |    261096
-##   [13]        6 [125922682, 125922834]      +   |    261098
-##   [14]        6 [125927663, 125927758]      +   |    261100
-##   [15]        6 [125928174, 125928247]      +   |    261101
-##   [16]        6 [125928636, 125932030]      +   |    261105
+##   [12]        6 [125920943, 125921068]      +   |    272068
+##   [13]        6 [125922682, 125922834]      +   |    272070
+##   [14]        6 [125927663, 125927758]      +   |    272072
+##   [15]        6 [125928174, 125928247]      +   |    272073
+##   [16]        6 [125928636, 125932030]      +   |    272077
 ##              exon_name exon_rank
 ##            <character> <integer>
 ##    [1] ENSE00001617948         1
@@ -158,7 +179,7 @@ exons[["ENST00000392477"]]
 ##   [15] ENSE00002494782        15
 ##   [16] ENSE00002498964        16
 ##   -------
-##   seqinfo: 802 sequences from an unspecified genome; no seqlengths
+##   seqinfo: 869 sequences from an unspecified genome; no seqlengths
 ```
 
 ## References
