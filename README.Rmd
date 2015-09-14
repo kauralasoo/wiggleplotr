@@ -100,7 +100,7 @@ plot(tlr4_plot)
 Finally, we can overlay multiple samples by setting up a modified `track_data` data frame that has more than one sample per track:
 ```{r}
 track_data_overlay = data_frame(sample_id = c("sample_1", "sample_2"), track_id = c("track_1", "track_1"), bigWig = c("data/sample1.str2.bw", "data/sample1.str2.bw"), scaling_factor = c(1,2), colour_group = c("control", "control"))
-track_data
+track_data_overlay
 ```
 Now, we need to set alpha to something less than 1:
 ```{r}
