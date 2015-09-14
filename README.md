@@ -46,38 +46,25 @@ We can also find all protein coding transcript of the TLR4 gene
 
 ```r
 tlr4_tx = dplyr::filter(transcript_metadata, gene_name == "TLR4", transcript_biotype == "protein_coding")
-```
-
-```
-## Error in UseMethod("filter_"): no applicable method for 'filter_' applied to an object of class "function"
-```
-
-```r
 tlr4_tx
 ```
 
 ```
-## Error in eval(expr, envir, enclos): object 'tlr4_tx' not found
+##     transcript_id         gene_id gene_name strand   gene_biotype
+## 1 ENST00000394487 ENSG00000136869      TLR4      1 protein_coding
+## 2 ENST00000355622 ENSG00000136869      TLR4      1 protein_coding
+##   transcript_biotype
+## 1     protein_coding
+## 2     protein_coding
 ```
 Finally, we plot the exon structure of these two transcripts:
 
 ```r
 tlr4_txids = tlr4_tx$transcript_id
-```
-
-```
-## Error in eval(expr, envir, enclos): object 'tlr4_tx' not found
-```
-
-```r
 plotTranscripts(exons[tlr4_txids], cdss[tlr4_txids], transcript_metadata, rescale_introns = FALSE)
 ```
 
-```
-## Error in unlist(lapply(exons, function(x) IRanges::as.vector(seqnames(x)[1]))): error in evaluating the argument 'x' in selecting a method for function 'unlist': Error in lapply(exons, function(x) IRanges::as.vector(seqnames(x)[1])) : 
-##   error in evaluating the argument 'X' in selecting a method for function 'lapply': Error in exons[tlr4_txids] : 
-##   error in evaluating the argument 'i' in selecting a method for function '[': Error: object 'tlr4_txids' not found
-```
+![plot of chunk unnamed-chunk-5](figure/unnamed-chunk-5-1.png) 
 
 ### Plotting RNA-Seq read coverage
 The **wiggleplotr** command works similarly to plotTranscripts, but it requires an additional data frame that describes where the bigWig files containing the read coverage are located and how to the data should be plotted. If you do not have bigWig files yet, then you can learn how to create them here.
@@ -121,41 +108,19 @@ Now we can make the coverage plot in which the introns have been rescaled:
 
 ```r
 tlr4_plot = wiggleplotr(exon = exons[tlr4_txids], cdss = cdss[tlr4_txids], track_data = track_data, transcript_annotations = tlr4_tx, rescale_introns = TRUE)
-```
-
-```
-## Error in unlist(lapply(exons, function(x) IRanges::as.vector(seqnames(x)[1]))): error in evaluating the argument 'x' in selecting a method for function 'unlist': Error in lapply(exons, function(x) IRanges::as.vector(seqnames(x)[1])) : 
-##   error in evaluating the argument 'X' in selecting a method for function 'lapply': Error in exons[tlr4_txids] : 
-##   error in evaluating the argument 'i' in selecting a method for function '[': Error: object 'tlr4_txids' not found
-```
-
-```r
 plot(tlr4_plot)
 ```
 
-```
-## Error in plot(tlr4_plot): error in evaluating the argument 'x' in selecting a method for function 'plot': Error: object 'tlr4_plot' not found
-```
+![plot of chunk unnamed-chunk-7](figure/unnamed-chunk-7-1.png) 
 
 We can also make the coverage plot in which the introns are displayed in full length:
 
 ```r
 tlr4_plot = wiggleplotr(exon = exons[tlr4_txids], cdss = cdss[tlr4_txids], track_data = track_data, transcript_annotations = tlr4_tx, rescale_introns = FALSE)
-```
-
-```
-## Error in unlist(lapply(exons, function(x) IRanges::as.vector(seqnames(x)[1]))): error in evaluating the argument 'x' in selecting a method for function 'unlist': Error in lapply(exons, function(x) IRanges::as.vector(seqnames(x)[1])) : 
-##   error in evaluating the argument 'X' in selecting a method for function 'lapply': Error in exons[tlr4_txids] : 
-##   error in evaluating the argument 'i' in selecting a method for function '[': Error: object 'tlr4_txids' not found
-```
-
-```r
 plot(tlr4_plot)
 ```
 
-```
-## Error in plot(tlr4_plot): error in evaluating the argument 'x' in selecting a method for function 'plot': Error: object 'tlr4_plot' not found
-```
+![plot of chunk unnamed-chunk-8](figure/unnamed-chunk-8-1.png) 
 
 Finally, we can overlay multiple samples by setting up a modified `track_data` data frame that has more than one sample per track:
 
@@ -175,18 +140,7 @@ Now, we need to set alpha to something less than 1:
 
 ```r
 tlr4_plot_overlay = wiggleplotr(exon = exons[tlr4_txids], cdss = cdss[tlr4_txids], track_data = track_data_overlay, transcript_annotations = tlr4_tx, rescale_introns = FALSE, alpha = 0.5)
-```
-
-```
-## Error in unlist(lapply(exons, function(x) IRanges::as.vector(seqnames(x)[1]))): error in evaluating the argument 'x' in selecting a method for function 'unlist': Error in lapply(exons, function(x) IRanges::as.vector(seqnames(x)[1])) : 
-##   error in evaluating the argument 'X' in selecting a method for function 'lapply': Error in exons[tlr4_txids] : 
-##   error in evaluating the argument 'i' in selecting a method for function '[': Error: object 'tlr4_txids' not found
-```
-
-```r
 plot(tlr4_plot_overlay)
 ```
 
-```
-## Error in plot(tlr4_plot_overlay): error in evaluating the argument 'x' in selecting a method for function 'plot': Error: object 'tlr4_plot_overlay' not found
-```
+![plot of chunk unnamed-chunk-10](figure/unnamed-chunk-10-1.png) 
