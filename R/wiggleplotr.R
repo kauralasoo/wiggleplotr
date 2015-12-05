@@ -1,6 +1,6 @@
 ### External functions to make the actual plots
 
-plotTranscripts <- function(exons, cdss, annotations, rescale_introns = TRUE, new_intron_length = 50){
+plotTranscripts <- function(exons, cdss, annotations, rescale_introns = TRUE, new_intron_length = 50, flanking_length = c(50,50)){
   #Function to quickly plot transcript structure without any read coverage
   # annotations: data.frame with 4 columns: transcript_id, gene_id, gene_name, strand
   
@@ -9,7 +9,7 @@ plotTranscripts <- function(exons, cdss, annotations, rescale_introns = TRUE, ne
   
   #Rescale introns
   if (rescale_introns){
-    tx_annotations = rescaleIntrons(exons, cdss, joint_exons, new_intron_length = new_intron_length)
+    tx_annotations = rescaleIntrons(exons, cdss, joint_exons, new_intron_length = new_intron_length, flanking_length)
   } else {
     tx_annotations = list(exon_ranges = lapply(exons, ranges), cds_ranges = lapply(cdss, ranges))
   }
