@@ -134,3 +134,24 @@ meanCoverage <- function(coverage_df){
     dplyr::ungroup()
   return(coverage_df)
 }
+
+#' Choose a subsample of points to make plotting faster
+#' 
+#' Makes sure that intron-exon boundaries are well samples.
+subsamplePoints <- function(tx_annotations, plot_fraction){
+  #Define the start and end coorinates of the region
+  region_start = min(start(tx_annotations$new_introns))
+  region_end = max(end(tx_annotations$new_introns))
+  region_length = region_end - region_start
+
+  #Take a subsample of points that's easier to plot
+  points = sample(region_length, floor(region_length*plot_fraction))
+  #Subtract the start coordinate of the region
+  exon_starts = unique(unlist(lapply(tx_annotations$exon_ranges, start))) - (region_start -1)
+  exon_ends = unique(unlist(lapply(tx_annotations$exon_ranges, end))) - (region_start - 1)
+  points = unique(sort(c(points, exon_starts, exon_ends, 
+                         exon_starts -3, exon_starts +3, 
+                         exon_ends + 3, exon_ends -3)))
+  points = points[points >= 0]
+  return(points)
+}

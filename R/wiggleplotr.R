@@ -72,8 +72,7 @@ wiggleplotr <- function(exons, cdss, track_data, transcript_annotations, rescale
   #Find the start and end cooridinates of the whole region spanning the gene
   joint_exons = joinExons(exons)
   gene_range = constructGeneRange(joint_exons, flanking_length)
-  #return(gene_range)
-  
+
   #Read coverage tracks from BigWig file
   sample_list = as.list(track_data$bigWig)
   names(sample_list) = track_data$sample_id
@@ -93,24 +92,10 @@ wiggleplotr <- function(exons, cdss, track_data, transcript_annotations, rescale
   }
   
   #Shrink intron coverage and convert coverage vectors into data frames
-  coverage_list = lapply(coverage_list, shrinkIntronsCoverage, 
-                         tx_annotations$old_introns, tx_annotations$new_introns)
+  coverage_list = lapply(coverage_list, shrinkIntronsCoverage, tx_annotations$old_introns, tx_annotations$new_introns)
 
-  #Define the start and end coorinates of the region
-  region_start = min(start(tx_annotations$new_introns))
-  region_end = max(end(tx_annotations$new_introns))
-  region_length = region_end - region_start
-  limits = c(region_start, region_end)
-  
-  #Take a subsample of points that's easier to plot
-  points = sample(region_length, floor(region_length*plot_fraction))
-  #Subtract the start coordinate of the region
-  exon_starts = unique(unlist(lapply(tx_annotations$exon_ranges, start))) - (region_start -1)
-  exon_ends = unique(unlist(lapply(tx_annotations$exon_ranges, end))) - (region_start - 1)
-  points = unique(sort(c(points, exon_starts, exon_ends, 
-                         exon_starts -3, exon_starts +3, 
-                         exon_ends + 3, exon_ends -3)))
-  points = points[points >= 0]
+  #Take a subsample of points that is easier to plot
+  points = subsamplePoints(tx_annotations, plot_fraction)
   coverage_list = lapply(coverage_list, function(x) {x[points,]} )
   
   #Covert to data frame and plot
@@ -120,11 +105,11 @@ wiggleplotr <- function(exons, cdss, track_data, transcript_annotations, rescale
     dplyr::mutate(coverage = coverage/scaling_factor) #Normalize by library size
   
   #Calculate mean coverage within each track and colour group
-  if(mean_only){
-    coverage_df = meanCoverage(coverage_df)
-  }
+  if(mean_only){  coverage_df = meanCoverage(coverage_df) }
+  
   #Make plots
   #Construct transcript structure data.frame from ranges lists
+  limits = c(start(gene_range), end(gene_range))
   transcript_struct = prepareTranscriptStructureForPlotting(tx_annotations$exon_ranges, 
                                                             tx_annotations$cds_ranges, transcript_annotations)
   tx_structure = plotTranscriptStructure(transcript_struct, limits)
