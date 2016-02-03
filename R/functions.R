@@ -76,6 +76,11 @@ prepareTranscriptStructureForPlotting <- function(exon_ranges, cds_ranges, trans
   cds_df = dplyr::mutate(cds_df, feature_type = "cds")
   transcript_struct = rbind(exons_df, cds_df)
   
+  #Prepare transcript annotations for plotting:
+  #Keep only required columns
+  transcript_annotations = dplyr::select(transcript_annotations, transcript_id, gene_id, gene_name, strand) %>%
+    dplyr::mutate(strand = ifelse(strand == "+" | strand == 1, 1, -1)) #Change strand indicator to number is specified by character
+  
   #Add additional metadata
   transcript_struct = dplyr::left_join(transcript_struct, transcript_annotations, by = "transcript_id") %>% #Add gene name
     #Construct a label for each transcript
