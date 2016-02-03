@@ -98,3 +98,31 @@ intronsFromJointExonRanges <- function(joint_exon_ranges, flanking_length){
                      end = max(end(joint_exon_ranges)) + flanking_length[2])
   return(introns)
 }
+
+
+#' Paste two factors together and preserved their joint order.
+#'
+#' @param factor1 First factor
+#' @param factor2 Second factor
+pasteFactors <- function(factor1, factor2){
+  #Extract levels
+  levels1 = levels(factor1)
+  levels2 = levels(factor2)
+  
+  #Construct joint levels
+  new1 = rep(levels1, length(levels2))
+  new2 = rep(levels2, each = length(levels1))
+  new_levels = paste(new1, new2, sep = "_")
+  
+  new_factor = factor(paste(factor1, factor2, sep = "_"), levels = new_levels)
+  return(new_factor)
+}
+
+#' Calculate mean coverage within each track_id and colour_group
+meanCoverage <- function(coverage_df){
+  coverage_df = group_by(coverage_df, track_id, colour_group, bins) %>% 
+    dplyr::summarise(coverage = mean(coverage)) %>%
+    dplyr::mutate(sample_id = pasteFactors(track_id, colour_group)) %>% #Construct a new sample id for mean vector
+    dplyr::ungroup()
+  return(coverage_df)
+}
