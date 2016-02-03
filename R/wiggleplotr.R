@@ -48,7 +48,7 @@ plotTranscripts <- function(exons, cdss, annotations, rescale_introns = TRUE, ne
 #' depth and bigWig files not normalised for that.
 #'  \item colour_group - additional column to group samples into, is used as the colour of the coverage track.
 #' }
-#' @param transcript_annotations Data.frame with three columns: transcript_id, gene_id, gene_name.
+#' @param transcript_annotations Data.frame with four columns: transcript_id, gene_id, gene_name, strand.
 #' @param rescale_introns Specifies if the introns should be scaled to fixed length or not. (default: TRUE)
 #' @param new_intron_length length (bp) of introns after scaling. (default: 50)
 #' @param flanking_length Lengths of the flanking regions upstream and downstream of the gene. (default: c(50,50))
@@ -68,16 +68,16 @@ wiggleplotr <- function(exons, cdss, track_data, transcript_annotations, rescale
                         new_intron_length = 50, flanking_length = c(50,50),
                         plot_fraction = 0.1, heights = c(0.75, 0.25), alpha = 1,
                         fill_palette = c("#a1dab4","#41b6c4","#225ea8"), mean_only = TRUE){
-  #Join exons together
+  
+  #Find the start and end cooridinates of the whole region spanning the gene
   joint_exons = joinExons(exons)
+  gene_range = constructGeneRange(joint_exons, flanking_length)
+  #return(gene_range)
   
   #Read coverage tracks from BigWig file
   sample_list = as.list(track_data$bigWig)
   names(sample_list) = track_data$sample_id
-  gene_range = reduce(c(joint_exons,gaps(joint_exons, start = NA, end = NA)))
-  seqlevels(gene_range) = IRanges::as.vector(seqnames(gene_range))[1]
-  coverage_list = lapply(sample_list, readCoverageFromBigWig, 
-                         gene_range, flanking_length = flanking_length)
+  coverage_list = lapply(sample_list, readCoverageFromBigWig, gene_range)
   
   #Shorten introns and translate exons into the new introns
   if(rescale_introns){
@@ -95,8 +95,7 @@ wiggleplotr <- function(exons, cdss, track_data, transcript_annotations, rescale
   #Shrink intron coverage and convert coverage vectors into data frames
   coverage_list = lapply(coverage_list, shrinkIntronsCoverage, 
                          tx_annotations$old_introns, tx_annotations$new_introns)
-  #return(coverage_list)
-  
+
   #Define the start and end coorinates of the region
   region_start = min(start(tx_annotations$new_introns))
   region_end = max(end(tx_annotations$new_introns))
@@ -124,7 +123,6 @@ wiggleplotr <- function(exons, cdss, track_data, transcript_annotations, rescale
   if(mean_only){
     coverage_df = meanCoverage(coverage_df)
   }
-  
   #Make plots
   #Construct transcript structure data.frame from ranges lists
   transcript_struct = prepareTranscriptStructureForPlotting(tx_annotations$exon_ranges, 

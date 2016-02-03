@@ -1,12 +1,12 @@
 #Helper function to make wiggle plots
 
-readCoverageFromBigWig <- function(bigwig_path, gene_range, flanking_length){
+readCoverageFromBigWig <- function(bigwig_path, gene_range){
   #Read coverage over a region from a bigWig file
   sel = BigWigSelection(gene_range)
   coverage_ranges = rtracklayer::import.bw(bigwig_path, selection = sel)
   seqlevels(coverage_ranges) = IRanges::as.vector(seqnames(gene_range))
   coverage_rle = coverage(coverage_ranges, weight = score(coverage_ranges))[[1]]
-  coverage_rle = coverage_rle[(start(gene_range)-flanking_length[1]):(end(gene_range)+flanking_length[2])] #Keep the region of interest
+  coverage_rle = coverage_rle[(start(gene_range)):(end(gene_range))] #Keep the region of interest
 }
 
 joinExons <- function(exons) {
@@ -80,7 +80,7 @@ prepareTranscriptStructureForPlotting <- function(exon_ranges, cds_ranges, trans
   #Keep only required columns
   transcript_annotations = dplyr::select(transcript_annotations, transcript_id, gene_id, gene_name, strand) %>%
     dplyr::mutate(strand = ifelse(strand == "+" | strand == 1, 1, -1)) #Change strand indicator to number is specified by character
-  
+
   #Add additional metadata
   transcript_struct = dplyr::left_join(transcript_struct, transcript_annotations, by = "transcript_id") %>% #Add gene name
     #Construct a label for each transcript
@@ -99,6 +99,14 @@ intronsFromJointExonRanges <- function(joint_exon_ranges, flanking_length){
   return(introns)
 }
 
+#' Find the start and end coordinates of the whole gene form joint exons. 
+constructGeneRange <- function(joint_exon_ranges, flanking_length){
+  gene_range = reduce(c(joint_exon_ranges, gaps(joint_exon_ranges, start = NA, end = NA)))
+  seqlevels(gene_range) = IRanges::as.vector(seqnames(gene_range))[1]
+  start(gene_range) = start(gene_range) - flanking_length[1]
+  end(gene_range) = end(gene_range) + flanking_length[2]
+  return(gene_range)
+}
 
 #' Paste two factors together and preserved their joint order.
 #'

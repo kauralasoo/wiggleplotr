@@ -30,7 +30,7 @@ depth and bigWig files not normalised for that.
  \item colour_group - additional column to group samples into, is used as the colour of the coverage track.
 }}
 
-\item{transcript_annotations}{Data.frame with three columns: transcript_id, gene_id, gene_name.}
+\item{transcript_annotations}{Data.frame with four columns: transcript_id, gene_id, gene_name, strand.}
 
 \item{rescale_introns}{Specifies if the introns should be scaled to fixed length or not. (default: TRUE)}
 
