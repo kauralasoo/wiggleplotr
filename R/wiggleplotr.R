@@ -61,13 +61,17 @@ plotTranscripts <- function(exons, cdss, annotations, rescale_introns = TRUE, ne
 #' @param fill_palette Colour palette used for the coverage tracks.
 #' @param mean_only Plot only mean coverage within each combination of track_id and colour_group values. 
 #' Useful for example for plotting mean coverage stratified by genotype (which is specified in the colour_group column) (default: TRUE).
+#' @param connect_exons Print lines that connect exons together. Set to FALSE when plotting peaks (default: TRUE).
+#' @param label_type Specifies the format for annotation labels. If set to "transcript" then plots both gene_name and transcript_id, 
+#' if set to "peak" then plots only gene_name form transcript_annotations data.frame (default: "transcript"). 
 #'
 #' @return Object form gridExtra::arrangeGrob() function. Can we viewed using plot command or saved using ggsave.
 #' @export
-wiggleplotr <- function(exons, cdss, track_data, transcript_annotations, rescale_introns = TRUE,
+plotCoverage <- function(exons, cdss, track_data, transcript_annotations, rescale_introns = TRUE,
                         new_intron_length = 50, flanking_length = c(50,50),
                         plot_fraction = 0.1, heights = c(0.75, 0.25), alpha = 1,
-                        fill_palette = c("#a1dab4","#41b6c4","#225ea8"), mean_only = TRUE){
+                        fill_palette = c("#a1dab4","#41b6c4","#225ea8"), mean_only = TRUE, 
+                        connect_exons = TRUE, label_type = "transcript"){
   
   #Find the start and end cooridinates of the whole region spanning the gene
   joint_exons = joinExons(exons)
@@ -90,7 +94,6 @@ wiggleplotr <- function(exons, cdss, track_data, transcript_annotations, rescale
     tx_annotations = list(exon_ranges = lapply(exons, ranges), cds_ranges = lapply(cdss, ranges),
                           old_introns = old_introns, new_introns = old_introns)
   }
-  
   #Shrink intron coverage and convert coverage vectors into data frames
   coverage_list = lapply(coverage_list, shrinkIntronsCoverage, tx_annotations$old_introns, tx_annotations$new_introns)
 
@@ -109,12 +112,12 @@ wiggleplotr <- function(exons, cdss, track_data, transcript_annotations, rescale
   
   #Make plots
   #Construct transcript structure data.frame from ranges lists
-  limits = c(start(gene_range), end(gene_range))
+  limits = c( min(start(tx_annotations$new_introns)), max(end(tx_annotations$new_introns)))
   transcript_struct = prepareTranscriptStructureForPlotting(tx_annotations$exon_ranges, 
-                                                            tx_annotations$cds_ranges, transcript_annotations)
-  tx_structure = plotTranscriptStructure(transcript_struct, limits)
+                       tx_annotations$cds_ranges, transcript_annotations, label_type)
+  tx_structure = plotTranscriptStructure(transcript_struct, limits, connect_exons)
   
-  coverage_plot = plotCoverage(coverage_df, limits, alpha, fill_palette)
+  coverage_plot = makeCoveragePlot(coverage_df, limits, alpha, fill_palette)
   plot = gridExtra::arrangeGrob(coverage_plot, tx_structure, heights = heights, ncol = 1, nrow = 2)
   return(plot)
   }

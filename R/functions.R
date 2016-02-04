@@ -57,13 +57,13 @@ saveCoveragePlots <- function(plot_list, path, width, height){
   }
 }
 
-prepareTranscriptStructureForPlotting <- function(exon_ranges, cds_ranges, transcript_annotations){
+prepareTranscriptStructureForPlotting <- function(exon_ranges, cds_ranges, transcript_annotations, label_type){
   #Combine exon_ranges and cds_ranges into a single data.frame that also contains transcript rank
   
   #Convert exon ranges into data.frame and add transcript rank
   exons_df = plyr::ldply(exon_ranges, data.frame)
   colnames(exons_df)[colnames(exons_df) == ".id"] = "transcript_id"
-  exons_df = dplyr::mutate(exons_df, transcript_rank = as.numeric(factor(exons_df$transcript_id)), type = "isoforms")
+  exons_df = dplyr::mutate(exons_df, transcript_rank = as.numeric(factor(exons_df$transcript_id)), type = "annotations")
   transcript_rank = unique(exons_df[,c("transcript_id", "transcript_rank", "type")])
   
   #Convert CDS ranges into a data.frame
@@ -82,11 +82,15 @@ prepareTranscriptStructureForPlotting <- function(exon_ranges, cds_ranges, trans
     dplyr::mutate(strand = ifelse(strand == "+" | strand == 1, 1, -1)) #Change strand indicator to number is specified by character
 
   #Add additional metadata
-  transcript_struct = dplyr::left_join(transcript_struct, transcript_annotations, by = "transcript_id") %>% #Add gene name
-    #Construct a label for each transcript
-    dplyr::mutate(transcript_label = ifelse(strand == 1, 
-                    paste(paste(gene_name, transcript_id, sep = ":")," >",sep =""), 
-                    paste("< ",paste(gene_name, transcript_id, sep = ":"),sep =""))) 
+  transcript_struct = dplyr::left_join(transcript_struct, transcript_annotations, by = "transcript_id") #Add gene name
+  #Construct a label for each transcript
+  if(label_type == "transcript"){
+    transcript_struct = dplyr::mutate(transcript_struct, transcript_label = ifelse(strand == 1, 
+                        paste(paste(gene_name, transcript_id, sep = ":")," >",sep =""), 
+                        paste("< ",paste(gene_name, transcript_id, sep = ":"),sep =""))) 
+  } else if(label_type == "peak"){
+    transcript_struct = dplyr::mutate(transcript_struct, transcript_label = gene_name)
+  }
   
   return(transcript_struct)
 }

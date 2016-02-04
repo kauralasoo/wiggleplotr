@@ -1,4 +1,4 @@
-plotTranscriptStructure <- function(exons_df, limits = NA){
+plotTranscriptStructure <- function(exons_df, limits = NA, connect_exons = TRUE){
   
   #Extract the position for plotting transcript name
   transcript_annot = dplyr::group_by(exons_df, transcript_id) %>% 
@@ -7,9 +7,11 @@ plotTranscriptStructure <- function(exons_df, limits = NA){
     dplyr::filter(row_number() == 1)
 
   #Create a plot of transcript structure
-  plot = ggplot(exons_df) + 
-    geom_line(aes(x = start, y = transcript_rank, group = transcript_rank, color = feature_type)) +
-    geom_rect(aes(xmin = start, xmax = end, ymax = transcript_rank + 0.2, ymin = transcript_rank - 0.2, fill = feature_type)) + 
+  plot = ggplot(exons_df) + geom_blank()
+  if(connect_exons){ #Print line connecting exons
+    plot = plot + geom_line(aes(x = start, y = transcript_rank, group = transcript_rank, color = feature_type))
+  }
+  plot = plot + geom_rect(aes(xmin = start, xmax = end, ymax = transcript_rank + 0.2, ymin = transcript_rank - 0.2, fill = feature_type)) + 
     geom_text(aes(x = start, y = transcript_rank + 0.25, label = transcript_label), data = transcript_annot, hjust = 0, vjust = 0, size  =4) +
     theme(plot.margin=unit(c(0,1,1,1),"line"), 
           axis.title.y = element_blank(),
@@ -28,7 +30,7 @@ plotTranscriptStructure <- function(exons_df, limits = NA){
   return(plot)
 }
 
-plotCoverage <- function(coverage_df, limits, alpha, fill_palette){
+makeCoveragePlot <- function(coverage_df, limits, alpha, fill_palette){
   #Plot coverage over a region
   coverage_plot = ggplot(coverage_df, aes(bins, coverage, group = sample_id, fill = colour_group)) + 
     geom_area(alpha = alpha, position = "identity") + 
