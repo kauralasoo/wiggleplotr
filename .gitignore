@@ -1,0 +1,6 @@
+.Rproj.user
+.Rhistory
+.RData
+cache/*
+download_annotations_cache/*
+

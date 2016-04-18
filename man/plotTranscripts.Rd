@@ -5,7 +5,8 @@
 \title{Function to quickly plot transcript structure without any read coverage}
 \usage{
 plotTranscripts(exons, cdss, annotations, rescale_introns = TRUE,
-  new_intron_length = 50, flanking_length = c(50, 50))
+  new_intron_length = 50, flanking_length = c(50, 50),
+  label_type = "transcript")
 }
 \arguments{
 \item{exons}{}
@@ -19,6 +20,9 @@ plotTranscripts(exons, cdss, annotations, rescale_introns = TRUE,
 \item{new_intron_length}{}
 
 \item{flanking_length}{}
+
+\item{label_type}{Specifies the format for annotation labels. If set to "transcript" then plots both gene_name and transcript_id, 
+if set to "peak" then plots only gene_name form transcript_annotations data.frame (default: "transcript").}
 }
 \value{
 ggplot2 object

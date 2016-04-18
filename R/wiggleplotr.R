@@ -6,10 +6,12 @@
 #' @param rescale_introns 
 #' @param new_intron_length 
 #' @param flanking_length 
+#' @param label_type Specifies the format for annotation labels. If set to "transcript" then plots both gene_name and transcript_id, 
+#' if set to "peak" then plots only gene_name form transcript_annotations data.frame (default: "transcript"). 
 #'
 #' @return ggplot2 object
 #' @export
-plotTranscripts <- function(exons, cdss, annotations, rescale_introns = TRUE, new_intron_length = 50, flanking_length = c(50,50)){
+plotTranscripts <- function(exons, cdss, annotations, rescale_introns = TRUE, new_intron_length = 50, flanking_length = c(50,50), label_type = "transcript"){
   #
   # annotations: data.frame with 4 columns: transcript_id, gene_id, gene_name, strand
   
