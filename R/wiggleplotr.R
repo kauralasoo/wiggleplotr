@@ -26,7 +26,7 @@ plotTranscripts <- function(exons, cdss, annotations, rescale_introns = TRUE, ne
   }
   
   plot = prepareTranscriptStructureForPlotting(tx_annotations$exon_ranges, 
-                                               tx_annotations$cds_ranges, annotations) %>%
+                                               tx_annotations$cds_ranges, annotations, label_type) %>%
     plotTranscriptStructure()
   return(plot)
 }
