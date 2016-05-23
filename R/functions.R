@@ -159,3 +159,8 @@ subsamplePoints <- function(tx_annotations, plot_fraction){
   points = points[points >= 0]
   return(points)
 }
+
+#' Returns a three-colour colour palette suitable for plotting coverage stratified by genotype
+getGenotypePalette <- function(){
+  c("#d7191c","#fdae61","#1a9641")
+}
