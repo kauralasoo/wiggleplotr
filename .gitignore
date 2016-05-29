@@ -4,3 +4,7 @@
 cache/*
 download_annotations_cache/*
 
+
+*.Rproj
+
+.Rbuildignore
