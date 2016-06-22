@@ -2,18 +2,18 @@
 
 readCoverageFromBigWig <- function(bigwig_path, gene_range){
   #Read coverage over a region from a bigWig file
-  sel = BigWigSelection(gene_range)
+  sel = rtracklayer::BigWigSelection(gene_range)
   coverage_ranges = rtracklayer::import.bw(bigwig_path, selection = sel)
-  seqlevels(coverage_ranges) = IRanges::as.vector(seqnames(gene_range))
-  coverage_rle = coverage(coverage_ranges, weight = score(coverage_ranges))[[1]]
-  coverage_rle = coverage_rle[(start(gene_range)):(end(gene_range))] #Keep the region of interest
+  GenomeInfoDb::seqlevels(coverage_ranges) = IRanges::as.vector(GenomicRanges::seqnames(gene_range))
+  coverage_rle = GenomicRanges::coverage(coverage_ranges, weight = GenomicRanges::score(coverage_ranges))[[1]]
+  coverage_rle = coverage_rle[(GenomicRanges::start(gene_range)):(GenomicRanges::end(gene_range))] #Keep the region of interest
 }
 
 joinExons <- function(exons) {
   #Join a list of exons into one GRanges object
   
   #Test that all transcripts are on the same chromosome
-  chrs = unlist(lapply(exons, function(x) IRanges::as.vector(seqnames(x)[1])))
+  chrs = unlist(lapply(exons, function(x) IRanges::as.vector(GenomicRanges::seqnames(x)[1])))
   if (!all(chrs == chrs[1])){
     stop("Some transcripts are on different chromosomes.")
   }
@@ -30,30 +30,16 @@ joinExons <- function(exons) {
       joint_exons = c(joint_exons, tx)
     }
   }
-  joint_exons = reduce(joint_exons)
+  joint_exons = GenomicRanges::reduce(joint_exons)
   return(joint_exons)
 }
 
-plotGenesCoverage <- function(transcript_list, tx_annot, exons, cdss, sample_data, heights = c(0.75, 0.25)){
-  gene_names = names(transcript_list)
-  results = list()
-  for (gene in gene_names){
-    print(gene)
-    transcripts = transcript_list[[gene]]
-    gene_exons = exons[intersect(transcripts, names(exons))]
-    gene_cdss = cdss[intersect(transcripts, names(cdss))]
-    coverage_plot = wiggleplotr(gene_exons, gene_cdss, sample_data, tx_annot, plot_fraction = 0.2, heights = heights)
-    results[[gene]] = coverage_plot
-  }
-  return(results)
-}
-
-saveCoveragePlots <- function(plot_list, path, width, height){
+saveCoveragePlots <- function(plot_list, path, ...){
   #Save a list of plots into the folder specified by path
   gene_names = names(plot_list)
   for (gene in gene_names){
     file_name = file.path(path, paste(gene, ".pdf", sep = ""))
-    ggsave(file_name, plot_list[[gene]], width = width, height = height)
+    ggplot2::ggsave(file_name, plot_list[[gene]], ...)
   }
 }
 
@@ -97,18 +83,18 @@ prepareTranscriptStructureForPlotting <- function(exon_ranges, cds_ranges, trans
 
 intronsFromJointExonRanges <- function(joint_exon_ranges, flanking_length){
   #Construct intron ranges from joint exon ranges
-  introns = gaps(joint_exon_ranges, 
-                     start = min(start(joint_exon_ranges)) - flanking_length[1], 
-                     end = max(end(joint_exon_ranges)) + flanking_length[2])
+  introns = IRanges::gaps(joint_exon_ranges, 
+                     start = min(IRanges::start(joint_exon_ranges)) - flanking_length[1], 
+                     end = max(IRanges::end(joint_exon_ranges)) + flanking_length[2])
   return(introns)
 }
 
 #' Find the start and end coordinates of the whole gene form joint exons. 
 constructGeneRange <- function(joint_exon_ranges, flanking_length){
-  gene_range = reduce(c(joint_exon_ranges, gaps(joint_exon_ranges, start = NA, end = NA)))
-  seqlevels(gene_range) = IRanges::as.vector(seqnames(gene_range))[1]
-  start(gene_range) = start(gene_range) - flanking_length[1]
-  end(gene_range) = end(gene_range) + flanking_length[2]
+  gene_range = GenomicRanges::reduce(c(joint_exon_ranges, GenomicRanges::gaps(joint_exon_ranges, start = NA, end = NA)))
+  GenomeInfoDb::seqlevels(gene_range) = IRanges::as.vector(GenomicRanges::seqnames(gene_range))[1]
+  GenomicRanges::start(gene_range) = GenomicRanges::start(gene_range) - flanking_length[1]
+  GenomicRanges::end(gene_range) = GenomicRanges::end(gene_range) + flanking_length[2]
   return(gene_range)
 }
 
@@ -144,8 +130,8 @@ meanCoverage <- function(coverage_df){
 #' Makes sure that intron-exon boundaries are well samples.
 subsamplePoints <- function(tx_annotations, plot_fraction){
   #Define the start and end coorinates of the region
-  region_start = min(start(tx_annotations$new_introns))
-  region_end = max(end(tx_annotations$new_introns))
+  region_start = min(IRanges::start(tx_annotations$new_introns))
+  region_end = max(IRanges::end(tx_annotations$new_introns))
   region_length = region_end - region_start
 
   #Take a subsample of points that's easier to plot

@@ -2,11 +2,4 @@
 
 export(plotCoverage)
 export(plotTranscripts)
-import(GenomicRanges)
-import(IRanges)
-import(cowplot)
-import(dplyr)
 import(ggplot2)
-import(grid)
-import(plyr)
-import(rtracklayer)

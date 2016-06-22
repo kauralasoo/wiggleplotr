@@ -8,9 +8,11 @@ Depends:
 Imports:
     plyr,
     dplyr,
-    gridExtra,
     ggplot2,
-    GenomicRanges
+    grid,
+    GenomicRanges,
+    rtracklayer,
+    cowplot
 License: What license is it under?
 LazyData: true
 RoxygenNote: 5.0.1

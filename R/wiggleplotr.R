@@ -60,7 +60,8 @@ plotTranscripts <- function(exons, cdss, annotations, rescale_introns = TRUE, ne
 #' relative to transcript annotations (second value). (default: c(0.75,0.25))
 #' @param alpha Transparency (alpha) value for the read coverage tracks. 
 #' Useful to set to something < 1 when overlaying multiple tracks (see track_id). (default: 1)
-#' @param fill_palette Colour palette used for the coverage tracks.
+#' @param fill_palette Vector of fill colours used for the coverage tracks. Length must be equal to the number of 
+#' unique values in track_data$colour_group column.
 #' @param mean_only Plot only mean coverage within each combination of track_id and colour_group values. 
 #' Useful for example for plotting mean coverage stratified by genotype (which is specified in the colour_group column) (default: TRUE).
 #' @param connect_exons Print lines that connect exons together. Set to FALSE when plotting peaks (default: TRUE).
@@ -76,18 +77,33 @@ plotCoverage <- function(exons, cdss, track_data, transcript_annotations, rescal
                         fill_palette = c("#a1dab4","#41b6c4","#225ea8"), mean_only = TRUE, 
                         connect_exons = TRUE, label_type = "transcript", return_subplots_list = FALSE){
   
+  #Make some assertions about the input data
+  #Check track_data
+  assertthat::assert_that(assertthat::has_name(track_data, "sample_id"))
+  assertthat::assert_that(assertthat::has_name(track_data, "track_id"))
+  assertthat::assert_that(assertthat::has_name(track_data, "bigWig"))
+  assertthat::assert_that(assertthat::has_name(track_data, "scaling_factor"))
+  assertthat::assert_that(assertthat::has_name(track_data, "colour_group"))
+  
+  #Check transcript annotation
+  assertthat::assert_that(assertthat::has_name(transcript_annotations, "transcript_id"))
+  assertthat::assert_that(assertthat::has_name(transcript_annotations, "gene_id"))
+  assertthat::assert_that(assertthat::has_name(transcript_annotations, "gene_name"))
+  assertthat::assert_that(assertthat::has_name(transcript_annotations, "strand"))
+  
+  
   #Find the start and end cooridinates of the whole region spanning the gene
   joint_exons = joinExons(exons)
   gene_range = constructGeneRange(joint_exons, flanking_length)
-  
+
   #Extract chromosome name
-  chromosome_name = as.vector(seqnames(gene_range)[1])
+  chromosome_name = as.vector(GenomicRanges::seqnames(gene_range)[1])
 
   #Read coverage tracks from BigWig file
   sample_list = as.list(track_data$bigWig)
   names(sample_list) = track_data$sample_id
   coverage_list = lapply(sample_list, readCoverageFromBigWig, gene_range)
-  
+
   #Shorten introns and translate exons into the new introns
   if(rescale_introns){
     #Recale transcript annotations
@@ -98,9 +114,10 @@ plotCoverage <- function(exons, cdss, track_data, transcript_annotations, rescal
   }
   else{ #Do not rescale transcript annotationn
     #Need to calculate joint intron coordinates for transcript annotations
-    old_introns = intronsFromJointExonRanges(ranges(joint_exons), flanking_length = flanking_length)
-    tx_annotations = list(exon_ranges = lapply(exons, ranges), cds_ranges = lapply(cdss, ranges),
+    old_introns = intronsFromJointExonRanges(GenomicRanges::ranges(joint_exons), flanking_length = flanking_length)
+    tx_annotations = list(exon_ranges = lapply(exons, GenomicRanges::ranges), cds_ranges = lapply(cdss, GenomicRanges::ranges),
                           old_introns = old_introns, new_introns = old_introns)
+    
     #Make a label for gene structure plot
     xlabel = paste("Chromosome", chromosome_name, "position (bp)")
   }
@@ -110,19 +127,19 @@ plotCoverage <- function(exons, cdss, track_data, transcript_annotations, rescal
   #Take a subsample of points that is easier to plot
   points = subsamplePoints(tx_annotations, plot_fraction)
   coverage_list = lapply(coverage_list, function(x) {x[points,]} )
-  
+
   #Covert to data frame and plot
   coverage_df = plyr::ldply(coverage_list, data.frame, .id = "sample_id") %>% 
     dplyr::mutate(sample_id = as.character(sample_id)) #Convert factor to character
   coverage_df = dplyr::left_join(coverage_df, track_data, by = "sample_id") %>%
     dplyr::mutate(coverage = coverage/scaling_factor) #Normalize by library size
-  
+
   #Calculate mean coverage within each track and colour group
   if(mean_only){  coverage_df = meanCoverage(coverage_df) }
   
   #Make plots
   #Construct transcript structure data.frame from ranges lists
-  limits = c( min(start(tx_annotations$new_introns)), max(end(tx_annotations$new_introns)))
+  limits = c( min(IRanges::start(tx_annotations$new_introns)), max(IRanges::end(tx_annotations$new_introns)))
   transcript_struct = prepareTranscriptStructureForPlotting(tx_annotations$exon_ranges, 
                        tx_annotations$cds_ranges, transcript_annotations, label_type)
   tx_structure = plotTranscriptStructure(transcript_struct, limits, connect_exons, xlabel)

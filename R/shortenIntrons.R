@@ -2,45 +2,48 @@ shortenIntrons <- function(introns, intron_length){
   #Shorten introns from a fixed length to a variable length
   
   #Calculate neccesary parameters
-  exons = gaps(introns)
+  exons = IRanges::gaps(introns)
   n_introns = length(introns)
   n_exons = length(exons)
   
   #Calculate cumulative with of introns
   intron_cum_width = seq(intron_length,(n_introns-1)*intron_length,intron_length)
   #Calculate new exon starts ignoring introns
-  new_intron_starts = c(1,start(introns)[2:n_introns] - (end(introns)[1:n_introns-1] - intron_cum_width))
+  new_intron_starts = c(1,IRanges::start(introns)[2:n_introns] - (IRanges::end(introns)[1:n_introns-1] - intron_cum_width))
   #Add exon widths to the introns
-  new_intron_starts = new_intron_starts + c(0,cumsum(width(exons)) - width(exons))
+  new_intron_starts = new_intron_starts + c(0,cumsum(IRanges::width(exons)) - IRanges::width(exons))
   
-  new_introns = IRanges(start = new_intron_starts, width = rep(intron_length, n_introns))
+  new_introns = IRanges::IRanges(start = new_intron_starts, width = rep(intron_length, n_introns))
   return(new_introns)
 }
 
 shrinkIntronsCoverage <- function(coverage, old_introns, new_introns){
   
   #Covert coverage vector from Rle to normal vector
-  coverage = IRanges::as.vector(coverage)  
-  
+  coverage = IRanges::as.vector(coverage) 
+
   #Calculate full annotations
-  old_annot = sort(c(old_introns, gaps(old_introns)))
-  new_annot = sort(c(new_introns, gaps(new_introns)))
+  old_annot = sort(c(old_introns, IRanges::gaps(old_introns)))
+  new_annot = sort(c(new_introns, IRanges::gaps(new_introns)))
   
   #If new and old annotations are identical then return coverage as data frame
-  if(all(width(old_annot) == width(new_annot))){
-    bins = seq(min(start(new_annot)), max(end(new_annot)))
+  if(all(IRanges::width(old_annot) == IRanges::width(new_annot))){
+    bins = seq(min(IRanges::start(new_annot)), max(IRanges::end(new_annot)))
+   
+    #Make sure that coverage vector and bins vector have equal length
+    assertthat::assert_that(assertthat::are_equal(length(bins), length(coverage)))
     new_coverage = dplyr::data_frame(bins = bins, coverage = coverage)
     return(new_coverage)
     
   } else{ #Otherwise shrink intron converage
     
     #Calculate the width of each annotation bin
-    bin_width = ceiling(width(old_annot)/width(new_annot))
+    bin_width = ceiling(IRanges::width(old_annot)/IRanges::width(new_annot))
     
     #Build summarisation groups
-    s_coord = start(new_annot)
-    e_coord = end(new_annot)
-    w_old = width(old_annot)
+    s_coord = IRanges::start(new_annot)
+    e_coord = IRanges::end(new_annot)
+    w_old = IRanges::width(old_annot)
     
     bins = c()
     for (i in 1:length(new_annot)){
@@ -57,9 +60,9 @@ shrinkIntronsCoverage <- function(coverage, old_introns, new_introns){
 
 translateExonCoordinates <- function(exons, old_introns, new_introns){
   #Tranlate exon coordinates by shortening introns
-  old_exon_starts = start(exons)
-  old_intron_ends = end(old_introns)
-  new_intron_ends = end(new_introns)
+  old_exon_starts = IRanges::start(exons)
+  old_intron_ends = IRanges::end(old_introns)
+  new_intron_ends = IRanges::end(new_introns)
   
   #Translate old exon coordinates to new exon coordinates
   new_exon_starts = rep(0,length(old_exon_starts))
@@ -70,18 +73,18 @@ translateExonCoordinates <- function(exons, old_introns, new_introns){
   }
   
   #Create new exon coordinates
-  new_exons = IRanges(start = new_exon_starts, width = width(exons))
+  new_exons = IRanges::IRanges(start = new_exon_starts, width = IRanges::width(exons))
   return(new_exons)
 }
 
 rescaleIntrons <- function(exons, cdss, joint_exons, new_intron_length, flanking_length){
   
   #Convert exons and cds objects to ranges
-  exon_ranges = lapply(exons, ranges)
-  cds_ranges = lapply(cdss, ranges)
+  exon_ranges = lapply(exons, GenomicRanges::ranges)
+  cds_ranges = lapply(cdss, GenomicRanges::ranges)
   
   #Shorten introns and translate exons into the new exons
-  old_introns = intronsFromJointExonRanges(ranges(joint_exons), flanking_length = flanking_length)
+  old_introns = intronsFromJointExonRanges(GenomicRanges::ranges(joint_exons), flanking_length = flanking_length)
   new_introns = shortenIntrons(old_introns,new_intron_length)
   new_exon_ranges = lapply(exon_ranges, translateExonCoordinates, old_introns, new_introns)
   new_cds_ranges = lapply(cds_ranges, translateExonCoordinates, old_introns, new_introns)

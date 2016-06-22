@@ -47,7 +47,8 @@ relative to transcript annotations (second value). (default: c(0.75,0.25))}
 \item{alpha}{Transparency (alpha) value for the read coverage tracks. 
 Useful to set to something < 1 when overlaying multiple tracks (see track_id). (default: 1)}
 
-\item{fill_palette}{Colour palette used for the coverage tracks.}
+\item{fill_palette}{Vector of fill colours used for the coverage tracks. Length must be equal to the number of 
+unique values in track_data$colour_group column.}
 
 \item{mean_only}{Plot only mean coverage within each combination of track_id and colour_group values. 
 Useful for example for plotting mean coverage stratified by genotype (which is specified in the colour_group column) (default: TRUE).}
