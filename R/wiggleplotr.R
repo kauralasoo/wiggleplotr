@@ -68,6 +68,7 @@ plotTranscripts <- function(exons, cdss, annotations, rescale_introns = TRUE, ne
 #' @param label_type Specifies the format for annotation labels. If set to "transcript" then plots both gene_name and transcript_id, 
 #' if set to "peak" then plots only gene_name form transcript_annotations data.frame (default: "transcript"). 
 #' @param return_subplots_list Instead of a joint plot return a list of subplots that can be joined together manually. 
+#' @param region_coords Start and end coordinates of the region, overrides flanking_length parameter. 
 #'
 #' @return Either object from cow_plot::plot_grid() function or a list of subplots (if return_subplots_list == TRUE)
 #' @export
@@ -75,7 +76,8 @@ plotCoverage <- function(exons, cdss, track_data, transcript_annotations, rescal
                         new_intron_length = 50, flanking_length = c(50,50),
                         plot_fraction = 0.1, heights = c(0.75, 0.25), alpha = 1,
                         fill_palette = c("#a1dab4","#41b6c4","#225ea8"), mean_only = TRUE, 
-                        connect_exons = TRUE, label_type = "transcript", return_subplots_list = FALSE){
+                        connect_exons = TRUE, label_type = "transcript", return_subplots_list = FALSE,
+                        region_coords = NULL){
   
   #Make some assertions about the input data
   #Check track_data
@@ -94,7 +96,18 @@ plotCoverage <- function(exons, cdss, track_data, transcript_annotations, rescal
   
   #Find the start and end cooridinates of the whole region spanning the gene
   joint_exons = joinExons(exons)
-  gene_range = constructGeneRange(joint_exons, flanking_length)
+  
+  #If region_coords is specificed, then ignore the flanking_length attrbute and compute
+  # flanking_length form region_coords
+  if(!is.null(region_coords)){
+    gene_range = constructGeneRange(joint_exons, c(0,0))
+    flanking_length = c(GenomicRanges::start(gene_range) - region_coords[1],
+                        region_coords[2] - GenomicRanges::end(gene_range))
+    print(flanking_length)
+    gene_range = constructGeneRange(joint_exons, flanking_length)
+  } else{
+    gene_range = constructGeneRange(joint_exons, flanking_length)
+  }
 
   #Extract chromosome name
   chromosome_name = as.vector(GenomicRanges::seqnames(gene_range)[1])

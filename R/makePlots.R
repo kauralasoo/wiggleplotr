@@ -44,7 +44,7 @@ makeCoveragePlot <- function(coverage_df, limits, alpha, fill_palette){
     theme(axis.text.x = element_blank(), 
           axis.title.x = element_blank(), 
           axis.ticks.x = element_blank(),
-          plot.margin=unit(c(1,1,0,1),"line"),
+          plot.margin=unit(c(0.1,1,0.1,1),"line"),
           legend.position="none",
           panel.grid.major = element_blank(),
           panel.grid.minor = element_blank(),
@@ -55,4 +55,22 @@ makeCoveragePlot <- function(coverage_df, limits, alpha, fill_palette){
     scale_fill_manual(values = fill_palette) +
     ylab("FPM")
   return(coverage_plot)
+}
+
+makeManhattanPlot <- function(pvalues_df){
+  plot = ggplot(pvalues_df, aes(x = pos, y = -log(p_nominal, 10))) + 
+    facet_grid(track_id ~ .) +
+    geom_point() + 
+    theme_light() + 
+    ylab("-log10(p)") + 
+    theme(axis.text.x = element_blank(), 
+          axis.title.x = element_blank(), 
+          axis.ticks.x = element_blank(),
+          plot.margin=unit(c(0.1,1,0.1,1),"line"),
+          panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          strip.text.y = element_text(colour = "grey10"),
+          strip.background = element_rect(fill = "grey85")) +
+    scale_x_continuous(limits = c(s_coord, e_coord_2), expand = c(0,0))
+  return(plot)
 }

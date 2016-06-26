@@ -9,7 +9,7 @@ plotCoverage(exons, cdss, track_data, transcript_annotations,
   50), plot_fraction = 0.1, heights = c(0.75, 0.25), alpha = 1,
   fill_palette = c("#a1dab4", "#41b6c4", "#225ea8"), mean_only = TRUE,
   connect_exons = TRUE, label_type = "transcript",
-  return_subplots_list = FALSE)
+  return_subplots_list = FALSE, region_coords = NULL)
 }
 \arguments{
 \item{exons}{List of GRanges objects, each object containing exons for one transcript. 
@@ -59,6 +59,8 @@ Useful for example for plotting mean coverage stratified by genotype (which is s
 if set to "peak" then plots only gene_name form transcript_annotations data.frame (default: "transcript").}
 
 \item{return_subplots_list}{Instead of a joint plot return a list of subplots that can be joined together manually.}
+
+\item{region_coords}{Start and end coordinates of the region, overrides flanking_length parameter.}
 }
 \value{
 Either object from cow_plot::plot_grid() function or a list of subplots (if return_subplots_list == TRUE)
