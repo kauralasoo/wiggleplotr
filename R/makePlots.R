@@ -57,7 +57,7 @@ makeCoveragePlot <- function(coverage_df, limits, alpha, fill_palette){
   return(coverage_plot)
 }
 
-makeManhattanPlot <- function(pvalues_df){
+makeManhattanPlot <- function(pvalues_df, limits){
   plot = ggplot(pvalues_df, aes(x = pos, y = -log(p_nominal, 10))) + 
     facet_grid(track_id ~ .) +
     geom_point() + 
@@ -71,6 +71,6 @@ makeManhattanPlot <- function(pvalues_df){
           panel.grid.minor = element_blank(),
           strip.text.y = element_text(colour = "grey10"),
           strip.background = element_rect(fill = "grey85")) +
-    scale_x_continuous(limits = c(s_coord, e_coord_2), expand = c(0,0))
+    scale_x_continuous(limits = limits, expand = c(0,0))
   return(plot)
 }

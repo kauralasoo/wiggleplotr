@@ -103,7 +103,6 @@ plotCoverage <- function(exons, cdss, track_data, transcript_annotations, rescal
     gene_range = constructGeneRange(joint_exons, c(0,0))
     flanking_length = c(GenomicRanges::start(gene_range) - region_coords[1],
                         region_coords[2] - GenomicRanges::end(gene_range))
-    print(flanking_length)
     gene_range = constructGeneRange(joint_exons, flanking_length)
   } else{
     gene_range = constructGeneRange(joint_exons, flanking_length)
