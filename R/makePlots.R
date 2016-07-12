@@ -54,7 +54,7 @@ makeManhattanPlot <- function(pvalues_df, limits){
     facet_grid(track_id ~ .) +
     geom_point() + 
     theme_light() + 
-    ylab("-log10(p)") + 
+    ylab(expression(paste("-",log[10], " p-value"))) +
     dataTrackTheme() + 
     scale_x_continuous(limits = limits, expand = c(0,0))
   return(plot)
