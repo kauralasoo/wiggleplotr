@@ -150,3 +150,17 @@ subsamplePoints <- function(tx_annotations, plot_fraction){
 getGenotypePalette <- function(){
   c("#d7191c","#fdae61","#1a9641")
 }
+
+#Common theme for all data track plots
+dataTrackTheme <- function(){
+  theme = theme(axis.text.x = element_blank(), 
+                axis.title.x = element_blank(), 
+                axis.ticks.x = element_blank(),
+                plot.margin=unit(c(0.1,1,0.1,1),"line"),
+                legend.position="none",
+                panel.grid.major = element_blank(),
+                panel.grid.minor = element_blank(),
+                strip.text.y = element_text(colour = "grey10"),
+                strip.background = element_rect(fill = "grey85"))
+  return(theme)
+}

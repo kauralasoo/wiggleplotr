@@ -41,15 +41,7 @@ makeCoveragePlot <- function(coverage_df, limits, alpha, fill_palette){
     geom_area(alpha = alpha, position = "identity") + 
     facet_grid(track_id~.) +
     theme_light() +
-    theme(axis.text.x = element_blank(), 
-          axis.title.x = element_blank(), 
-          axis.ticks.x = element_blank(),
-          plot.margin=unit(c(0.1,1,0.1,1),"line"),
-          legend.position="none",
-          panel.grid.major = element_blank(),
-          panel.grid.minor = element_blank(),
-          strip.text.y = element_text(colour = "grey10"),
-          strip.background = element_rect(fill = "grey85")) +
+    dataTrackTheme() + 
     scale_x_continuous(limits = limits, expand = c(0,0)) +
     scale_y_continuous(expand = c(0,0)) +
     scale_fill_manual(values = fill_palette) +
@@ -63,14 +55,7 @@ makeManhattanPlot <- function(pvalues_df, limits){
     geom_point() + 
     theme_light() + 
     ylab("-log10(p)") + 
-    theme(axis.text.x = element_blank(), 
-          axis.title.x = element_blank(), 
-          axis.ticks.x = element_blank(),
-          plot.margin=unit(c(0.1,1,0.1,1),"line"),
-          panel.grid.major = element_blank(),
-          panel.grid.minor = element_blank(),
-          strip.text.y = element_text(colour = "grey10"),
-          strip.background = element_rect(fill = "grey85")) +
+    dataTrackTheme() + 
     scale_x_continuous(limits = limits, expand = c(0,0))
   return(plot)
 }
