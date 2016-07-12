@@ -6,14 +6,14 @@
 \usage{
 plotTranscripts(exons, cdss, annotations, rescale_introns = TRUE,
   new_intron_length = 50, flanking_length = c(50, 50),
-  label_type = "transcript")
+  connect_exons = TRUE, label_type = "transcript", region_coords = NULL)
 }
 \arguments{
 \item{exons}{}
 
 \item{cdss}{}
 
-\item{annotations}{}
+\item{annotations}{data.frame with 4 columns: transcript_id, gene_id, gene_name, strand}
 
 \item{rescale_introns}{}
 
@@ -21,8 +21,12 @@ plotTranscripts(exons, cdss, annotations, rescale_introns = TRUE,
 
 \item{flanking_length}{}
 
+\item{connect_exons}{}
+
 \item{label_type}{Specifies the format for annotation labels. If set to "transcript" then plots both gene_name and transcript_id, 
 if set to "peak" then plots only gene_name form transcript_annotations data.frame (default: "transcript").}
+
+\item{region_coords}{}
 }
 \value{
 ggplot2 object

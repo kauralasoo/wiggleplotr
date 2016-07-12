@@ -2,32 +2,40 @@
 #'
 #' @param exons 
 #' @param cdss 
-#' @param annotations 
+#' @param annotations data.frame with 4 columns: transcript_id, gene_id, gene_name, strand
 #' @param rescale_introns 
 #' @param new_intron_length 
 #' @param flanking_length 
+#' @param connect_exons 
 #' @param label_type Specifies the format for annotation labels. If set to "transcript" then plots both gene_name and transcript_id, 
 #' if set to "peak" then plots only gene_name form transcript_annotations data.frame (default: "transcript"). 
+#' @param region_coords 
 #'
 #' @return ggplot2 object
 #' @export
-plotTranscripts <- function(exons, cdss, annotations, rescale_introns = TRUE, new_intron_length = 50, flanking_length = c(50,50), label_type = "transcript"){
-  #
-  # annotations: data.frame with 4 columns: transcript_id, gene_id, gene_name, strand
-  
+plotTranscripts <- function(exons, cdss, annotations, rescale_introns = TRUE, new_intron_length = 50, 
+                            flanking_length = c(50,50), connect_exons = TRUE, label_type = "transcript", 
+                            region_coords = NULL){
   #Join exons together
   joint_exons = joinExons(exons)
+  
+  #If region_coords is specificed, then ignore the flanking_length attrbute and compute
+  # flanking_length form region_coords
+  if(!is.null(region_coords)){
+    gene_range = constructGeneRange(joint_exons, c(0,0))
+    flanking_length = c(GenomicRanges::start(gene_range) - region_coords[1],
+                        region_coords[2] - GenomicRanges::end(gene_range))
+  }
   
   #Rescale introns
   if (rescale_introns){
     tx_annotations = rescaleIntrons(exons, cdss, joint_exons, new_intron_length = new_intron_length, flanking_length)
   } else {
-    tx_annotations = list(exon_ranges = lapply(exons, ranges), cds_ranges = lapply(cdss, ranges))
+    tx_annotations = list(exon_ranges = lapply(exons, GenomicRanges::ranges), cds_ranges = lapply(cdss, GenomicRanges::ranges))
   }
-  
-  plot = prepareTranscriptStructureForPlotting(tx_annotations$exon_ranges, 
-                                               tx_annotations$cds_ranges, annotations, label_type) %>%
-    plotTranscriptStructure()
+  structure = prepareTranscriptStructureForPlotting(tx_annotations$exon_ranges, 
+                                               tx_annotations$cds_ranges, annotations, label_type)
+  plot = plotTranscriptStructure(structure, connect_exons = connect_exons)
   return(plot)
 }
 
