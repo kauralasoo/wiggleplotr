@@ -19,6 +19,9 @@ plotTranscripts <- function(exons, cdss, annotations, rescale_introns = TRUE, ne
   #Join exons together
   joint_exons = joinExons(exons)
   
+  #Extract chromosome name
+  chromosome_name = as.vector(GenomicRanges::seqnames(joint_exons)[1])
+  
   #If region_coords is specificed, then ignore the flanking_length attrbute and compute
   # flanking_length form region_coords
   if(!is.null(region_coords)){
@@ -30,12 +33,14 @@ plotTranscripts <- function(exons, cdss, annotations, rescale_introns = TRUE, ne
   #Rescale introns
   if (rescale_introns){
     tx_annotations = rescaleIntrons(exons, cdss, joint_exons, new_intron_length = new_intron_length, flanking_length)
+    xlabel = "Distance from region start (bp)"
   } else {
     tx_annotations = list(exon_ranges = lapply(exons, GenomicRanges::ranges), cds_ranges = lapply(cdss, GenomicRanges::ranges))
+    xlabel = paste("Chromosome", chromosome_name, "position (bp)")
   }
   structure = prepareTranscriptStructureForPlotting(tx_annotations$exon_ranges, 
                                                tx_annotations$cds_ranges, annotations, label_type)
-  plot = plotTranscriptStructure(structure, connect_exons = connect_exons)
+  plot = plotTranscriptStructure(structure, connect_exons = connect_exons, xlabel = xlabel)
   return(plot)
 }
 
