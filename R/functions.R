@@ -49,7 +49,7 @@ prepareTranscriptStructureForPlotting <- function(exon_ranges, cds_ranges, trans
   #Convert exon ranges into data.frame and add transcript rank
   exons_df = plyr::ldply(exon_ranges, data.frame)
   colnames(exons_df)[colnames(exons_df) == ".id"] = "transcript_id"
-  exons_df = dplyr::mutate(exons_df, transcript_rank = as.numeric(factor(exons_df$transcript_id)), type = "annotations")
+  exons_df = dplyr::mutate(exons_df, transcript_rank = as.numeric(factor(exons_df$transcript_id)), type = "")
   transcript_rank = unique(exons_df[,c("transcript_id", "transcript_rank", "type")])
   
   #Convert CDS ranges into a data.frame
