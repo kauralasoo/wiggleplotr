@@ -13,7 +13,8 @@ joinExons <- function(exons) {
   #Join a list of exons into one GRanges object
   
   #Test that all transcripts are on the same chromosome
-  chrs = unlist(lapply(exons, function(x) IRanges::as.vector(GenomicRanges::seqnames(x)[1])))
+  chrs = purrr::map_chr(as.list(exons), ~GenomicRanges::seqnames(.)[1] %>% 
+                              S4Vectors::as.vector.Rle(mode = "character"))
   if (!all(chrs == chrs[1])){
     stop("Some transcripts are on different chromosomes.")
   }
