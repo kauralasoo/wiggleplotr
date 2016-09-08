@@ -4,7 +4,7 @@ readCoverageFromBigWig <- function(bigwig_path, gene_range){
   #Read coverage over a region from a bigWig file
   sel = rtracklayer::BigWigSelection(gene_range)
   coverage_ranges = rtracklayer::import.bw(bigwig_path, selection = sel)
-  GenomeInfoDb::seqlevels(coverage_ranges) = IRanges::as.vector(GenomicRanges::seqnames(gene_range))
+  GenomeInfoDb::seqlevels(coverage_ranges) = S4Vectors::as.vector.Rle(GenomicRanges::seqnames(gene_range), mode = "character")
   coverage_rle = GenomicRanges::coverage(coverage_ranges, weight = GenomicRanges::score(coverage_ranges))[[1]]
   coverage_rle = coverage_rle[(GenomicRanges::start(gene_range)):(GenomicRanges::end(gene_range))] #Keep the region of interest
 }
@@ -93,7 +93,7 @@ intronsFromJointExonRanges <- function(joint_exon_ranges, flanking_length){
 #' Find the start and end coordinates of the whole gene form joint exons. 
 constructGeneRange <- function(joint_exon_ranges, flanking_length){
   gene_range = GenomicRanges::reduce(c(joint_exon_ranges, GenomicRanges::gaps(joint_exon_ranges, start = NA, end = NA)))
-  GenomeInfoDb::seqlevels(gene_range) = IRanges::as.vector(GenomicRanges::seqnames(gene_range))[1]
+  GenomeInfoDb::seqlevels(gene_range) = S4Vectors::as.vector.Rle(GenomicRanges::seqnames(gene_range), mode = "character")[1]
   GenomicRanges::start(gene_range) = GenomicRanges::start(gene_range) - flanking_length[1]
   GenomicRanges::end(gene_range) = GenomicRanges::end(gene_range) + flanking_length[2]
   return(gene_range)

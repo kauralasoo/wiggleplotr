@@ -20,7 +20,7 @@ shortenIntrons <- function(introns, intron_length){
 shrinkIntronsCoverage <- function(coverage, old_introns, new_introns){
   
   #Covert coverage vector from Rle to normal vector
-  coverage = IRanges::as.vector(coverage) 
+  coverage = S4Vectors::as.vector.Rle(coverage, mode = "double")
 
   #Calculate full annotations
   old_annot = sort(c(old_introns, IRanges::gaps(old_introns)))
