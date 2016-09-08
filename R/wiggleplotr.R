@@ -100,6 +100,12 @@ plotCoverage <- function(exons, cdss, track_data, transcript_annotations, rescal
   assertthat::assert_that(assertthat::has_name(track_data, "scaling_factor"))
   assertthat::assert_that(assertthat::has_name(track_data, "colour_group"))
   
+  #Make sure that bigWig column is not a factor
+  if(is.factor(track_data$bigWig)){
+    warning("bigWig column in track_data data.frame is a factor, coverting to a character vector.")
+    track_data = dplyr::mutate(track_data, bigWig = as.character(bigWig))
+  }
+  
   #Check transcript annotation
   assertthat::assert_that(assertthat::has_name(transcript_annotations, "transcript_id"))
   assertthat::assert_that(assertthat::has_name(transcript_annotations, "gene_id"))
