@@ -113,7 +113,7 @@ pasteFactors <- function(factor1, factor2){
   new2 = rep(levels2, each = length(levels1))
   new_levels = paste(new1, new2, sep = "_")
   
-  new_factor = factor(paste(factor1, factor2, sep = "_"), levels = new_levels)
+  new_factor = factor(paste(as.character(factor1), as.character(factor2), sep = "_"), levels = new_levels)
   return(new_factor)
 }
 
@@ -121,8 +121,8 @@ pasteFactors <- function(factor1, factor2){
 meanCoverage <- function(coverage_df){
   coverage_df = group_by(coverage_df, track_id, colour_group, bins) %>% 
     dplyr::summarise(coverage = mean(coverage)) %>%
-    dplyr::mutate(sample_id = pasteFactors(track_id, colour_group)) %>% #Construct a new sample id for mean vector
-    dplyr::ungroup()
+    dplyr::ungroup() %>% # It's important to do ungroup before mutate, or you get unexpected factor results
+    dplyr::mutate(sample_id = pasteFactors(as.factor(track_id), as.factor(colour_group))) #Construct a new sample id for mean vector
   return(coverage_df)
 }
 

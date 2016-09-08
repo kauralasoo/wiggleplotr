@@ -125,7 +125,7 @@ plotCoverage <- function(exons, cdss, track_data, transcript_annotations, rescal
   chromosome_name = as.vector(GenomicRanges::seqnames(gene_range)[1])
 
   #Read coverage tracks from BigWig file
-  sample_list = as.list(track_data$bigWig)
+  sample_list = as.character(track_data$bigWig)
   names(sample_list) = track_data$sample_id
   coverage_list = lapply(sample_list, readCoverageFromBigWig, gene_range)
 
