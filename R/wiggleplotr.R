@@ -90,7 +90,8 @@ plotTranscripts <- function(exons, cdss, annotations, rescale_introns = TRUE, ne
 #' @param label_type Specifies the format for annotation labels. If set to "transcript" then plots both gene_name and transcript_id, 
 #' if set to "peak" then plots only gene_name form transcript_annotations data.frame (default: "transcript"). 
 #' @param return_subplots_list Instead of a joint plot return a list of subplots that can be joined together manually. 
-#' @param region_coords Start and end coordinates of the region to plot, overrides flanking_length parameter. 
+#' @param region_coords Start and end coordinates of the region to plot, overrides flanking_length parameter.
+#' @param line_only If TRUE then read coverage is plotted only with a contour line, otherwise the whole area is filled. (default: FALSE). 
 #'
 #' @return Either object from cow_plot::plot_grid() function or a list of subplots (if return_subplots_list == TRUE)
 #' @export
@@ -99,7 +100,7 @@ plotCoverage <- function(exons, cdss, track_data, transcript_annotations, rescal
                         plot_fraction = 0.1, heights = c(0.75, 0.25), alpha = 1,
                         fill_palette = c("#a1dab4","#41b6c4","#225ea8"), mean_only = TRUE, 
                         connect_exons = TRUE, label_type = "transcript", return_subplots_list = FALSE,
-                        region_coords = NULL){
+                        region_coords = NULL, line_only = FALSE){
   
   #Make some assertions about the input data
   #Check track_data
@@ -122,8 +123,8 @@ plotCoverage <- function(exons, cdss, track_data, transcript_annotations, rescal
   assertthat::assert_that(assertthat::has_name(transcript_annotations, "strand"))
   
   #Check exons and cdss
-  assertthat::assert_that(is.list(exons)) #Check that exons and cdss objects are lists
-  assertthat::assert_that(is.list(cdss))
+  assertthat::assert_that(is.list(exons) || class(exons) == "GRangesList") #Check that exons and cdss objects are lists
+  assertthat::assert_that(is.list(cdss) || class(exons) == "GRangesList")
   #TODO: Check that the names of the exons and cdss list match that of the transcript_annotations data.frame
   
   #Find the start and end cooridinates of the whole region spanning the gene
@@ -172,7 +173,7 @@ plotCoverage <- function(exons, cdss, track_data, transcript_annotations, rescal
   points = subsamplePoints(tx_annotations, plot_fraction)
   coverage_list = lapply(coverage_list, function(x) {x[points,]} )
 
-  #Covert to data frame and plot
+  #Convert to data frame and plot
   coverage_df = plyr::ldply(coverage_list, data.frame, .id = "sample_id") %>% 
     dplyr::mutate(sample_id = as.character(sample_id)) #Convert factor to character
   coverage_df = dplyr::left_join(coverage_df, track_data, by = "sample_id") %>%
@@ -188,7 +189,7 @@ plotCoverage <- function(exons, cdss, track_data, transcript_annotations, rescal
                        tx_annotations$cds_ranges, transcript_annotations, label_type)
   tx_structure = plotTranscriptStructure(transcript_struct, limits, connect_exons, xlabel)
   
-  coverage_plot = makeCoveragePlot(coverage_df, limits, alpha, fill_palette)
+  coverage_plot = makeCoveragePlot(coverage_df, limits, alpha, fill_palette, line_only)
   
   #Choose between returning plot list or a joint plot using plot_grid
   if(return_subplots_list){

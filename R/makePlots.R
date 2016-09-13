@@ -35,15 +35,25 @@ plotTranscriptStructure <- function(exons_df, limits = NA, connect_exons = TRUE,
   return(plot)
 }
 
-makeCoveragePlot <- function(coverage_df, limits, alpha, fill_palette){
+makeCoveragePlot <- function(coverage_df, limits, alpha, fill_palette, line_only){
   #Plot coverage over a region
-  coverage_plot = ggplot(coverage_df, aes(bins, coverage, group = sample_id, fill = colour_group)) + 
-    geom_area(alpha = alpha, position = "identity") + 
+  coverage_plot = ggplot(coverage_df, aes(bins, coverage, group = sample_id, alpha = alpha)) + 
+    geom_blank() +
+    theme_light()
+  #Choose between plotting a line and plotting area
+  if(line_only){
+    coverage_plot = coverage_plot + 
+      geom_line(aes(colour = colour_group), alpha = alpha, position = "identity") 
+  } else{
+    coverage_plot = coverage_plot + 
+      geom_area(aes(fill = colour_group), alpha = alpha, position = "identity")
+  }
+  coverage_plot = coverage_plot +
     facet_grid(track_id~.) +
-    theme_light() +
     dataTrackTheme() + 
     scale_x_continuous(limits = limits, expand = c(0,0)) +
     scale_y_continuous(expand = c(0,0)) +
+    scale_color_manual(values = fill_palette) +
     scale_fill_manual(values = fill_palette) +
     ylab("FPM")
   return(coverage_plot)
