@@ -1,4 +1,4 @@
-#' Function to quickly plot transcript structure without any read coverage
+#' Quickly plot transcript structure without read coverage tracks
 #'
 #' @param exons 
 #' @param cdss 
@@ -9,13 +9,18 @@
 #' @param connect_exons 
 #' @param label_type Specifies the format for annotation labels. If set to "transcript" then plots both gene_name and transcript_id, 
 #' if set to "peak" then plots only gene_name form transcript_annotations data.frame (default: "transcript"). 
-#' @param region_coords 
+#' @param region_coords Start and end coordinates of the region to plot, overrides flanking_length parameter.
 #'
 #' @return ggplot2 object
 #' @export
 plotTranscripts <- function(exons, cdss, annotations, rescale_introns = TRUE, new_intron_length = 50, 
                             flanking_length = c(50,50), connect_exons = TRUE, label_type = "transcript", 
                             region_coords = NULL){
+  
+  #Check exons and cdss
+  assertthat::assert_that(is.list(exons)) #Check that exons and cdss objects are lists
+  assertthat::assert_that(is.list(exons))
+  
   #Join exons together
   joint_exons = joinExons(exons)
   
@@ -35,12 +40,16 @@ plotTranscripts <- function(exons, cdss, annotations, rescale_introns = TRUE, ne
     tx_annotations = rescaleIntrons(exons, cdss, joint_exons, new_intron_length = new_intron_length, flanking_length)
     xlabel = "Distance from region start (bp)"
   } else {
-    tx_annotations = list(exon_ranges = lapply(exons, GenomicRanges::ranges), cds_ranges = lapply(cdss, GenomicRanges::ranges))
+    old_introns = intronsFromJointExonRanges(GenomicRanges::ranges(joint_exons), flanking_length = flanking_length)
+    tx_annotations = list(exon_ranges = lapply(exons, GenomicRanges::ranges), cds_ranges = lapply(cdss, GenomicRanges::ranges),
+                          old_introns = old_introns, new_introns = old_introns)
+    
     xlabel = paste("Chromosome", chromosome_name, "position (bp)")
   }
+  limits = c( min(IRanges::start(tx_annotations$new_introns)), max(IRanges::end(tx_annotations$new_introns)))
   structure = prepareTranscriptStructureForPlotting(tx_annotations$exon_ranges, 
                                                tx_annotations$cds_ranges, annotations, label_type)
-  plot = plotTranscriptStructure(structure, connect_exons = connect_exons, xlabel = xlabel)
+  plot = plotTranscriptStructure(structure, limits, connect_exons = connect_exons, xlabel = xlabel)
   return(plot)
 }
 
@@ -81,7 +90,7 @@ plotTranscripts <- function(exons, cdss, annotations, rescale_introns = TRUE, ne
 #' @param label_type Specifies the format for annotation labels. If set to "transcript" then plots both gene_name and transcript_id, 
 #' if set to "peak" then plots only gene_name form transcript_annotations data.frame (default: "transcript"). 
 #' @param return_subplots_list Instead of a joint plot return a list of subplots that can be joined together manually. 
-#' @param region_coords Start and end coordinates of the region, overrides flanking_length parameter. 
+#' @param region_coords Start and end coordinates of the region to plot, overrides flanking_length parameter. 
 #'
 #' @return Either object from cow_plot::plot_grid() function or a list of subplots (if return_subplots_list == TRUE)
 #' @export
@@ -112,6 +121,9 @@ plotCoverage <- function(exons, cdss, track_data, transcript_annotations, rescal
   assertthat::assert_that(assertthat::has_name(transcript_annotations, "gene_name"))
   assertthat::assert_that(assertthat::has_name(transcript_annotations, "strand"))
   
+  #Check exons and cdss
+  assertthat::assert_that(is.list(exons)) #Check that exons and cdss objects are lists
+  assertthat::assert_that(is.list(exons))
   
   #Find the start and end cooridinates of the whole region spanning the gene
   joint_exons = joinExons(exons)

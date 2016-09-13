@@ -60,7 +60,7 @@ if set to "peak" then plots only gene_name form transcript_annotations data.fram
 
 \item{return_subplots_list}{Instead of a joint plot return a list of subplots that can be joined together manually.}
 
-\item{region_coords}{Start and end coordinates of the region, overrides flanking_length parameter.}
+\item{region_coords}{Start and end coordinates of the region to plot, overrides flanking_length parameter.}
 }
 \value{
 Either object from cow_plot::plot_grid() function or a list of subplots (if return_subplots_list == TRUE)

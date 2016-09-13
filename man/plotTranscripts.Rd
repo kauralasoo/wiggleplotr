@@ -2,7 +2,7 @@
 % Please edit documentation in R/wiggleplotr.R
 \name{plotTranscripts}
 \alias{plotTranscripts}
-\title{Function to quickly plot transcript structure without any read coverage}
+\title{Quickly plot transcript structure without read coverage tracks}
 \usage{
 plotTranscripts(exons, cdss, annotations, rescale_introns = TRUE,
   new_intron_length = 50, flanking_length = c(50, 50),
@@ -26,12 +26,12 @@ plotTranscripts(exons, cdss, annotations, rescale_introns = TRUE,
 \item{label_type}{Specifies the format for annotation labels. If set to "transcript" then plots both gene_name and transcript_id, 
 if set to "peak" then plots only gene_name form transcript_annotations data.frame (default: "transcript").}
 
-\item{region_coords}{}
+\item{region_coords}{Start and end coordinates of the region to plot, overrides flanking_length parameter.}
 }
 \value{
 ggplot2 object
 }
 \description{
-Function to quickly plot transcript structure without any read coverage
+Quickly plot transcript structure without read coverage tracks
 }
 
