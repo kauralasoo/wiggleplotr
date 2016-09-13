@@ -19,7 +19,7 @@ plotTranscripts <- function(exons, cdss, annotations, rescale_introns = TRUE, ne
   
   #Check exons and cdss
   assertthat::assert_that(is.list(exons)) #Check that exons and cdss objects are lists
-  assertthat::assert_that(is.list(exons))
+  assertthat::assert_that(is.list(cdss))
   
   #Join exons together
   joint_exons = joinExons(exons)
@@ -123,7 +123,8 @@ plotCoverage <- function(exons, cdss, track_data, transcript_annotations, rescal
   
   #Check exons and cdss
   assertthat::assert_that(is.list(exons)) #Check that exons and cdss objects are lists
-  assertthat::assert_that(is.list(exons))
+  assertthat::assert_that(is.list(cdss))
+  #TODO: Check that the names of the exons and cdss list match that of the transcript_annotations data.frame
   
   #Find the start and end cooridinates of the whole region spanning the gene
   joint_exons = joinExons(exons)
