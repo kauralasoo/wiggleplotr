@@ -18,8 +18,8 @@ plotTranscripts <- function(exons, cdss, annotations, rescale_introns = TRUE, ne
                             region_coords = NULL){
   
   #Check exons and cdss
-  assertthat::assert_that(is.list(exons)) #Check that exons and cdss objects are lists
-  assertthat::assert_that(is.list(cdss))
+  assertthat::assert_that(is.list(exons)|| class(exons) == "GRangesList") #Check that exons and cdss objects are lists
+  assertthat::assert_that(is.list(cdss) || class(exons) == "GRangesList")
   
   #Join exons together
   joint_exons = joinExons(exons)
