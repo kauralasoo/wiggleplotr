@@ -59,13 +59,33 @@ makeCoveragePlot <- function(coverage_df, limits, alpha, fill_palette, line_only
   return(coverage_plot)
 }
 
-makeManhattanPlot <- function(pvalues_df, limits){
-  plot = ggplot(pvalues_df, aes(x = pos, y = -log(p_nominal, 10))) + 
+makeManhattanPlot <- function(pvalues_df, limits, color_R2 = FALSE, data_track = TRUE){
+  
+  #Make assertions
+  assertthat::assert_that(assertthat::has_name(pvalues_df, "track_id"))
+  assertthat::assert_that(assertthat::has_name(pvalues_df, "p_nominal"))
+  assertthat::assert_that(assertthat::has_name(pvalues_df, "pos"))
+  
+  #If R2 is specified
+  if(color_R2){
+    assertthat::assert_that(assertthat::has_name(pvalues_df, "R2"))
+    plot_base = ggplot(pvalues_df, aes(x = pos, y = -log(p_nominal, 10), colour = R2)) + geom_blank()
+  } else{
+    #Else do not colour
+    plot_base = ggplot(pvalues_df, aes(x = pos, y = -log(p_nominal, 10))) + geom_blank()
+  }
+  
+  #Make the rest of the plot
+  plot = plot_base + 
     facet_grid(track_id ~ .) +
     geom_point() + 
     theme_light() + 
     ylab(expression(paste("-",log[10], " p-value"))) +
-    dataTrackTheme() + 
     scale_x_continuous(limits = limits, expand = c(0,0))
+  
+  #Apply data track theme so that plots can later be pasted together with cowplot
+  if(data_track){
+    plot = plot + dataTrackTheme()
+  }
   return(plot)
 }
