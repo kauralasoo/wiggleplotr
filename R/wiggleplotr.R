@@ -31,10 +31,13 @@ plotTranscripts <- function(exons, cdss, annotations, rescale_introns = TRUE, ne
   # flanking_length form region_coords
   if(!is.null(region_coords)){
     gene_range = constructGeneRange(joint_exons, c(0,0))
-    flanking_length = c(GenomicRanges::start(gene_range) - region_coords[1],
-                        region_coords[2] - GenomicRanges::end(gene_range))
+    min_start = min(GenomicRanges::start(gene_range))
+    max_end = max(GenomicRanges::end(gene_range))
+    flanking_length = c(min_start - region_coords[1], region_coords[2] - max_end)
   }
-  
+  #Make sure that flanking_length is a vector of two elements
+  assertthat::assert_that(length(flanking_length) == 2) 
+
   #Rescale introns
   if (rescale_introns){
     tx_annotations = rescaleIntrons(exons, cdss, joint_exons, new_intron_length = new_intron_length, flanking_length)
@@ -134,12 +137,15 @@ plotCoverage <- function(exons, cdss, track_data, transcript_annotations, rescal
   # flanking_length form region_coords
   if(!is.null(region_coords)){
     gene_range = constructGeneRange(joint_exons, c(0,0))
-    flanking_length = c(GenomicRanges::start(gene_range) - region_coords[1],
-                        region_coords[2] - GenomicRanges::end(gene_range))
+    min_start = min(GenomicRanges::start(gene_range))
+    max_end = max(GenomicRanges::end(gene_range))
+    flanking_length = c(min_start - region_coords[1], region_coords[2] - max_end)
+    
     gene_range = constructGeneRange(joint_exons, flanking_length)
   } else{
     gene_range = constructGeneRange(joint_exons, flanking_length)
   }
+  assertthat::assert_that(length(flanking_length) == 2) #flanking_length is a vector of two elements
 
   #Extract chromosome name
   chromosome_name = as.vector(GenomicRanges::seqnames(gene_range)[1])
