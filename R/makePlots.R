@@ -35,18 +35,24 @@ plotTranscriptStructure <- function(exons_df, limits = NA, connect_exons = TRUE,
   return(plot)
 }
 
-makeCoveragePlot <- function(coverage_df, limits, alpha, fill_palette, line_only){
+makeCoveragePlot <- function(coverage_df, limits, alpha, fill_palette, coverage_type){
   #Plot coverage over a region
   coverage_plot = ggplot(coverage_df, aes(bins, coverage, group = sample_id, alpha = alpha)) + 
     geom_blank() +
     theme_light()
   #Choose between plotting a line and plotting area
-  if(line_only){
+  if(coverage_type == "line"){
     coverage_plot = coverage_plot + 
       geom_line(aes(colour = colour_group), alpha = alpha, position = "identity") 
-  } else{
+  } else if (coverage_type == "area"){
     coverage_plot = coverage_plot + 
       geom_area(aes(fill = colour_group), alpha = alpha, position = "identity")
+  } else if (coverage_type == "both"){
+    coverage_plot = coverage_plot + 
+      geom_area(aes(fill = colour_group), alpha = alpha, position = "identity") +
+      geom_line(aes(colour = colour_group), alpha = alpha, position = "identity") 
+  } else{
+    error("Coverage type not supported.")
   }
   coverage_plot = coverage_plot +
     facet_grid(track_id~.) +

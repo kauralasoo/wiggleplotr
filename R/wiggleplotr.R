@@ -94,7 +94,8 @@ plotTranscripts <- function(exons, cdss, annotations, rescale_introns = TRUE, ne
 #' if set to "peak" then plots only gene_name form transcript_annotations data.frame (default: "transcript"). 
 #' @param return_subplots_list Instead of a joint plot return a list of subplots that can be joined together manually. 
 #' @param region_coords Start and end coordinates of the region to plot, overrides flanking_length parameter.
-#' @param line_only If TRUE then read coverage is plotted only with a contour line, otherwise the whole area is filled. (default: FALSE). 
+#' @param coverage_type Specifies if the read coverage is represented by either 'line', 'area' or 'both'. 
+#' The 'both' option tends to give better results for wide regions. (default: area). 
 #'
 #' @return Either object from cow_plot::plot_grid() function or a list of subplots (if return_subplots_list == TRUE)
 #' @export
@@ -103,7 +104,7 @@ plotCoverage <- function(exons, cdss, track_data, transcript_annotations, rescal
                         plot_fraction = 0.1, heights = c(0.75, 0.25), alpha = 1,
                         fill_palette = c("#a1dab4","#41b6c4","#225ea8"), mean_only = TRUE, 
                         connect_exons = TRUE, label_type = "transcript", return_subplots_list = FALSE,
-                        region_coords = NULL, line_only = FALSE){
+                        region_coords = NULL, coverage_type = "area"){
   
   #Make some assertions about the input data
   #Check track_data
@@ -195,7 +196,7 @@ plotCoverage <- function(exons, cdss, track_data, transcript_annotations, rescal
                        tx_annotations$cds_ranges, transcript_annotations, label_type)
   tx_structure = plotTranscriptStructure(transcript_struct, limits, connect_exons, xlabel)
   
-  coverage_plot = makeCoveragePlot(coverage_df, limits, alpha, fill_palette, line_only)
+  coverage_plot = makeCoveragePlot(coverage_df, limits, alpha, fill_palette, coverage_type)
   
   #Choose between returning plot list or a joint plot using plot_grid
   if(return_subplots_list){
