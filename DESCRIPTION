@@ -1,18 +1,23 @@
 Package: wiggleplotr
-Title: What the package does (short line)
+Title: Make read coverage plots from BigWig files
 Version: 0.1
-Authors@R: "First Last <first.last@example.com> [aut, cre]"
-Description: What the package does (paragraph)
+Author: Kaur Alasooo [aut, cre]
+Maintainer: Kaur Alasoo <kauralasoo@gmail.com>
+Description: Tools to visualise read coverage from sequencing experiments together with genomic annotations (genes, transcripts, peaks). Introns of long transcripts can be shrunken to a fixed length for better visualisation of exonic read coverage.
 Depends:
     R (>= 3.0.2)
 Imports:
     plyr,
     dplyr,
     ggplot2,
-    grid,
     GenomicRanges,
     rtracklayer,
-    cowplot
-License: What license is it under?
+    cowplot,
+    assertthat,
+    purrr,
+    S4Vectors,
+    IRanges,
+    GenomeInfoDb
+License: Apache License 2.0
 LazyData: true
 RoxygenNote: 5.0.1
