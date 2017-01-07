@@ -13,12 +13,12 @@ plotCoverage(exons, cdss, track_data, transcript_annotations,
   coverage_type = "area")
 }
 \arguments{
-\item{exons}{List of GRanges objects, each object containing exons for one transcript. 
+\item{exons}{list of GRanges objects, each object containing exons for one transcript. 
 The list must have names that correspond to transcript_id column in transript_annotations data.frame.}
 
 \item{cdss}{list of GRanges objects, each object containing the coding regions (CDS) of a single transcript. 
 The list must have names that correspond to transcript_id column in transript_annotations data.frame. 
-If specified then coding and non-coding regions will be plotted in a different colour.}
+If CDS annotation is not available then exons list can be used for both arguments.}
 
 \item{track_data}{data.frame with the metadata for the bigWig read coverage files. Must contain the following columns:
 \itemize{

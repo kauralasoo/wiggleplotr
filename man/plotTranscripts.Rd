@@ -9,19 +9,22 @@ plotTranscripts(exons, cdss, annotations, rescale_introns = TRUE,
   connect_exons = TRUE, label_type = "transcript", region_coords = NULL)
 }
 \arguments{
-\item{exons}{}
+\item{exons}{list of GRanges objects, each object containing exons for one transcript.
+The list must have names that correspond to transcript_id column in transript_annotations data.frame.}
 
-\item{cdss}{}
+\item{cdss}{list of GRanges objects, each object containing the coding regions (CDS) of a single transcript. 
+The list must have names that correspond to transcript_id column in transript_annotations data.frame. 
+If CDS annotation is not available then exons list can be used for both arguments.}
 
 \item{annotations}{data.frame with 4 columns: transcript_id, gene_id, gene_name, strand}
 
-\item{rescale_introns}{}
+\item{rescale_introns}{Specifies if the introns should be scaled to fixed length or not. (default: TRUE)}
 
-\item{new_intron_length}{}
+\item{new_intron_length}{length (bp) of introns after scaling. (default: 50)}
 
-\item{flanking_length}{}
+\item{flanking_length}{Lengths of the flanking regions upstream and downstream of the gene. (default: c(50,50))}
 
-\item{connect_exons}{}
+\item{connect_exons}{Print lines that connect exons together. Set to FALSE when plotting peaks (default: TRUE).}
 
 \item{label_type}{Specifies the format for annotation labels. If set to "transcript" then plots both gene_name and transcript_id, 
 if set to "peak" then plots only gene_name form transcript_annotations data.frame (default: "transcript").}
