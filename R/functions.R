@@ -65,8 +65,8 @@ prepareTranscriptStructureForPlotting <- function(exon_ranges, cds_ranges, trans
   
   #Prepare transcript annotations for plotting:
   #Keep only required columns
-  transcript_annotations = dplyr::select(transcript_annotations, transcript_id, gene_id, gene_name, strand) %>%
-    dplyr::mutate(strand = ifelse(strand == "+" | strand == 1, 1, -1)) #Change strand indicator to number is specified by character
+  transcript_annotations = dplyr::select_(transcript_annotations, "transcript_id", "gene_id", "gene_name", "strand") %>%
+    dplyr::mutate(strand = ifelse(strand == "+" | strand == 1, 1, -1)) #Change strand indicator to number if specified by character
 
   #Add additional metadata
   transcript_struct = dplyr::left_join(transcript_struct, transcript_annotations, by = "transcript_id") #Add gene name
@@ -90,7 +90,7 @@ intronsFromJointExonRanges <- function(joint_exon_ranges, flanking_length){
   return(introns)
 }
 
-#' Find the start and end coordinates of the whole gene form joint exons. 
+# Find the start and end coordinates of the whole gene form joint exons. 
 constructGeneRange <- function(joint_exon_ranges, flanking_length){
   gene_range = GenomicRanges::reduce(c(joint_exon_ranges, GenomicRanges::gaps(joint_exon_ranges, start = NA, end = NA)))
   GenomeInfoDb::seqlevels(gene_range) = S4Vectors::as.vector.Rle(GenomicRanges::seqnames(gene_range), mode = "character")[1]
@@ -117,18 +117,18 @@ pasteFactors <- function(factor1, factor2){
   return(new_factor)
 }
 
-#' Calculate mean coverage within each track_id and colour_group
+# Calculate mean coverage within each track_id and colour_group
 meanCoverage <- function(coverage_df){
-  coverage_df = group_by(coverage_df, track_id, colour_group, bins) %>% 
-    dplyr::summarise(coverage = mean(coverage)) %>%
+  coverage_df = dplyr::group_by_(coverage_df, "track_id", "colour_group", "bins") %>% 
+    dplyr::summarise_(.dots = stats::setNames(list(~mean(coverage)), c("coverage"))) %>%
     dplyr::ungroup() %>% # It's important to do ungroup before mutate, or you get unexpected factor results
-    dplyr::mutate(sample_id = pasteFactors(as.factor(track_id), as.factor(colour_group))) #Construct a new sample id for mean vector
+    dplyr::mutate_(.dots = stats::setNames(list(~pasteFactors(as.factor(track_id), as.factor(colour_group))),c("sample_id")) ) #Construct a new sample id for mean vector
+  
   return(coverage_df)
 }
 
-#' Choose a subsample of points to make plotting faster
-#' 
-#' Makes sure that intron-exon boundaries are well samples.
+# Choose a subsample of points to make plotting faster
+# Makes sure that intron-exon boundaries are well samples.
 subsamplePoints <- function(tx_annotations, plot_fraction){
   #Define the start and end coorinates of the region
   region_start = min(IRanges::start(tx_annotations$new_introns))
@@ -138,8 +138,8 @@ subsamplePoints <- function(tx_annotations, plot_fraction){
   #Take a subsample of points that's easier to plot
   points = sample(region_length, floor(region_length*plot_fraction))
   #Subtract the start coordinate of the region
-  exon_starts = unique(unlist(lapply(tx_annotations$exon_ranges, start))) - (region_start -1)
-  exon_ends = unique(unlist(lapply(tx_annotations$exon_ranges, end))) - (region_start - 1)
+  exon_starts = unique(unlist(lapply(tx_annotations$exon_ranges, IRanges::start))) - (region_start -1)
+  exon_ends = unique(unlist(lapply(tx_annotations$exon_ranges, IRanges::end))) - (region_start - 1)
   points = unique(sort(c(points, exon_starts, exon_ends, 
                          exon_starts -3, exon_starts +3, 
                          exon_ends + 3, exon_ends -3)))

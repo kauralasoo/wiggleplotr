@@ -3,3 +3,5 @@
 export(plotCoverage)
 export(plotTranscripts)
 import(ggplot2)
+importFrom(dplyr,"%>%")
+importFrom(dplyr,"row_number")

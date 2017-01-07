@@ -1,12 +1,15 @@
 #' Quickly plot transcript structure without read coverage tracks
 #'
-#' @param exons 
-#' @param cdss 
+#' @param exons list of GRanges objects, each object containing exons for one transcript.
+#' The list must have names that correspond to transcript_id column in transript_annotations data.frame.
+#' @param cdss list of GRanges objects, each object containing the coding regions (CDS) of a single transcript. 
+#' The list must have names that correspond to transcript_id column in transript_annotations data.frame. 
+#' If CDS annotation is not available then exons list can be used for both arguments.
 #' @param annotations data.frame with 4 columns: transcript_id, gene_id, gene_name, strand
-#' @param rescale_introns 
-#' @param new_intron_length 
-#' @param flanking_length 
-#' @param connect_exons 
+#' @param rescale_introns Specifies if the introns should be scaled to fixed length or not. (default: TRUE)
+#' @param new_intron_length length (bp) of introns after scaling. (default: 50)
+#' @param flanking_length Lengths of the flanking regions upstream and downstream of the gene. (default: c(50,50))
+#' @param connect_exons Print lines that connect exons together. Set to FALSE when plotting peaks (default: TRUE).
 #' @param label_type Specifies the format for annotation labels. If set to "transcript" then plots both gene_name and transcript_id, 
 #' if set to "peak" then plots only gene_name form transcript_annotations data.frame (default: "transcript"). 
 #' @param region_coords Start and end coordinates of the region to plot, overrides flanking_length parameter.
@@ -60,11 +63,11 @@ plotTranscripts <- function(exons, cdss, annotations, rescale_introns = TRUE, ne
 #' 
 #' Also supports rescaling introns to constant length.
 #' 
-#' @param exons List of GRanges objects, each object containing exons for one transcript. 
+#' @param exons list of GRanges objects, each object containing exons for one transcript. 
 #' The list must have names that correspond to transcript_id column in transript_annotations data.frame.
 #' @param cdss list of GRanges objects, each object containing the coding regions (CDS) of a single transcript. 
 #' The list must have names that correspond to transcript_id column in transript_annotations data.frame. 
-#' If specified then coding and non-coding regions will be plotted in a different colour.
+#' If CDS annotation is not available then exons list can be used for both arguments.
 #' @param track_data data.frame with the metadata for the bigWig read coverage files. Must contain the following columns:
 #' \itemize{
 #'  \item sample_id - unique id for each sample.
@@ -117,7 +120,7 @@ plotCoverage <- function(exons, cdss, track_data, transcript_annotations, rescal
   #Make sure that bigWig column is not a factor
   if(is.factor(track_data$bigWig)){
     warning("bigWig column in track_data data.frame is a factor, coverting to a character vector.")
-    track_data = dplyr::mutate(track_data, bigWig = as.character(bigWig))
+    track_data = dplyr::mutate_(track_data, .dots = stats::setNames(list(~as.character(bigWig)), c("bigWig")))
   }
   
   #Check transcript annotation
@@ -181,10 +184,11 @@ plotCoverage <- function(exons, cdss, track_data, transcript_annotations, rescal
   coverage_list = lapply(coverage_list, function(x) {x[points,]} )
 
   #Convert to data frame and plot
-  coverage_df = plyr::ldply(coverage_list, data.frame, .id = "sample_id") %>% 
-    dplyr::mutate(sample_id = as.character(sample_id)) #Convert factor to character
+  coverage_df = purrr::map_df(coverage_list, identity, .id = "sample_id") %>% 
+    as.data.frame() %>%
+    dplyr::mutate_(.dots = stats::setNames(list(~as.character(sample_id)), c("sample_id")) ) #Convert factor to character
   coverage_df = dplyr::left_join(coverage_df, track_data, by = "sample_id") %>%
-    dplyr::mutate(coverage = coverage/scaling_factor) #Normalize by library size
+    dplyr::mutate_(.dots = stats::setNames(list(~coverage/scaling_factor), c("coverage")) ) #Normalize by library size
 
   #Calculate mean coverage within each track and colour group
   if(mean_only){  coverage_df = meanCoverage(coverage_df) }
