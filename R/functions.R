@@ -64,7 +64,8 @@ prepareTranscriptStructureForPlotting <- function(exon_ranges, cds_ranges, trans
   #Prepare transcript annotations for plotting:
   #Keep only required columns
   transcript_annotations = dplyr::select_(transcript_annotations, "transcript_id", "gene_id", "gene_name", "strand") %>%
-    dplyr::mutate(strand = ifelse(strand == "+" | strand == 1, 1, -1)) #Change strand indicator to number if specified by character
+    #Change strand indicator to number if specified by character
+    dplyr::mutate(strand = ifelse(strand == "+" | strand == 1, 1, -1)) 
 
   #Add additional metadata
   transcript_struct = dplyr::left_join(transcript_struct, transcript_annotations, by = "transcript_id") #Add gene name
@@ -101,6 +102,8 @@ constructGeneRange <- function(joint_exon_ranges, flanking_length){
 #'
 #' @param factor1 First factor
 #' @param factor2 Second factor
+#' 
+#' @return Factors factor1 and factor2 pasted together.
 pasteFactors <- function(factor1, factor2){
   #Extract levels
   levels1 = levels(factor1)
@@ -145,7 +148,7 @@ subsamplePoints <- function(tx_annotations, plot_fraction){
   return(points)
 }
 
-#' Returns a three-colour colour palette suitable for plotting coverage stratified by genotype
+# Returns a three-colour colour palette suitable for plotting coverage stratified by genotype
 getGenotypePalette <- function(){
   c("#d7191c","#fdae61","#1a9641")
 }
