@@ -4,5 +4,5 @@
 cache/*
 download_annotations_cache/*
 
-
 *.Rproj
+inst/doc
