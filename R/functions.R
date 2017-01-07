@@ -48,14 +48,12 @@ prepareTranscriptStructureForPlotting <- function(exon_ranges, cds_ranges, trans
   #Combine exon_ranges and cds_ranges into a single data.frame that also contains transcript rank
   
   #Convert exon ranges into data.frame and add transcript rank
-  exons_df = plyr::ldply(exon_ranges, data.frame)
-  colnames(exons_df)[colnames(exons_df) == ".id"] = "transcript_id"
+  exons_df = purrr::map_df(exon_ranges, data.frame, .id = "transcript_id")
   exons_df = dplyr::mutate(exons_df, transcript_rank = as.numeric(factor(exons_df$transcript_id)), type = "")
   transcript_rank = unique(exons_df[,c("transcript_id", "transcript_rank", "type")])
   
   #Convert CDS ranges into a data.frame
-  cds_df = plyr::ldply(cds_ranges, data.frame)
-  colnames(cds_df)[colnames(cds_df) == ".id"] = "transcript_id"
+  cds_df = purrr::map_df(cds_ranges, data.frame, .id = "transcript_id")
   cds_df = dplyr::left_join(cds_df, transcript_rank, by = "transcript_id") #Add matching transcript rank
   
   #Join exons and cdss together

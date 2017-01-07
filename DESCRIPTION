@@ -7,9 +7,8 @@ Description: Tools to visualise read coverage from sequencing experiments togeth
 Depends:
     R (>= 3.0.2)
 Imports:
-    plyr,
     dplyr,
-    ggplot2,
+    ggplot2 (>= 2.2.0),
     GenomicRanges,
     rtracklayer,
     cowplot,
