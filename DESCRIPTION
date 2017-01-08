@@ -21,7 +21,9 @@ License: Apache License 2.0
 LazyData: true
 RoxygenNote: 5.0.1
 Suggests: knitr,
-    rmarkdown
+    rmarkdown,
+    biomaRt,
+    GenomicFeatures
 VignetteBuilder: knitr
 biocViews: Coverage,
     RNASeq,
