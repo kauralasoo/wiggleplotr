@@ -1,6 +1,6 @@
 ---
-title: "Vignette Title"
-author: "Vignette Author"
+title: "Introduction to wiggleplotr"
+author: "Kaur Alasoo"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
@@ -9,50 +9,79 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-Vignettes are long form documentation commonly included in packages. Because they are part of the distribution of the package, they need to be as compact as possible. The `html_vignette` output type provides a custom style sheet (and tweaks some options) to ensure that the resulting html is as small as possible. The `html_vignette` format:
+## Using biomaRt to download transcript annotations from Ensembl
+The easiest way to access reference transcript annotations in R is to download them directly from Ensembl using the biomaRt R package. To do that, we first need to load the neccessary R packages.
 
-- Never uses retina figures
-- Has a smaller default figure size
-- Uses a custom CSS stylesheet instead of the default Twitter Bootstrap style
-
-## Vignette Info
-
-Note the various macros within the `vignette` section of the metadata block above. These are required in order to instruct R how to build the vignette. Note that you should change the `title` field and the `\VignetteIndexEntry` to match the title of your vignette.
-
-## Styles
-
-The `html_vignette` template includes a basic CSS theme. To override this theme you can specify your own CSS in the document metadata as follows:
-
-    output: 
-      rmarkdown::html_vignette:
-        css: mystyles.css
-
-## Figures
-
-The figure sizes have been customised so that you can easily put two images side-by-side. 
-
-```{r, fig.show='hold'}
-plot(1:10)
-plot(10:1)
+```{r, include=FALSE}
+#This block get rid of the import messages
+library("biomaRt")
+library("dplyr")
+library("GenomicFeatures")
+```
+```{r}
+library("biomaRt")
+library("dplyr")
+library("GenomicFeatures")
 ```
 
-You can enable figure captions by `fig_caption: yes` in YAML:
+### Downloading transcript metadata
+First, we want to download transcript metadata, such as which transcripts belong to which genes and what are their names. We can use the biomaRt package to do that. First, let's define which mart and dataset we want to use. 
+```{r}
+ensembl_mart = useMart("ENSEMBL_MART_ENSEMBL", host = "dec2014.archive.ensembl.org")
+ensembl_dataset = useDataset("hsapiens_gene_ensembl",mart=ensembl_mart)
+ensembl_dataset
+```
+The `host` helps to make sure that we get the annotations from a specific Ensembl version. For example, Ensembl 78 correseponds to `host="dec2014.archive.ensembl.org"`. You can use the Ensembl Archives [website](http://www.ensembl.org/info/website/archives/index.html) to check which host name corresponds to desired Ensembl version. More information using specific ensembl versions with biomaRt can be found in the [biomaRt vignette].
 
-    output:
-      rmarkdown::html_vignette:
-        fig_caption: yes
-
-Then you can use the chunk option `fig.cap = "Your figure caption."` in **knitr**.
-
-## More Examples
-
-You can write math expressions, e.g. $Y = X\beta + \epsilon$, footnotes^[A footnote here.], and tables, e.g. using `knitr::kable()`.
-
-```{r, echo=FALSE, results='asis'}
-knitr::kable(head(mtcars, 10))
+We can see all available attributes with the `listAttributes` command. 
+```{r}
+attributes = listAttributes(ensembl_dataset)
+head(attributes)
 ```
 
-Also a quote using `>`:
+Now, let's select gene id, gene name, transcript_id and strand from the biomart and download the corresponding columns.
+```{r}
+selected_attributes = c("ensembl_transcript_id", "ensembl_gene_id", "external_gene_name", "strand","gene_biotype", "transcript_biotype")
+data = getBM(attributes = selected_attributes, mart = ensembl_dataset)
+head(data)
+```
 
-> "He who gives up [code] safety for [code] speed deserves neither."
-([via](https://twitter.com/hadleywickham/status/504368538874703872))
+Finally, we need to rename the columns
+```{r}
+data = dplyr::rename(data, transcript_id = ensembl_transcript_id, gene_id = ensembl_gene_id, gene_name = external_gene_name)
+head(data)
+```
+
+We can now save the metadata into a file to avoid downloading it every time we need to use it.
+```{r}
+saveRDS(data, "transcript_metadata.rds")
+```
+
+Next time that we need to access the data we can load it directly from disk.
+```{r}
+transcript_metadata = readRDS("transcript_metadata.rds")
+head(transcript_metadata)
+```
+
+### Downloading the full transcript database from Ensembl
+However, just the transcript metadata is not enought to use wiggleplotr, we also need the coordinates for all exons. We can get those using the *GenomicFeatures* packages. First, we use the `makeTranscriptDbFromBiomart` function to download the full transcript database correspondint to a sepcifc Ensembl version, in this case Ensembl 78. Please note that as the database is quite big this can take at least a couple of minutes to run.
+```{r eval=FALSE}
+txdb = makeTranscriptDbFromBiomart(biomart = "ENSEMBL_MART_ENSEMBL", dataset = "hsapiens_gene_ensembl", host="dec2014.archive.ensembl.org")
+```
+We can also save the database to disk to avoid re-downloading it every time we want to use it.
+```{r eval=FALSE}
+saveDb(txdb, "TranscriptDb_GRCh38_78.db")
+```
+And we can load it from disk using the loadDb function.
+```{r}
+txdb = loadDb("TranscriptDb_GRCh38_79.db")
+```
+Finally, we can extract exon and CDS coordinates for all annotated transcripts from the database. This command will produce a a list of [GRanges] objects, each one containing the exons of a single transcript.
+```{r}
+exons = exonsBy(txdb, by = "tx", use.names = TRUE)
+cdss = cdsBy(txdb, by = "tx", use.names = TRUE)
+exons[["ENST00000392477"]]
+```
+
+[biomaRt vignette]:https://www.bioconductor.org/packages/3.3/bioc/vignettes/biomaRt/inst/doc/biomaRt.pdf
+
