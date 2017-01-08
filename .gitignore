@@ -2,7 +2,8 @@
 .Rhistory
 .RData
 cache/*
-download_annotations_cache/*
+vignettes/transcript_metadata.rds
+vignettes/TranscriptDb_GRCh38_79.db
 
 *.Rproj
 inst/doc
