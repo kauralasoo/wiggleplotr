@@ -13,12 +13,12 @@ cdss = cdsBy(txdb, by = "tx", use.names = TRUE)
 
 
 #Extract subset of the data needed for the vignette
-transcript_metadata = dplyr::filter(tx_metadata, gene_name == "NCOA7") %>% tbl_df() %>%
+ncoa7_metadata = dplyr::filter(tx_metadata, gene_name == "NCOA7") %>% tbl_df() %>%
   dplyr::filter(transcript_biotype == "protein_coding") %>%
   dplyr::select(transcript_id, gene_id, gene_name, strand)
-exons = exons[transcript_metadata$transcript_id]
-cdss = cdss[transcript_metadata$transcript_id]
-devtools::use_data(transcript_metadata, exons, cdss, overwrite = TRUE)
+ncoa7_exons = exons[transcript_metadata$transcript_id]
+ncoa7_cdss = cdss[transcript_metadata$transcript_id]
+devtools::use_data(ncoa7_metadata, ncoa7_exons, ncoa7_cdss, overwrite = TRUE)
 
 
 #Make small versions of some example bigwig files
