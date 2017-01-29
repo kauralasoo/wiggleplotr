@@ -37,4 +37,8 @@ ggplot2 object
 \description{
 Quickly plot transcript structure without read coverage tracks
 }
+\examples{
+plotTranscripts(ncoa7_exons, ncoa7_cdss, ncoa7_transcript_metadata, rescale_introns = FALSE)
+
+}
 

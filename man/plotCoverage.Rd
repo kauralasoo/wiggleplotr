@@ -72,4 +72,18 @@ Either object from cow_plot::plot_grid() function or a list of subplots (if retu
 \description{
 Also supports rescaling introns to constant length.
 }
+\examples{
+sample_data = dplyr::data_frame(sample_id = c("aipt_A", "aipt_C", "bima_A", "bima_C"), 
+    condition = factor(c("Naive", "LPS", "Naive", "LPS"), levels = c("Naive", "LPS")), 
+    scaling_factor = 1) \%>\%
+    dplyr::mutate(bigWig = system.file("extdata",  paste0(sample_id, ".str2.bw"), package = "wiggleplotr"))
+
+track_data = dplyr::mutate(sample_data, track_id = condition, colour_group = condition)
+
+selected_transcripts = c("ENST00000438495", "ENST00000392477") #Plot only two transcripts of the gens
+plotCoverage(ncoa7_exons[selected_transcripts], ncoa7_cdss[selected_transcripts], 
+   track_data, ncoa7_metadata, 
+   heights = c(2,1), fill_palette = getGenotypePalette())
+
+}
 

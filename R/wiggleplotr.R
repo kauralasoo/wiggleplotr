@@ -15,6 +15,9 @@
 #' @param region_coords Start and end coordinates of the region to plot, overrides flanking_length parameter.
 #'
 #' @return ggplot2 object
+#' @examples
+#' plotTranscripts(ncoa7_exons, ncoa7_cdss, ncoa7_transcript_metadata, rescale_introns = FALSE)
+#' 
 #' @export
 plotTranscripts <- function(exons, cdss, annotations, rescale_introns = TRUE, new_intron_length = 50, 
                             flanking_length = c(50,50), connect_exons = TRUE, label_type = "transcript", 
@@ -101,6 +104,19 @@ plotTranscripts <- function(exons, cdss, annotations, rescale_introns = TRUE, ne
 #' The 'both' option tends to give better results for wide regions. (default: area). 
 #'
 #' @return Either object from cow_plot::plot_grid() function or a list of subplots (if return_subplots_list == TRUE)
+#' @examples
+#' sample_data = dplyr::data_frame(sample_id = c("aipt_A", "aipt_C", "bima_A", "bima_C"), 
+#'     condition = factor(c("Naive", "LPS", "Naive", "LPS"), levels = c("Naive", "LPS")), 
+#'     scaling_factor = 1) %>%
+#'     dplyr::mutate(bigWig = system.file("extdata",  paste0(sample_id, ".str2.bw"), package = "wiggleplotr"))
+#' 
+#' track_data = dplyr::mutate(sample_data, track_id = condition, colour_group = condition)
+#' 
+#' selected_transcripts = c("ENST00000438495", "ENST00000392477") #Plot only two transcripts of the gens
+#' plotCoverage(ncoa7_exons[selected_transcripts], ncoa7_cdss[selected_transcripts], 
+#'    track_data, ncoa7_metadata, 
+#'    heights = c(2,1), fill_palette = getGenotypePalette())
+#' 
 #' @export
 plotCoverage <- function(exons, cdss, track_data, transcript_annotations, rescale_introns = TRUE,
                         new_intron_length = 50, flanking_length = c(50,50),

@@ -56,7 +56,7 @@ We used the NCOA7 example above, because we discovered recently that this gene u
 First, you need to create a data frame containing sample metadata. In our case we have four samples, two from the naive condition and two after LPS stimulation: 
 
 ```{r}
-sample_data = data_frame(sample_id = c("aipt_A", "aipt_C", "bima_A", "bima_C"), 
+sample_data = dplyr::data_frame(sample_id = c("aipt_A", "aipt_C", "bima_A", "bima_C"), 
                         condition = factor(c("Naive", "LPS", "Naive", "LPS"), levels = c("Naive", "LPS")), 
                         scaling_factor = 1) %>%
   dplyr::mutate(bigWig = system.file("extdata",  paste0(sample_id, ".str2.bw"), package = "wiggleplotr"))
