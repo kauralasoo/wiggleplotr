@@ -2,12 +2,112 @@
 title: "Introduction to wiggleplotr"
 author: "Kaur Alasoo"
 date: "`r Sys.Date()`"
-output: rmarkdown::html_vignette
+output: 
+  rmarkdown::html_vignette:
+    fig_width: 6
+    fig_height: 4
+    toc: true
+    toc_depth: 2
 vignette: >
   %\VignetteIndexEntry{Vignette Title}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
+
+```{r, include=FALSE}
+#This block get rid of the import messages
+library("devtools")
+library("dplyr")
+load_all("../../wiggleplotr")
+```
+
+_wiggleplotr_ is a tool to visualise RNA-seq read overage accross annotated exons. A key feature of _wiggleplotr_ is that it is able rescale all introns of a gene to fixed length, making it easier to see differences in read coverage between neighbouring exons that can otherwise be too far away. Since _wiggleplotr_ takes standard BigWig files as input, it can also be used to visualise read overage from other sequencing-based assays such as ATAC-seq and ChIP-seq. 
+
+##Visualizing transcript annotations
+First, the _plotTranscripts_ function allows you to visualise the structucte of all transcripts of a gene (or multiple genes). It requires three inputs:
+
+* `exons` - list of GRanges objects containing the start and end coordinates of exons for each transcript.
+* `cdss` - list of GRanges objects containing the start and end coordinates of coding sequence (cds) for each transcript.
+* `annotations` - a data.frame with at least the following four columns: gene_id, transcript_id, gene_name and strand
+
+To get you started, the _wiggleplotr_ package comes with example annotations for the nine protein coding transcripts of the NCOA7 gene pre-loaded. Please see below to learn how to downloaed those annotations from Ensembl on your own. This is what the annotations look like:
+
+```{r}
+ncoa7_metadata
+names(ncoa7_exons)
+names(ncoa7_cdss)
+```
+
+Now, to plot these nine transcripts, we simply use the _plotTranscripts_ function:
+```{r}
+plotTranscripts(ncoa7_exons, ncoa7_cdss, ncoa7_metadata, rescale_introns = FALSE)
+```
+
+You might have noticed that since NCOA7 gene has relatively long introns, it can be quite hard to see where all of the exons are. To focus on the exons, we can rescale all introns to a fixed length (50 bp by default):
+```{r}
+plotTranscripts(ncoa7_exons, ncoa7_cdss, ncoa7_metadata, rescale_introns = TRUE)
+```
+
+It is now much easier to see, which of the exons can be alternatively spliced and which are shared by all transcripts.
+
+##Visualizing RNA-seq read coverage
+We used the NCOA7 example above, because we discovered recently that this gene undergoes alternative promoter usage in human macrophages in response to lipopolysaccharide (LPS) stimulation [^1]. We'll now show how the _plotCoverage_ function can be used to visualise RNA-seq read coverage accross the exons of a gene. In addition the the `exons`, `cdss` and `transcript_annotations` paramteres required by _plotTranscripts_, _plotCoverage_ also requires a `track_data` data.frame containing RNA-seq sample metadata as well as path to the read coverage data in BigWig format. 
+
+First, you need to create a data frame containing sample metadata. In our case we have four samples, two from the naive condition and two after LPS stimulation: 
+
+```{r}
+sample_data = data_frame(sample_id = c("aipt_A", "aipt_C", "bima_A", "bima_C"), 
+                        condition = factor(c("Naive", "LPS", "Naive", "LPS"), levels = c("Naive", "LPS")), 
+                        scaling_factor = 1) %>%
+  dplyr::mutate(bigWig = system.file("extdata",  paste0(sample_id, ".str2.bw"), package = "wiggleplotr"))
+as.data.frame(sample_data)
+```
+
+Finally, we need to add the `track_id` and `colour_group` columns that define which sample belongs to which track and what their colour should be. For simplicity, we first set both of these values equal to the the experimental condition: 
+
+```{r}
+track_data = dplyr::mutate(sample_data, track_id = condition, colour_group = condition)
+```
+
+Now, we can make our first read coverage plot
+```{r}
+selected_transcripts = c("ENST00000438495", "ENST00000392477") #Plot only two transcripts of the gens
+plotCoverage(ncoa7_exons[selected_transcripts], ncoa7_cdss[selected_transcripts], 
+             track_data, ncoa7_metadata, 
+             heights = c(2,1), fill_palette = getGenotypePalette())
+```
+
+By default, _plotCoverage_ plots the mean read coverage across all of the samples in the same colour group. However, it is also possible to overlay all of the individual samples by setting `mean_only = FALSE` and `alpha < 1`.
+
+```{r}
+plotCoverage(ncoa7_exons[selected_transcripts], ncoa7_cdss[selected_transcripts], 
+             track_data, ncoa7_metadata, 
+             heights = c(2,1), fill_palette = getGenotypePalette(), mean_only = FALSE, alpha = 0.5)
+```
+
+It is clear from both plots that the short transcript skipping the first 11 exons of the gene is only expressed after LPS stimulation.
+
+### Overlaying multiple conditions
+Finally, we can overlay the two conditions in different colours by assigning all of the samples to a single track. This approach can we very useful for visualising eQTLs and splice QTLs. Setting `coverage_type = "line"` allows us to see both signals even if one overlaps the other:
+```{r}
+track_data = dplyr::mutate(sample_data, track_id = "RNA-seq", colour_group = condition)
+plotCoverage(ncoa7_exons[selected_transcripts], ncoa7_cdss[selected_transcripts], 
+             track_data, ncoa7_metadata, 
+             heights = c(2,1), fill_palette = getGenotypePalette(), coverage_type = "line")
+```
+
+Unfortunately, it is currently not possible to automatically add legends to the read coverage plots. This is because _plotTranscripts_ uses internally the _cowplot::plot\_grid_ function to paste the read coverage and transcript annotations plots together and _plot\_grid_ does not support legends. 
+
+## Plotting other types of data
+Although _wiggleplotr_ was initially written with RNA-seq data in mind, it can be used equally well to visualise any other sequencing data that can be summarised as read coverage in BigWig format (ATAC-seq, DNAse-seq, ChIP-seq). All you need to do is specify your own `exons`, `cdss`, `transcript_annotations` and `track_data` parameters. Furthermore, setting `connect_exons = FALSE` and `label_type = "peak"` makes it easier to plot other types of genomic annotations.
+
+```{r, eval = FALSE}
+track_data = dplyr::mutate(sample_data, track_id = "RNA-seq", colour_group = condition)
+plotCoverage(ncoa7_exons[selected_transcripts], ncoa7_cdss[selected_transcripts], 
+             track_data, ncoa7_metadata, 
+             heights = c(2,1), fill_palette = getGenotypePalette(), coverage_type = "line",
+             label_type = "peak", connect_exons = FALSE,  rescale_introns = FALSE)
+```
 
 ## Using biomaRt to download transcript annotations from Ensembl
 The easiest way to access reference transcript annotations in R is to download them directly from Ensembl using the biomaRt R package. To do that, we first need to load the neccessary R packages.
@@ -15,12 +115,10 @@ The easiest way to access reference transcript annotations in R is to download t
 ```{r, include=FALSE}
 #This block get rid of the import messages
 library("biomaRt")
-library("dplyr")
 library("GenomicFeatures")
 ```
 ```{r}
 library("biomaRt")
-library("dplyr")
 library("GenomicFeatures")
 ```
 
@@ -84,4 +182,6 @@ exons[["ENST00000392477"]]
 ```
 
 [biomaRt vignette]:https://www.bioconductor.org/packages/3.3/bioc/vignettes/biomaRt/inst/doc/biomaRt.pdf
+
+[^1]: Alasoo, Kaur, et al. ["Transcriptional profiling of macrophages derived from monocytes and iPS cells identifies a conserved response to LPS and novel alternative transcription."](http://www.nature.com/articles/srep12524) Scientific reports 5 (2015): 12524.
 
