@@ -4,3 +4,4 @@
 ^LICENSE$
 ^vignettes/transcript_metadata.rds$
 ^vignettes/TranscriptDb_GRCh38_79.db$
+^data-raw$
