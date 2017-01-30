@@ -15,10 +15,9 @@ vignette: >
 ---
 
 ```{r, include=FALSE}
-#This block get rid of the import messages
-library("devtools")
+#This block gets rid of the import messages
+library("wiggleplotr")
 library("dplyr")
-load_all("../../wiggleplotr")
 ```
 
 _wiggleplotr_ is a tool to visualise RNA-seq read overage accross annotated exons. A key feature of _wiggleplotr_ is that it is able rescale all introns of a gene to fixed length, making it easier to see differences in read coverage between neighbouring exons that can otherwise be too far away. Since _wiggleplotr_ takes standard BigWig files as input, it can also be used to visualise read overage from other sequencing-based assays such as ATAC-seq and ChIP-seq. 
@@ -110,7 +109,7 @@ plotCoverage(ncoa7_exons[selected_transcripts], ncoa7_cdss[selected_transcripts]
 ```
 
 ## Using biomaRt to download transcript annotations from Ensembl
-The easiest way to access reference transcript annotations in R is to download them directly from Ensembl using the biomaRt R package. To do that, we first need to load the neccessary R packages.
+The easiest way to access reference transcript annotations in R is to download them directly from Ensembl using the _biomaRt_ R package. To do that, we first need to load the neccessary R packages.
 
 ```{r, include=FALSE}
 #This block get rid of the import messages
@@ -123,13 +122,13 @@ library("GenomicFeatures")
 ```
 
 ### Downloading transcript metadata
-First, we want to download transcript metadata, such as which transcripts belong to which genes and what are their names. We can use the biomaRt package to do that. First, let's define which mart and dataset we want to use. 
+First, we want to download transcript metadata, such as which transcripts belong to which genes and what are their names. We can use the _biomaRt_ package to do that. First, let's define which mart and dataset we want to use. 
 ```{r}
 ensembl_mart = useMart("ENSEMBL_MART_ENSEMBL", host = "dec2014.archive.ensembl.org")
 ensembl_dataset = useDataset("hsapiens_gene_ensembl",mart=ensembl_mart)
 ensembl_dataset
 ```
-The `host` helps to make sure that we get the annotations from a specific Ensembl version. For example, Ensembl 78 correseponds to `host="dec2014.archive.ensembl.org"`. You can use the Ensembl Archives [website](http://www.ensembl.org/info/website/archives/index.html) to check which host name corresponds to desired Ensembl version. More information using specific ensembl versions with biomaRt can be found in the [biomaRt vignette].
+The `host` helps to make sure that we get the annotations from a specific Ensembl version. For example, Ensembl 78 correseponds to `host="dec2014.archive.ensembl.org"`. You can use the Ensembl Archives [website](http://www.ensembl.org/info/website/archives/index.html) to check which host name corresponds to desired Ensembl version. More information using specific ensembl versions with _biomaRt_ can be found in the [biomaRt vignette].
 
 We can see all available attributes with the `listAttributes` command. 
 ```{r}
@@ -137,7 +136,7 @@ attributes = listAttributes(ensembl_dataset)
 head(attributes)
 ```
 
-Now, let's select gene id, gene name, transcript_id and strand from the biomart and download the corresponding columns.
+Now, let's select gene id, gene name, transcript id and strand from the biomart and download the corresponding columns.
 ```{r}
 selected_attributes = c("ensembl_transcript_id", "ensembl_gene_id", "external_gene_name", "strand","gene_biotype", "transcript_biotype")
 data = getBM(attributes = selected_attributes, mart = ensembl_dataset)
@@ -162,7 +161,7 @@ head(transcript_metadata)
 ```
 
 ### Downloading the full transcript database from Ensembl
-However, just the transcript metadata is not enought to use wiggleplotr, we also need the coordinates for all exons. We can get those using the *GenomicFeatures* packages. First, we use the `makeTranscriptDbFromBiomart` function to download the full transcript database correspondint to a sepcifc Ensembl version, in this case Ensembl 78. Please note that as the database is quite big this can take at least a couple of minutes to run.
+However, just the transcript metadata is not enought to use wiggleplotr, we also need the coordinates for all exons. We can get those using the _GenomicFeatures_ packages. First, we use the _makeTranscriptDbFromBiomart_ function to download the full transcript database correspondint to a sepcifc Ensembl version, in this case Ensembl 78. Please note that as the database is quite big this can take at least a couple of minutes to run.
 ```{r eval=FALSE}
 txdb = makeTranscriptDbFromBiomart(biomart = "ENSEMBL_MART_ENSEMBL", dataset = "hsapiens_gene_ensembl", host="dec2014.archive.ensembl.org")
 ```
@@ -174,7 +173,7 @@ And we can load it from disk using the loadDb function.
 ```{r, eval=FALSE}
 txdb = loadDb("TranscriptDb_GRCh38_79.db")
 ```
-Finally, we can extract exon and coding sequence (CDS) coordinates for all annotated transcripts from the database. This command will produce a a list of [GRanges] objects, each element containing the exons of a single transcript.
+Finally, we can extract exon and coding sequence (CDS) coordinates for all annotated transcripts from the database. The following commands will produce a a list of _GRanges_ objects, each element containing the exons or coding sequences of a single transcript.
 ```{rm, eval=FALSE}
 exons = exonsBy(txdb, by = "tx", use.names = TRUE)
 cdss = cdsBy(txdb, by = "tx", use.names = TRUE)
