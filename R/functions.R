@@ -35,15 +35,6 @@ joinExons <- function(exons) {
   return(joint_exons)
 }
 
-saveCoveragePlots <- function(plot_list, path, ...){
-  #Save a list of plots into the folder specified by path
-  gene_names = names(plot_list)
-  for (gene in gene_names){
-    file_name = file.path(path, paste(gene, ".pdf", sep = ""))
-    ggplot2::ggsave(file_name, plot_list[[gene]], ...)
-  }
-}
-
 prepareTranscriptStructureForPlotting <- function(exon_ranges, cds_ranges, transcript_annotations, label_type){
   #Combine exon_ranges and cds_ranges into a single data.frame that also contains transcript rank
   
@@ -148,7 +139,14 @@ subsamplePoints <- function(tx_annotations, plot_fraction){
   return(points)
 }
 
-# Returns a three-colour colour palette suitable for plotting coverage stratified by genotype
+
+#' Returns a three-colour palette suitable for visualising read coverage stratified by genotype
+#'
+#' @return Vector of three colours.
+#' @export
+#'
+#' @examples
+#' getGenotypePalette()
 getGenotypePalette <- function(){
   c("#d7191c","#fdae61","#1a9641")
 }

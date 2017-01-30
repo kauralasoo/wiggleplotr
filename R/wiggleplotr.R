@@ -16,7 +16,7 @@
 #'
 #' @return ggplot2 object
 #' @examples
-#' plotTranscripts(ncoa7_exons, ncoa7_cdss, ncoa7_transcript_metadata, rescale_introns = FALSE)
+#' plotTranscripts(ncoa7_exons, ncoa7_cdss, ncoa7_metadata, rescale_introns = FALSE)
 #' 
 #' @export
 plotTranscripts <- function(exons, cdss, annotations, rescale_introns = TRUE, new_intron_length = 50, 
@@ -105,6 +105,8 @@ plotTranscripts <- function(exons, cdss, annotations, rescale_introns = TRUE, ne
 #'
 #' @return Either object from cow_plot::plot_grid() function or a list of subplots (if return_subplots_list == TRUE)
 #' @examples
+#' require("dplyr")
+#' require("GenomicRanges")
 #' sample_data = dplyr::data_frame(sample_id = c("aipt_A", "aipt_C", "bima_A", "bima_C"), 
 #'     condition = factor(c("Naive", "LPS", "Naive", "LPS"), levels = c("Naive", "LPS")), 
 #'     scaling_factor = 1) %>%

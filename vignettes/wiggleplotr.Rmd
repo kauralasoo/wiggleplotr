@@ -171,14 +171,13 @@ We can also save the database to disk to avoid re-downloading it every time we w
 saveDb(txdb, "TranscriptDb_GRCh38_78.db")
 ```
 And we can load it from disk using the loadDb function.
-```{r}
+```{r, eval=FALSE}
 txdb = loadDb("TranscriptDb_GRCh38_79.db")
 ```
-Finally, we can extract exon and CDS coordinates for all annotated transcripts from the database. This command will produce a a list of [GRanges] objects, each one containing the exons of a single transcript.
-```{r}
+Finally, we can extract exon and coding sequence (CDS) coordinates for all annotated transcripts from the database. This command will produce a a list of [GRanges] objects, each element containing the exons of a single transcript.
+```{rm, eval=FALSE}
 exons = exonsBy(txdb, by = "tx", use.names = TRUE)
 cdss = cdsBy(txdb, by = "tx", use.names = TRUE)
-exons[["ENST00000392477"]]
 ```
 
 [biomaRt vignette]:https://www.bioconductor.org/packages/3.3/bioc/vignettes/biomaRt/inst/doc/biomaRt.pdf

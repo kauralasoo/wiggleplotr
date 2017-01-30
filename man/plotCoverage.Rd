@@ -73,6 +73,8 @@ Either object from cow_plot::plot_grid() function or a list of subplots (if retu
 Also supports rescaling introns to constant length.
 }
 \examples{
+require("dplyr")
+require("GenomicRanges")
 sample_data = dplyr::data_frame(sample_id = c("aipt_A", "aipt_C", "bima_A", "bima_C"), 
     condition = factor(c("Naive", "LPS", "Naive", "LPS"), levels = c("Naive", "LPS")), 
     scaling_factor = 1) \%>\%
