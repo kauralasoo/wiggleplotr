@@ -17,6 +17,7 @@ vignette: >
 ```{r, include=FALSE}
 #This block gets rid of the import messages
 library("wiggleplotr")
+library("GenomicRanges")
 library("dplyr")
 ```
 
