@@ -70,7 +70,8 @@ The 'both' option tends to give better results for wide regions. (default: area)
 Either object from cow_plot::plot_grid() function or a list of subplots (if return_subplots_list == TRUE)
 }
 \description{
-Also supports rescaling introns to constant length.
+Also supports rescaling introns to constant length. Does not work 
+on Windows, because rtracklayer cannot read BigWig files on Windows.
 }
 \examples{
 require("dplyr")
@@ -83,9 +84,11 @@ sample_data = dplyr::data_frame(sample_id = c("aipt_A", "aipt_C", "bima_A", "bim
 track_data = dplyr::mutate(sample_data, track_id = condition, colour_group = condition)
 
 selected_transcripts = c("ENST00000438495", "ENST00000392477") #Plot only two transcripts of the gens
+\dontrun{
 plotCoverage(ncoa7_exons[selected_transcripts], ncoa7_cdss[selected_transcripts], 
    track_data, ncoa7_metadata, 
    heights = c(2,1), fill_palette = getGenotypePalette())
+}
 
 }
 
