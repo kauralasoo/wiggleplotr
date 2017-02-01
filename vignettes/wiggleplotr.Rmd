@@ -19,9 +19,27 @@ vignette: >
 library("wiggleplotr")
 library("GenomicRanges")
 library("dplyr")
+library("biomaRt")
+library("GenomicFeatures")
 ```
 
-_wiggleplotr_ is a tool to visualise RNA-seq read overage accross annotated exons. A key feature of _wiggleplotr_ is that it is able rescale all introns of a gene to fixed length, making it easier to see differences in read coverage between neighbouring exons that can otherwise be too far away. Since _wiggleplotr_ takes standard BigWig files as input, it can also be used to visualise read overage from other sequencing-based assays such as ATAC-seq and ChIP-seq. 
+_wiggleplotr_ is a tool to visualise RNA-seq read overage accross annotated exons. A key feature of _wiggleplotr_ is that it is able rescale all introns of a gene to fixed length, making it easier to see differences in read coverage between neighbouring exons that can otherwise be too far away. Since _wiggleplotr_ takes standard BigWig files as input, it can also be used to visualise read overage from other sequencing-based assays such as ATAC-seq and ChIP-seq.
+
+##Getting started
+To install _wiggleplotr_, start R and enter:
+```{r, eval = FALSE}
+source("http://www.bioconductor.org/biocLite.R")
+biocLite("wiggleplotr")
+```
+
+To run the code examples shown in this vignette, we first need to load neccessary packages:
+```{r}
+library("wiggleplotr")
+library("dplyr")
+library("GenomicRanges")
+library("GenomicFeatures")
+library("biomaRt")
+```
 
 ##Visualizing transcript annotations
 First, the _plotTranscripts_ function allows you to visualise the structucte of all transcripts of a gene (or multiple genes). It requires three inputs:
@@ -56,10 +74,13 @@ We used the NCOA7 example above, because we discovered recently that this gene u
 First, you need to create a data frame containing sample metadata. In our case we have four samples, two from the naive condition and two after LPS stimulation: 
 
 ```{r}
-sample_data = dplyr::data_frame(sample_id = c("aipt_A", "aipt_C", "bima_A", "bima_C"), 
-                        condition = factor(c("Naive", "LPS", "Naive", "LPS"), levels = c("Naive", "LPS")), 
-                        scaling_factor = 1) %>%
-  dplyr::mutate(bigWig = system.file("extdata",  paste0(sample_id, ".str2.bw"), package = "wiggleplotr"))
+sample_data = dplyr::data_frame(
+  sample_id = c("aipt_A", "aipt_C", "bima_A", "bima_C"), 
+  condition = factor(c("Naive", "LPS", "Naive", "LPS"), levels = c("Naive", "LPS")), 
+  scaling_factor = 1)
+sample_data = sample_data %>%
+  dplyr::mutate(bigWig = system.file("extdata", paste0(sample_id, ".str2.bw"), 
+                                     package = "wiggleplotr"))
 as.data.frame(sample_data)
 ```
 
@@ -110,17 +131,7 @@ plotCoverage(ncoa7_exons[selected_transcripts], ncoa7_cdss[selected_transcripts]
 ```
 
 ## Using biomaRt to download transcript annotations from Ensembl
-The easiest way to access reference transcript annotations in R is to download them directly from Ensembl using the _biomaRt_ R package. To do that, we first need to load the neccessary R packages.
-
-```{r, include=FALSE}
-#This block get rid of the import messages
-library("biomaRt")
-library("GenomicFeatures")
-```
-```{r}
-library("biomaRt")
-library("GenomicFeatures")
-```
+The easiest way to access reference transcript annotations in R is to download them directly from Ensembl using the _biomaRt_ R package.
 
 ### Downloading transcript metadata
 First, we want to download transcript metadata, such as which transcripts belong to which genes and what are their names. We can use the _biomaRt_ package to do that. First, let's define which mart and dataset we want to use. 
@@ -139,45 +150,62 @@ head(attributes)
 
 Now, let's select gene id, gene name, transcript id and strand from the biomart and download the corresponding columns.
 ```{r}
-selected_attributes = c("ensembl_transcript_id", "ensembl_gene_id", "external_gene_name", "strand","gene_biotype", "transcript_biotype")
+selected_attributes = c("ensembl_transcript_id", "ensembl_gene_id", 
+                        "external_gene_name", "strand", 
+                        "gene_biotype", "transcript_biotype")
 data = getBM(attributes = selected_attributes, mart = ensembl_dataset)
 head(data)
 ```
 
 Finally, we need to rename the columns
 ```{r}
-data = dplyr::rename(data, transcript_id = ensembl_transcript_id, gene_id = ensembl_gene_id, gene_name = external_gene_name)
+data = dplyr::rename(data, 
+                     transcript_id = ensembl_transcript_id, 
+                     gene_id = ensembl_gene_id, 
+                     gene_name = external_gene_name)
 head(data)
 ```
 
 We can now save the metadata into a file to avoid downloading it every time we need to use it.
 ```{r}
-saveRDS(data, "transcript_metadata.rds")
+temporary_file = tempfile(pattern = "file", tmpdir = tempdir(), fileext = ".rds")
+saveRDS(data, temporary_file)
 ```
 
-Next time that we need to access the data we can load it directly from disk.
+Next time we need to access the metadata, we can load it directly from disk.
 ```{r}
-transcript_metadata = readRDS("transcript_metadata.rds")
+transcript_metadata = readRDS(temporary_file)
 head(transcript_metadata)
 ```
 
 ### Downloading the full transcript database from Ensembl
-However, just the transcript metadata is not enought to use wiggleplotr, we also need the coordinates for all exons. We can get those using the _GenomicFeatures_ packages. First, we use the _makeTranscriptDbFromBiomart_ function to download the full transcript database correspondint to a sepcifc Ensembl version, in this case Ensembl 78. Please note that as the database is quite big this can take at least a couple of minutes to run.
+However, just the transcript metadata is not enought to use _wiggleplotr_, we also need the coordinates for all exons. We can get those using the _GenomicFeatures_ packages. First, we use the _makeTxDbFromBiomart_ function to download the full transcript database corresponding to a sepcifc Ensembl version, in this case Ensembl 78. Please note that as the database is quite large, this can take at least a couple of minutes to run.
 ```{r eval=FALSE}
-txdb = makeTranscriptDbFromBiomart(biomart = "ENSEMBL_MART_ENSEMBL", dataset = "hsapiens_gene_ensembl", host="dec2014.archive.ensembl.org")
+txdb = makeTxDbFromBiomart(biomart = "ENSEMBL_MART_ENSEMBL", 
+                           dataset = "hsapiens_gene_ensembl", 
+                           host="dec2014.archive.ensembl.org")
 ```
-We can also save the database to disk to avoid re-downloading it every time we want to use it.
+We can save the database to disk to avoid downloading it again every time we want to use it.
 ```{r eval=FALSE}
 saveDb(txdb, "TranscriptDb_GRCh38_78.db")
 ```
-And we can load it from disk using the loadDb function.
+And we can load it from disk using the _loadDb_ function.
 ```{r, eval=FALSE}
 txdb = loadDb("TranscriptDb_GRCh38_79.db")
 ```
-Finally, we can extract exon and coding sequence (CDS) coordinates for all annotated transcripts from the database. The following commands will produce a a list of _GRanges_ objects, each element containing the exons or coding sequences of a single transcript.
-```{rm, eval=FALSE}
+We can extract exon and coding sequence (CDS) coordinates for all annotated transcripts from the database. The following commands will produce a a list of _GRanges_ objects, each element containing the exons or coding sequences of a single transcript.
+```{r, eval=FALSE}
 exons = exonsBy(txdb, by = "tx", use.names = TRUE)
 cdss = cdsBy(txdb, by = "tx", use.names = TRUE)
+```
+
+Finally, we use the newly downloaded annotations to visualise the structure of all protein coding transcripts of NCOA7.
+```{r, eval=FALSE}
+selected_transcripts = transcript_metadata %>%
+  dplyr::filter(gene_name == "NCOA7", transcript_biotype == "protein_coding")
+tx_ids = selected_transcripts$transcript_id
+plotTranscripts(exons[tx_ids], cdss[tx_ids], 
+                transcript_metadata, rescale_introns = TRUE)
 ```
 
 [biomaRt vignette]:https://www.bioconductor.org/packages/3.3/bioc/vignettes/biomaRt/inst/doc/biomaRt.pdf
