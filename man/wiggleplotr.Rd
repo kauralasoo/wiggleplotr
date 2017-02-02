@@ -4,8 +4,13 @@
 \name{wiggleplotr}
 \alias{wiggleplotr}
 \alias{wiggleplotr-package}
-\title{wiggleplotr.}
+\title{wiggleplotr}
 \description{
-wiggleplotr.
+wiggleplotr package provides tools to visualise transcript annotations (\code{\link[wiggleplotr]{plotTranscripts}}) and plot 
+sequencing read coverage over annotated transcripts (\code{\link[wiggleplotr]{plotCoverage}}).
+}
+\details{
+To learn more about wiggleplotr, start with the vignette: 
+\code{browseVignettes(package = "wiggleplotr")}
 }
 

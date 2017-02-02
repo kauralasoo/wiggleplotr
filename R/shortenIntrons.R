@@ -46,7 +46,8 @@ shrinkIntronsCoverage <- function(coverage, old_introns, new_introns){
     w_old = IRanges::width(old_annot)
     
     bins = c()
-    for (i in 1:length(new_annot)){
+    
+    for (i in seq_along(new_annot)){
       bin_id = rep(c(s_coord[i]:e_coord[i]),each = bin_width[i])[1:w_old[i]]
       bins = c(bins, bin_id)
     }
@@ -66,7 +67,7 @@ translateExonCoordinates <- function(exons, old_introns, new_introns){
   
   #Translate old exon coordinates to new exon coordinates
   new_exon_starts = rep(0,length(old_exon_starts))
-  for (i in 1:length(old_exon_starts)){
+  for (i in seq_along(old_exon_starts)){
     #Find the nearest upstream intron for the current gene
     nearest_intron_number = max(which(old_exon_starts[i] > old_intron_ends))
     new_exon_starts[i] = old_exon_starts[i] - old_intron_ends[nearest_intron_number] + new_intron_ends[nearest_intron_number]
