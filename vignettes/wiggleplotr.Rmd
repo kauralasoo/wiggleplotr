@@ -68,7 +68,7 @@ plotTranscripts(ncoa7_exons, ncoa7_cdss, ncoa7_metadata, rescale_introns = TRUE)
 
 It is now much easier to see, which of the exons can be alternatively spliced and which are shared by all transcripts.
 
-##Visualizing RNA-seq read coverage
+##Visualising RNA-seq read coverage
 We used the NCOA7 example above, because we discovered recently that this gene undergoes alternative promoter usage in human macrophages in response to lipopolysaccharide (LPS) stimulation [^1]. We'll now show how the _plotCoverage_ function can be used to visualise RNA-seq read coverage accross the exons of a gene. In addition the the `exons`, `cdss` and `transcript_annotations` paramteres required by _plotTranscripts_, _plotCoverage_ also requires a `track_data` data frame containing RNA-seq sample metadata as well as path to the read coverage data in BigWig format. 
 
 First, you need to create a data frame containing sample metadata. In our case we have four samples, two from the naive condition and two after LPS stimulation: 
