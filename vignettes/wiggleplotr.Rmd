@@ -211,4 +211,3 @@ plotTranscripts(exons[tx_ids], cdss[tx_ids],
 [biomaRt vignette]:https://www.bioconductor.org/packages/3.3/bioc/vignettes/biomaRt/inst/doc/biomaRt.pdf
 
 [^1]: Alasoo, Kaur, et al. ["Transcriptional profiling of macrophages derived from monocytes and iPS cells identifies a conserved response to LPS and novel alternative transcription."](http://www.nature.com/articles/srep12524) Scientific reports 5 (2015): 12524.
-
