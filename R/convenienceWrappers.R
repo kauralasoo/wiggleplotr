@@ -1,6 +1,5 @@
 extractTranscriptAnnotationsFromEnsembldb <- function(ensembldb, gene_names, transcript_ids){
-  require(ensembldb)
-  
+
   #Fetch gene metadata
   gene_filter = ensembldb::GenenameFilter(gene_names)
   gene_metadata = ensembldb::transcripts(ensembldb, filter = gene_filter) %>%
@@ -8,8 +7,8 @@ extractTranscriptAnnotationsFromEnsembldb <- function(ensembldb, gene_names, tra
     dplyr::transmute(transcript_id = tx_id, gene_name, strand)
   
   #Fetch gene exons and cdss
-  exons = exonsBy(ensembldb, filter = gene_filter)
-  cdss = cdsBy(ensembldb, filter = gene_filter)
+  exons = ensembldb::exonsBy(ensembldb, filter = gene_filter)
+  cdss = ensembldb::cdsBy(ensembldb, filter = gene_filter)
   
   if(!is.null(transcript_ids)){
     gene_metadata = dplyr::filter(gene_metadata, transcript_id %in% transcript_ids)
@@ -20,17 +19,17 @@ extractTranscriptAnnotationsFromEnsembldb <- function(ensembldb, gene_names, tra
 }
 
 extractTranscriptAnnotationsFromUCSC <- function(orgdb, txdb, gene_names, transcript_ids = NULL){
-  gene_meta = select(orgdb, keys = gene_names, columns = c("SYMBOL", "UCSCKG"), keytype = "SYMBOL") %>%
-    dplyr::rename(gene_name = SYMBOL, transcript_id = UCSCKG)
+  gene_meta = AnnotationDbi::select(orgdb, keys = gene_names, columns = c("SYMBOL", "UCSCKG"), keytype = "SYMBOL")
+  colnames(gene_meta) = c("gene_name", "transcript_id")
   
   if(!is.null(transcript_ids)){
     gene_meta = dplyr::filter(gene_meta, transcript_id %in% transcript_ids)
   }
   
   #Extract exons and cdss
-  tx_list = setNames(as.list(gene_meta$transcript_id), gene_meta$transcript_id)
-  exons_list = purrr::map(tx_list, ~exons(txdb, filter = list(tx_name = .)))
-  cds_list = purrr::map(tx_list, ~cds(txdb, filter = list(tx_name = .)))
+  tx_list = stats::setNames(as.list(gene_meta$transcript_id), gene_meta$transcript_id)
+  exons_list = purrr::map(tx_list, ~GenomicFeatures::exons(txdb, filter = list(tx_name = .)))
+  cds_list = purrr::map(tx_list, ~GenomicFeatures::cds(txdb, filter = list(tx_name = .)))
   
   #Add strand to gene gene metada
   gene_meta = dplyr::mutate(gene_meta, strand = extractStrandsFromGrangesList(exons_list))
@@ -165,7 +164,7 @@ plotTranscriptsFromUCSC <- function(orgdb, txdb, gene_names, transcript_ids = NU
 #' }
 plotCoverageFromUCSC <- function(orgdb, txdb, gene_names, transcript_ids = NULL, ...){
   tx_annot = extractTranscriptAnnotationsFromUCSC(orgdb, txdb, gene_names, transcript_ids)
-  plotTranscripts(exons = tx_annot$exons, 
+  plotCoverage(exons = tx_annot$exons, 
                   cdss = tx_annot$cdss, 
                   transcript_annotations = tx_annot$transcript_annotations, ...)
 }

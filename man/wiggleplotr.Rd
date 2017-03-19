@@ -10,6 +10,10 @@ wiggleplotr package provides tools to visualise transcript annotations (\code{\l
 sequencing read coverage over annotated transcripts (\code{\link[wiggleplotr]{plotCoverage}}).
 }
 \details{
+You can also use covenient wrapper functions 
+(\code{\link[wiggleplotr]{plotTranscriptsFromEnsembldb}}), (\code{\link[wiggleplotr]{plotCoverageFromEnsembldb}}), 
+(\code{\link[wiggleplotr]{plotTranscriptsFromUCSC}}) and (\code{\link[wiggleplotr]{plotCoverageFromUCSC}}).
+
 To learn more about wiggleplotr, start with the vignette: 
 \code{browseVignettes(package = "wiggleplotr")}
 }
