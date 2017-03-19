@@ -89,6 +89,8 @@ plotTranscripts <- function(exons, cdss = NULL, transcript_annotations = NULL, r
 #' @param cdss list of GRanges objects, each object containing the coding regions (CDS) of a single transcript. 
 #' The list must have names that correspond to transcript_id column in transript_annotations data.frame. 
 #' If cdss is not specified then exons list will be used for both arguments. (default: NULL).
+#' @param transcript_annotations Data frame with at least three columns: transcript_id, gene_name, strand. 
+#' Used to construct transcript labels. (default: NULL)
 #' @param track_data data.frame with the metadata for the bigWig read coverage files. Must contain the following columns:
 #' \itemize{
 #'  \item sample_id - unique id for each sample.
@@ -99,8 +101,6 @@ plotTranscripts <- function(exons, cdss = NULL, transcript_annotations = NULL, r
 #' depth and bigWig files not normalised for that.
 #'  \item colour_group - additional column to group samples into, is used as the colour of the coverage track.
 #' }
-#' @param transcript_annotations Data frame with at least three columns: transcript_id, gene_name, strand. 
-#' Used to construct transcript labels. (default: NULL)
 #' @param rescale_introns Specifies if the introns should be scaled to fixed length or not. (default: TRUE)
 #' @param new_intron_length length (bp) of introns after scaling. (default: 50)
 #' @param flanking_length Lengths of the flanking regions upstream and downstream of the gene. (default: c(50,50))
@@ -136,12 +136,12 @@ plotTranscripts <- function(exons, cdss = NULL, transcript_annotations = NULL, r
 #' selected_transcripts = c("ENST00000438495", "ENST00000392477") #Plot only two transcripts of the gens
 #' \dontrun{
 #' plotCoverage(ncoa7_exons[selected_transcripts], ncoa7_cdss[selected_transcripts], 
-#'    track_data, ncoa7_metadata, 
+#'    ncoa7_metadata, track_data, 
 #'    heights = c(2,1), fill_palette = getGenotypePalette())
 #' }
 #' 
 #' @export
-plotCoverage <- function(exons, cdss = NULL, track_data, transcript_annotations = NULL, rescale_introns = TRUE,
+plotCoverage <- function(exons, cdss = NULL, transcript_annotations = NULL, track_data, rescale_introns = TRUE,
                         new_intron_length = 50, flanking_length = c(50,50),
                         plot_fraction = 0.1, heights = c(0.75, 0.25), alpha = 1,
                         fill_palette = c("#a1dab4","#41b6c4","#225ea8"), mean_only = TRUE, 

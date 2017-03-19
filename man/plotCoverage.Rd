@@ -4,7 +4,7 @@
 \alias{plotCoverage}
 \title{Plot read coverage across genomic regions}
 \usage{
-plotCoverage(exons, cdss = NULL, track_data, transcript_annotations = NULL,
+plotCoverage(exons, cdss = NULL, transcript_annotations = NULL, track_data,
   rescale_introns = TRUE, new_intron_length = 50, flanking_length = c(50,
   50), plot_fraction = 0.1, heights = c(0.75, 0.25), alpha = 1,
   fill_palette = c("#a1dab4", "#41b6c4", "#225ea8"), mean_only = TRUE,
@@ -20,6 +20,9 @@ The list must have names that correspond to transcript_id column in transript_an
 The list must have names that correspond to transcript_id column in transript_annotations data.frame. 
 If cdss is not specified then exons list will be used for both arguments. (default: NULL).}
 
+\item{transcript_annotations}{Data frame with at least three columns: transcript_id, gene_name, strand. 
+Used to construct transcript labels. (default: NULL)}
+
 \item{track_data}{data.frame with the metadata for the bigWig read coverage files. Must contain the following columns:
 \itemize{
  \item sample_id - unique id for each sample.
@@ -30,9 +33,6 @@ plot, track_id is also used as the facet label on the right.
 depth and bigWig files not normalised for that.
  \item colour_group - additional column to group samples into, is used as the colour of the coverage track.
 }}
-
-\item{transcript_annotations}{Data frame with at least three columns: transcript_id, gene_name, strand. 
-Used to construct transcript labels. (default: NULL)}
 
 \item{rescale_introns}{Specifies if the introns should be scaled to fixed length or not. (default: TRUE)}
 
@@ -87,7 +87,7 @@ track_data = dplyr::mutate(sample_data, track_id = condition, colour_group = con
 selected_transcripts = c("ENST00000438495", "ENST00000392477") #Plot only two transcripts of the gens
 \dontrun{
 plotCoverage(ncoa7_exons[selected_transcripts], ncoa7_cdss[selected_transcripts], 
-   track_data, ncoa7_metadata, 
+   ncoa7_metadata, track_data, 
    heights = c(2,1), fill_palette = getGenotypePalette())
 }
 
