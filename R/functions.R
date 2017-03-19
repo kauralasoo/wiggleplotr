@@ -51,7 +51,7 @@ prepareTranscriptAnnotations <- function(transcript_annotations){
                                          strand = ifelse(strand %in% c("+","*") | strand == 1, 1, -1))
   
   #Add transcript label
-  if(assertthat::has_name(transcript_annotations, "gene_id")){
+  if(assertthat::has_name(transcript_annotations, "gene_name")){
     transcript_annotations = dplyr::select_(transcript_annotations, "transcript_id", "gene_name", "strand") %>% 
       dplyr::mutate(transcript_label = ifelse(strand == 1, 
                     paste(paste(gene_name, transcript_id, sep = ":")," >",sep =""), 
