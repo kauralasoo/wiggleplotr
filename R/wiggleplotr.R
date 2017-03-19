@@ -11,8 +11,7 @@
 #' @param new_intron_length length (bp) of introns after scaling. (default: 50)
 #' @param flanking_length Lengths of the flanking regions upstream and downstream of the gene. (default: c(50,50))
 #' @param connect_exons Print lines that connect exons together. Set to FALSE when plotting peaks (default: TRUE).
-#' @param label_type Specifies the format for annotation labels. If set to "transcript" then plots both gene_name and transcript_id, 
-#' if set to "peak" then plots only gene_name form transcript_annotations data.frame (default: "transcript"). 
+#' @param transcript_label If TRUE then transcript labels are printed above each transcript. (default: TRUE). 
 #' @param region_coords Start and end coordinates of the region to plot, overrides flanking_length parameter.
 #'
 #' @return ggplot2 object
@@ -20,9 +19,10 @@
 #' plotTranscripts(ncoa7_exons, ncoa7_cdss, ncoa7_metadata, rescale_introns = FALSE)
 #' 
 #' @export
-plotTranscripts <- function(exons, cdss = NULL, transcript_annotations = NULL, rescale_introns = TRUE, new_intron_length = 50, 
-                            flanking_length = c(50,50), connect_exons = TRUE, label_type = "transcript", 
-                            region_coords = NULL){
+plotTranscripts <- function(exons, cdss = NULL, transcript_annotations = NULL, 
+                            rescale_introns = TRUE, new_intron_length = 50, 
+                            flanking_length = c(50,50), connect_exons = TRUE, 
+                            transcript_label = TRUE, region_coords = NULL){
   
   #IF cdss is not specified then use exons instead on cdss
   if(is.null(cdss)){
@@ -74,8 +74,9 @@ plotTranscripts <- function(exons, cdss = NULL, transcript_annotations = NULL, r
   #Plot transcript structures
   limits = c( min(IRanges::start(tx_annotations$new_introns)), max(IRanges::end(tx_annotations$new_introns)))
   structure = prepareTranscriptStructureForPlotting(tx_annotations$exon_ranges, 
-                                               tx_annotations$cds_ranges, plotting_annotations, label_type)
-  plot = plotTranscriptStructure(structure, limits, connect_exons = connect_exons, xlabel = xlabel)
+                                               tx_annotations$cds_ranges, plotting_annotations)
+  plot = plotTranscriptStructure(structure, limits, connect_exons = connect_exons, xlabel = xlabel, 
+                                 transcript_label = transcript_label)
   return(plot)
 }
 
@@ -115,8 +116,7 @@ plotTranscripts <- function(exons, cdss = NULL, transcript_annotations = NULL, r
 #' @param mean_only Plot only mean coverage within each combination of track_id and colour_group values. 
 #' Useful for example for plotting mean coverage stratified by genotype (which is specified in the colour_group column) (default: TRUE).
 #' @param connect_exons Print lines that connect exons together. Set to FALSE when plotting peaks (default: TRUE).
-#' @param label_type Specifies the format for annotation labels. If set to "transcript" then plots both gene_name and transcript_id, 
-#' if set to "peak" then plots only gene_name form transcript_annotations data.frame (default: "transcript"). 
+#' @param transcript_label If TRUE then transcript labels are printed above each transcript. (default: TRUE). 
 #' @param return_subplots_list Instead of a joint plot return a list of subplots that can be joined together manually. 
 #' @param region_coords Start and end coordinates of the region to plot, overrides flanking_length parameter.
 #' @param coverage_type Specifies if the read coverage is represented by either 'line', 'area' or 'both'. 
@@ -145,7 +145,7 @@ plotCoverage <- function(exons, cdss = NULL, transcript_annotations = NULL, trac
                         new_intron_length = 50, flanking_length = c(50,50),
                         plot_fraction = 0.1, heights = c(0.75, 0.25), alpha = 1,
                         fill_palette = c("#a1dab4","#41b6c4","#225ea8"), mean_only = TRUE, 
-                        connect_exons = TRUE, label_type = "transcript", return_subplots_list = FALSE,
+                        connect_exons = TRUE, transcript_label = TRUE, return_subplots_list = FALSE,
                         region_coords = NULL, coverage_type = "area"){
   
   #IF cdss is not specified then use exons instead on cdss
@@ -248,8 +248,8 @@ plotCoverage <- function(exons, cdss = NULL, transcript_annotations = NULL, trac
   #Construct transcript structure data.frame from ranges lists
   limits = c( min(IRanges::start(tx_annotations$new_introns)), max(IRanges::end(tx_annotations$new_introns)))
   transcript_struct = prepareTranscriptStructureForPlotting(tx_annotations$exon_ranges, 
-                       tx_annotations$cds_ranges, plotting_annotations, label_type)
-  tx_structure = plotTranscriptStructure(transcript_struct, limits, connect_exons, xlabel)
+                       tx_annotations$cds_ranges, plotting_annotations)
+  tx_structure = plotTranscriptStructure(transcript_struct, limits, connect_exons, xlabel, transcript_label)
   
   coverage_plot = makeCoveragePlot(coverage_df, limits, alpha, fill_palette, coverage_type)
   

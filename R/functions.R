@@ -64,7 +64,7 @@ prepareTranscriptAnnotations <- function(transcript_annotations){
   return(transcript_annotations)
 }
 
-prepareTranscriptStructureForPlotting <- function(exon_ranges, cds_ranges, transcript_annotations, label_type){
+prepareTranscriptStructureForPlotting <- function(exon_ranges, cds_ranges, transcript_annotations){
   #Combine exon_ranges and cds_ranges into a single data.frame that also contains transcript rank
   
   #Convert exon ranges into data.frame and add transcript rank

@@ -1,5 +1,5 @@
-plotTranscriptStructure <- function(exons_df, limits = NA, connect_exons = TRUE, 
-                                    xlabel = "Distance from gene start (bp)"){
+plotTranscriptStructure <- function(exons_df, limits = NA, connect_exons = TRUE,  
+                                    xlabel = "Distance from gene start (bp)", transcript_label = TRUE){
   
   #Extract the position for plotting transcript name
   transcript_annot = dplyr::group_by_(exons_df, ~transcript_id) %>% 
@@ -12,8 +12,12 @@ plotTranscriptStructure <- function(exons_df, limits = NA, connect_exons = TRUE,
   if(connect_exons){ #Print line connecting exons
     plot = plot + geom_line(aes_(x = ~start, y = ~transcript_rank, group = ~transcript_rank, color = ~feature_type))
   }
-  plot = plot + geom_rect(aes_(xmin = ~start, xmax = ~end, ymax = ~transcript_rank + 0.25, ymin = ~transcript_rank - 0.25, fill = ~feature_type)) + 
-    geom_text(aes_(x = ~start, y = ~transcript_rank + 0.30, label = ~transcript_label), data = transcript_annot, hjust = 0, vjust = 0, size  =4) +
+  plot = plot + 
+    geom_rect(aes_(xmin = ~start, 
+                   xmax = ~end, 
+                   ymax = ~transcript_rank + 0.25, 
+                   ymin = ~transcript_rank - 0.25, 
+                   fill = ~feature_type)) + 
     theme_light() +
     theme(plot.margin=unit(c(0,1,1,1),"line"), 
           axis.title.y = element_blank(),
@@ -31,6 +35,13 @@ plotTranscriptStructure <- function(exons_df, limits = NA, connect_exons = TRUE,
     scale_colour_manual(values = c("#2c7bb6","#abd9e9"))
   if(all(!is.na(limits))){
     plot = plot + scale_x_continuous(limits = limits, expand = c(0,0))
+  }
+  if(transcript_label){
+    plot = plot + geom_text(aes_(x = ~start, 
+                                 y = ~transcript_rank + 0.30, 
+                                 label = ~transcript_label), 
+                            data = transcript_annot, hjust = 0, vjust = 0, size = 4)
+
   }
   return(plot)
 }
