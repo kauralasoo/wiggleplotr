@@ -217,11 +217,12 @@ txdb = makeTxDbFromBiomart(biomart = "ENSEMBL_MART_ENSEMBL",
 ```
 We can save the database to disk to avoid downloading it again every time we want to use it.
 ```{r eval=FALSE}
-saveDb(txdb, "TranscriptDb_GRCh38_78.db")
+txdb_file = tempfile(pattern = "file", tmpdir = tempdir(), fileext = ".rds")
+saveDb(txdb, txdb_file)
 ```
 And we can load it from disk using the _loadDb_ function.
 ```{r, eval=FALSE}
-txdb = loadDb("TranscriptDb_GRCh38_79.db")
+txdb = loadDb(txdb_file)
 ```
 We can extract exon and coding sequence (CDS) coordinates for all annotated transcripts from the database. The following commands will produce a a list of _GRanges_ objects, each element containing the exons or coding sequences of a single transcript.
 ```{r, eval=FALSE}
