@@ -4,7 +4,7 @@
 \alias{plotCoverage}
 \title{Plot read coverage across genomic regions}
 \usage{
-plotCoverage(exons, cdss, track_data, transcript_annotations,
+plotCoverage(exons, cdss = NULL, track_data, transcript_annotations = NULL,
   rescale_introns = TRUE, new_intron_length = 50, flanking_length = c(50,
   50), plot_fraction = 0.1, heights = c(0.75, 0.25), alpha = 1,
   fill_palette = c("#a1dab4", "#41b6c4", "#225ea8"), mean_only = TRUE,
@@ -18,7 +18,7 @@ The list must have names that correspond to transcript_id column in transript_an
 
 \item{cdss}{list of GRanges objects, each object containing the coding regions (CDS) of a single transcript. 
 The list must have names that correspond to transcript_id column in transript_annotations data.frame. 
-If CDS annotation is not available then exons list can be used for both arguments.}
+If cdss is not specified then exons list will be used for both arguments. (default: NULL).}
 
 \item{track_data}{data.frame with the metadata for the bigWig read coverage files. Must contain the following columns:
 \itemize{
@@ -31,7 +31,8 @@ depth and bigWig files not normalised for that.
  \item colour_group - additional column to group samples into, is used as the colour of the coverage track.
 }}
 
-\item{transcript_annotations}{Data.frame with four columns: transcript_id, gene_id, gene_name, strand.}
+\item{transcript_annotations}{Data frame with at least three columns: transcript_id, gene_name, strand. 
+Used to construct transcript labels. (default: NULL)}
 
 \item{rescale_introns}{Specifies if the introns should be scaled to fixed length or not. (default: TRUE)}
 
@@ -91,4 +92,3 @@ plotCoverage(ncoa7_exons[selected_transcripts], ncoa7_cdss[selected_transcripts]
 }
 
 }
-

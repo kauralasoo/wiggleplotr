@@ -17,4 +17,3 @@ Factors factor1 and factor2 pasted together.
 \description{
 Paste two factors together and preserved their joint order.
 }
-

@@ -13,4 +13,3 @@ sequencing read coverage over annotated transcripts (\code{\link[wiggleplotr]{pl
 To learn more about wiggleplotr, start with the vignette: 
 \code{browseVignettes(package = "wiggleplotr")}
 }
-

@@ -4,8 +4,9 @@
 #' The list must have names that correspond to transcript_id column in transript_annotations data.frame.
 #' @param cdss list of GRanges objects, each object containing the coding regions (CDS) of a single transcript. 
 #' The list must have names that correspond to transcript_id column in transript_annotations data.frame. 
-#' If CDS annotation is not available then exons list can be used for both arguments.
-#' @param annotations data.frame with 4 columns: transcript_id, gene_id, gene_name, strand
+#' If cdss is not specified then exons list will be used for both arguments. (default: NULL)
+#' @param transcript_annotations Data frame with at least three columns: transcript_id, gene_name, strand.
+#' Used to construct transcript labels. (default: NULL)
 #' @param rescale_introns Specifies if the introns should be scaled to fixed length or not. (default: TRUE)
 #' @param new_intron_length length (bp) of introns after scaling. (default: 50)
 #' @param flanking_length Lengths of the flanking regions upstream and downstream of the gene. (default: c(50,50))
@@ -19,9 +20,14 @@
 #' plotTranscripts(ncoa7_exons, ncoa7_cdss, ncoa7_metadata, rescale_introns = FALSE)
 #' 
 #' @export
-plotTranscripts <- function(exons, cdss, annotations, rescale_introns = TRUE, new_intron_length = 50, 
+plotTranscripts <- function(exons, cdss = NULL, transcript_annotations = NULL, rescale_introns = TRUE, new_intron_length = 50, 
                             flanking_length = c(50,50), connect_exons = TRUE, label_type = "transcript", 
                             region_coords = NULL){
+  
+  #IF cdss is not specified then use exons instead on cdss
+  if(is.null(cdss)){
+    cdss = exons
+  }
   
   #Check exons and cdss
   assertthat::assert_that(is.list(exons)|| class(exons) == "GRangesList") #Check that exons and cdss objects are lists
@@ -55,9 +61,20 @@ plotTranscripts <- function(exons, cdss, annotations, rescale_introns = TRUE, ne
     
     xlabel = paste("Chromosome", chromosome_name, "position (bp)")
   }
+  
+  #If transcript annotations are not supplied then construct them manually from the GRanges list
+  if(is.null(transcript_annotations)){
+    plotting_annotations = dplyr::data_frame(transcript_id = names(exons),
+                                             strand = extractStrandsFromGrangesList(exons)) %>%
+      prepareTranscriptAnnotations()
+  } else{
+    plotting_annotations = prepareTranscriptAnnotations(transcript_annotations)
+  }
+  
+  #Plot transcript structures
   limits = c( min(IRanges::start(tx_annotations$new_introns)), max(IRanges::end(tx_annotations$new_introns)))
   structure = prepareTranscriptStructureForPlotting(tx_annotations$exon_ranges, 
-                                               tx_annotations$cds_ranges, annotations, label_type)
+                                               tx_annotations$cds_ranges, plotting_annotations, label_type)
   plot = plotTranscriptStructure(structure, limits, connect_exons = connect_exons, xlabel = xlabel)
   return(plot)
 }
@@ -71,7 +88,7 @@ plotTranscripts <- function(exons, cdss, annotations, rescale_introns = TRUE, ne
 #' The list must have names that correspond to transcript_id column in transript_annotations data.frame.
 #' @param cdss list of GRanges objects, each object containing the coding regions (CDS) of a single transcript. 
 #' The list must have names that correspond to transcript_id column in transript_annotations data.frame. 
-#' If CDS annotation is not available then exons list can be used for both arguments.
+#' If cdss is not specified then exons list will be used for both arguments. (default: NULL).
 #' @param track_data data.frame with the metadata for the bigWig read coverage files. Must contain the following columns:
 #' \itemize{
 #'  \item sample_id - unique id for each sample.
@@ -82,7 +99,8 @@ plotTranscripts <- function(exons, cdss, annotations, rescale_introns = TRUE, ne
 #' depth and bigWig files not normalised for that.
 #'  \item colour_group - additional column to group samples into, is used as the colour of the coverage track.
 #' }
-#' @param transcript_annotations Data.frame with four columns: transcript_id, gene_id, gene_name, strand.
+#' @param transcript_annotations Data frame with at least three columns: transcript_id, gene_name, strand. 
+#' Used to construct transcript labels. (default: NULL)
 #' @param rescale_introns Specifies if the introns should be scaled to fixed length or not. (default: TRUE)
 #' @param new_intron_length length (bp) of introns after scaling. (default: 50)
 #' @param flanking_length Lengths of the flanking regions upstream and downstream of the gene. (default: c(50,50))
@@ -123,12 +141,17 @@ plotTranscripts <- function(exons, cdss, annotations, rescale_introns = TRUE, ne
 #' }
 #' 
 #' @export
-plotCoverage <- function(exons, cdss, track_data, transcript_annotations, rescale_introns = TRUE,
+plotCoverage <- function(exons, cdss = NULL, track_data, transcript_annotations = NULL, rescale_introns = TRUE,
                         new_intron_length = 50, flanking_length = c(50,50),
                         plot_fraction = 0.1, heights = c(0.75, 0.25), alpha = 1,
                         fill_palette = c("#a1dab4","#41b6c4","#225ea8"), mean_only = TRUE, 
                         connect_exons = TRUE, label_type = "transcript", return_subplots_list = FALSE,
                         region_coords = NULL, coverage_type = "area"){
+  
+  #IF cdss is not specified then use exons instead on cdss
+  if(is.null(cdss)){
+    cdss = exons
+  }
   
   #Make some assertions about the input data
   #Check track_data
@@ -145,10 +168,17 @@ plotCoverage <- function(exons, cdss, track_data, transcript_annotations, rescal
   }
   
   #Check transcript annotation
-  assertthat::assert_that(assertthat::has_name(transcript_annotations, "transcript_id"))
-  assertthat::assert_that(assertthat::has_name(transcript_annotations, "gene_id"))
-  assertthat::assert_that(assertthat::has_name(transcript_annotations, "gene_name"))
-  assertthat::assert_that(assertthat::has_name(transcript_annotations, "strand"))
+  #If transcript annotations are not supplied then construct them manually from the GRanges list
+  if(is.null(transcript_annotations)){
+    plotting_annotations = dplyr::data_frame(transcript_id = names(exons),
+                                             strand = extractStrandsFromGrangesList(exons)) %>%
+      prepareTranscriptAnnotations()
+  } else{
+    assertthat::assert_that(assertthat::has_name(transcript_annotations, "transcript_id"))
+    assertthat::assert_that(assertthat::has_name(transcript_annotations, "gene_name"))
+    assertthat::assert_that(assertthat::has_name(transcript_annotations, "strand"))
+    plotting_annotations = prepareTranscriptAnnotations(transcript_annotations)
+  }
   
   #Check exons and cdss
   assertthat::assert_that(is.list(exons) || class(exons) == "GRangesList") #Check that exons and cdss objects are lists
@@ -218,7 +248,7 @@ plotCoverage <- function(exons, cdss, track_data, transcript_annotations, rescal
   #Construct transcript structure data.frame from ranges lists
   limits = c( min(IRanges::start(tx_annotations$new_introns)), max(IRanges::end(tx_annotations$new_introns)))
   transcript_struct = prepareTranscriptStructureForPlotting(tx_annotations$exon_ranges, 
-                       tx_annotations$cds_ranges, transcript_annotations, label_type)
+                       tx_annotations$cds_ranges, plotting_annotations, label_type)
   tx_structure = plotTranscriptStructure(transcript_struct, limits, connect_exons, xlabel)
   
   coverage_plot = makeCoveragePlot(coverage_df, limits, alpha, fill_palette, coverage_type)

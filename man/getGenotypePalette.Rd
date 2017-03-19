@@ -15,4 +15,3 @@ Returns a three-colour palette suitable for visualising read coverage stratified
 \examples{
 getGenotypePalette()
 }
-

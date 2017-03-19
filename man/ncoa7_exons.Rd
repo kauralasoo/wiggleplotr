@@ -20,4 +20,3 @@ A dataset containing start and end coordinates of exons from nine
 protein coding transcripts of NCOA7.
 }
 \keyword{datasets}
-

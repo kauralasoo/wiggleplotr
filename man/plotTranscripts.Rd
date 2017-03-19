@@ -4,9 +4,10 @@
 \alias{plotTranscripts}
 \title{Quickly plot transcript structure without read coverage tracks}
 \usage{
-plotTranscripts(exons, cdss, annotations, rescale_introns = TRUE,
-  new_intron_length = 50, flanking_length = c(50, 50),
-  connect_exons = TRUE, label_type = "transcript", region_coords = NULL)
+plotTranscripts(exons, cdss = NULL, transcript_annotations = NULL,
+  rescale_introns = TRUE, new_intron_length = 50, flanking_length = c(50,
+  50), connect_exons = TRUE, label_type = "transcript",
+  region_coords = NULL)
 }
 \arguments{
 \item{exons}{list of GRanges objects, each object containing exons for one transcript.
@@ -14,9 +15,10 @@ The list must have names that correspond to transcript_id column in transript_an
 
 \item{cdss}{list of GRanges objects, each object containing the coding regions (CDS) of a single transcript. 
 The list must have names that correspond to transcript_id column in transript_annotations data.frame. 
-If CDS annotation is not available then exons list can be used for both arguments.}
+If cdss is not specified then exons list will be used for both arguments. (default: NULL)}
 
-\item{annotations}{data.frame with 4 columns: transcript_id, gene_id, gene_name, strand}
+\item{transcript_annotations}{Data frame with at least three columns: transcript_id, gene_name, strand.
+Used to construct transcript labels. (default: NULL)}
 
 \item{rescale_introns}{Specifies if the introns should be scaled to fixed length or not. (default: TRUE)}
 
@@ -41,4 +43,3 @@ Quickly plot transcript structure without read coverage tracks
 plotTranscripts(ncoa7_exons, ncoa7_cdss, ncoa7_metadata, rescale_introns = FALSE)
 
 }
-

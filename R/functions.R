@@ -35,6 +35,35 @@ joinExons <- function(exons) {
   return(joint_exons)
 }
 
+extractStrandsFromGrangesList <- function(granges_list){
+  strands = purrr::map(as.list(granges_list), ~(GenomicRanges::strand(.) %>%
+                         S4Vectors::as.vector.Rle(.,"character"))[1])
+  return(unlist(strands))
+}
+
+prepareTranscriptAnnotations <- function(transcript_annotations){
+  assertthat::assert_that(assertthat::has_name(transcript_annotations, "transcript_id"))
+  assertthat::assert_that(assertthat::has_name(transcript_annotations, "strand"))
+  
+  
+  #Make sure that the strand information is represented correctly
+  transcript_annotations = dplyr::mutate(transcript_annotations,
+                                         strand = ifelse(strand %in% c("+","*") | strand == 1, 1, -1))
+  
+  #Add transcript label
+  if(assertthat::has_name(transcript_annotations, "gene_id")){
+    transcript_annotations = dplyr::select_(transcript_annotations, "transcript_id", "gene_name", "strand") %>% 
+      dplyr::mutate(transcript_label = ifelse(strand == 1, 
+                    paste(paste(gene_name, transcript_id, sep = ":")," >",sep =""), 
+                    paste("< ",paste(gene_name, transcript_id, sep = ":"),sep ="")))
+  } else{
+    transcript_annotations = dplyr::mutate(transcript_annotations, transcript_label = ifelse(strand == 1, 
+                    paste(paste(transcript_id, sep = ":")," >",sep =""), 
+                    paste("< ",paste(transcript_id, sep = ":"),sep =""))) 
+  }
+  return(transcript_annotations)
+}
+
 prepareTranscriptStructureForPlotting <- function(exon_ranges, cds_ranges, transcript_annotations, label_type){
   #Combine exon_ranges and cds_ranges into a single data.frame that also contains transcript rank
   
@@ -51,24 +80,9 @@ prepareTranscriptStructureForPlotting <- function(exon_ranges, cds_ranges, trans
   exons_df = dplyr::mutate(exons_df, feature_type = "exon")
   cds_df = dplyr::mutate(cds_df, feature_type = "cds")
   transcript_struct = rbind(exons_df, cds_df)
-  
-  #Prepare transcript annotations for plotting:
-  #Keep only required columns
-  transcript_annotations = dplyr::select_(transcript_annotations, "transcript_id", "gene_id", "gene_name", "strand") %>%
-    #Change strand indicator to number if specified by character
-    dplyr::mutate(strand = ifelse(strand == "+" | strand == 1, 1, -1)) 
 
-  #Add additional metadata
-  transcript_struct = dplyr::left_join(transcript_struct, transcript_annotations, by = "transcript_id") #Add gene name
-  #Construct a label for each transcript
-  if(label_type == "transcript"){
-    transcript_struct = dplyr::mutate(transcript_struct, transcript_label = ifelse(strand == 1, 
-                        paste(paste(gene_name, transcript_id, sep = ":")," >",sep =""), 
-                        paste("< ",paste(gene_name, transcript_id, sep = ":"),sep =""))) 
-  } else if(label_type == "peak"){
-    transcript_struct = dplyr::mutate(transcript_struct, transcript_label = gene_name)
-  }
-  
+  #Add transcript label to transcript structure
+  transcript_struct = dplyr::left_join(transcript_struct, transcript_annotations, by = "transcript_id")
   return(transcript_struct)
 }
 
