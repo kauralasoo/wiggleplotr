@@ -1,0 +1,244 @@
+---
+title: "Introduction to wiggleplotr"
+author: "Kaur Alasoo"
+date: "`r Sys.Date()`"
+output: 
+  rmarkdown::html_vignette:
+    fig_width: 6
+    fig_height: 4
+    toc: true
+    toc_depth: 2
+vignette: >
+  %\VignetteIndexEntry{Introduction to wiggleplotr}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include=FALSE}
+#This block gets rid of the import messages
+library("wiggleplotr")
+library("GenomicRanges")
+library("dplyr")
+library("biomaRt")
+library("GenomicFeatures")
+library("ensembldb")
+library("EnsDb.Hsapiens.v86")
+library("org.Hs.eg.db")
+library("TxDb.Hsapiens.UCSC.hg38.knownGene")
+```
+
+_wiggleplotr_ is a tool to visualise RNA-seq read overage accross annotated exons. A key feature of _wiggleplotr_ is that it is able rescale all introns of a gene to fixed length, making it easier to see differences in read coverage between neighbouring exons that can otherwise be too far away. Since _wiggleplotr_ takes standard BigWig files as input, it can also be used to visualise read overage from other sequencing-based assays such as ATAC-seq and ChIP-seq.
+
+##Getting started
+To install _wiggleplotr_, start R and enter:
+```{r, eval = FALSE}
+source("http://www.bioconductor.org/biocLite.R")
+biocLite("wiggleplotr")
+```
+
+To run the code examples shown in this vignette, we need to load the following packages:
+```{r}
+library("wiggleplotr")
+library("dplyr")
+library("GenomicRanges")
+library("GenomicFeatures")
+library("biomaRt")
+```
+
+##Visualizing transcript annotations
+First, the _plotTranscripts_ function allows you to visualise the structucte of all transcripts of a gene (or multiple genes). It takes the following three inputs, but only the first one is required:
+
+* `exons` - list of GRanges objects containing the start and end coordinates of exons for each transcript.
+* `cdss` - list of GRanges objects containing the start and end coordinates of coding sequence (cds) for each transcript (optional).
+* `annotations` - a data frame with at least the following three columns: transcript_id, gene_name and strand (optional).
+
+To get you started, the _wiggleplotr_ package comes with example annotations for the nine protein coding transcripts of the NCOA7 gene pre-loaded. Please see below to learn how to downloaed those annotations from Ensembl on your own or how to extract them automatically from the _ensembldb_ and _TxDb_ objects. This is what the annotations look like:
+
+```{r}
+ncoa7_metadata
+names(ncoa7_exons)
+names(ncoa7_cdss)
+```
+
+Now, to plot these nine transcripts, we simply use the _plotTranscripts_ function:
+```{r}
+plotTranscripts(ncoa7_exons, ncoa7_cdss, ncoa7_metadata, rescale_introns = FALSE)
+```
+
+You might have noticed that since NCOA7 gene has relatively long introns, it can be quite hard to see where all of the exons are. To focus on the exons, we can rescale all introns to a fixed length (50 bp by default):
+```{r}
+plotTranscripts(ncoa7_exons, ncoa7_cdss, ncoa7_metadata, rescale_introns = TRUE)
+```
+
+It is now much easier to see, which of the exons can be alternatively spliced and which are shared by all transcripts.
+
+If you are constructing your own transcript annotations, you only need to specify the `exons` GRanges list for the code to work. In this case, the names of the list will be used as transcript labels on the plot.
+```{r}
+plotTranscripts(ncoa7_exons, rescale_introns = TRUE)
+```
+
+
+
+##Visualising RNA-seq read coverage
+We used the NCOA7 example above, because we discovered recently that this gene undergoes alternative promoter usage in human macrophages in response to lipopolysaccharide (LPS) stimulation [^1]. We'll now show how the _plotCoverage_ function can be used to visualise RNA-seq read coverage accross the exons of a gene. In addition the the `exons`, `cdss` and `transcript_annotations` paramteres required by _plotTranscripts_, _plotCoverage_ also requires a `track_data` data frame containing RNA-seq sample metadata as well as path to the read coverage data in BigWig format. 
+
+First, you need to create a data frame containing sample metadata. In our case we have four samples, two from the naive condition and two after LPS stimulation: 
+
+```{r}
+sample_data = dplyr::data_frame(
+  sample_id = c("aipt_A", "aipt_C", "bima_A", "bima_C"), 
+  condition = factor(c("Naive", "LPS", "Naive", "LPS"), levels = c("Naive", "LPS")), 
+  scaling_factor = 1)
+sample_data = sample_data %>%
+  dplyr::mutate(bigWig = system.file("extdata", paste0(sample_id, ".str2.bw"), 
+                                     package = "wiggleplotr"))
+as.data.frame(sample_data)
+```
+
+Finally, we need to add the `track_id` and `colour_group` columns that define which sample belongs to which track and what their colour should be. For simplicity, we first set both of these values equal to the the experimental condition: 
+
+```{r}
+track_data = dplyr::mutate(sample_data, track_id = condition, colour_group = condition)
+```
+
+Now, we can make our first read coverage plot
+```{r}
+selected_transcripts = c("ENST00000438495", "ENST00000392477") #Plot only two transcripts of the gens
+plotCoverage(ncoa7_exons[selected_transcripts], ncoa7_cdss[selected_transcripts], 
+             ncoa7_metadata, track_data,
+             heights = c(2,1), fill_palette = getGenotypePalette())
+```
+
+By default, _plotCoverage_ plots the mean read coverage across all of the samples in the same colour group. However, it is also possible to overlay all of the individual samples by setting `mean_only = FALSE` and `alpha < 1`.
+
+```{r}
+plotCoverage(ncoa7_exons[selected_transcripts], ncoa7_cdss[selected_transcripts], 
+             ncoa7_metadata, track_data,
+             heights = c(2,1), fill_palette = getGenotypePalette(), mean_only = FALSE, alpha = 0.5)
+```
+
+It is clear from both plots that the short transcript skipping the first 11 exons of the gene is only expressed after LPS stimulation.
+
+### Overlaying multiple conditions
+Finally, we can overlay the two conditions in different colours by assigning all of the samples to a single track. This approach can we very useful for visualising eQTLs and splice QTLs. Setting `coverage_type = "line"` allows us to see both signals even if one overlaps the other:
+```{r}
+track_data = dplyr::mutate(sample_data, track_id = "RNA-seq", colour_group = condition)
+plotCoverage(ncoa7_exons[selected_transcripts], ncoa7_cdss[selected_transcripts], 
+            ncoa7_metadata, track_data,
+             heights = c(2,1), fill_palette = getGenotypePalette(), coverage_type = "line")
+```
+
+Unfortunately, it is currently not possible to automatically add legends to the read coverage plots. This is because _plotTranscripts_ uses the _cowplot::plot\_grid_ function to align the read coverage and transcript annotations plots and _plot\_grid_ does not support legends. 
+
+## Plotting other types of data
+Although _wiggleplotr_ was initially written with RNA-seq data in mind, it can be used equally well to visualise any other sequencing data that can be summarised as read coverage in BigWig format (ATAC-seq, DNAse-seq, ChIP-seq). All you need to do is specify your own `exons`, `cdss`, `transcript_annotations` and `track_data` parameters. Furthermore, setting `connect_exons = FALSE` and `transcript_label = FALSE` makes it easier to plot other types of genomic annotations.
+
+```{r, eval = FALSE}
+track_data = dplyr::mutate(sample_data, track_id = "RNA-seq", colour_group = condition)
+plotCoverage(ncoa7_exons[selected_transcripts], ncoa7_cdss[selected_transcripts], 
+            ncoa7_metadata, track_data,
+             heights = c(2,1), fill_palette = getGenotypePalette(), coverage_type = "line",
+             connect_exons = FALSE, transcript_label = FALSE, rescale_introns = FALSE)
+```
+
+## Extract transcript annotations automatically from Ensembl and UCSC annotations objects
+In addition specifying your own transcript annotations, _wiggleplotr_ also provides four additional wrapper functions that can extract transcript annotations directly from _ensembldb_ and _TxDb_ (UCSC) objects. For _ensembldb_, you can use the _plotTranscriptsFromEnsembldb_ and _plotCoverageFromEnsembldb_ functions:
+
+```{r}
+library("ensembldb")
+library("EnsDb.Hsapiens.v86")
+plotTranscriptsFromEnsembldb(EnsDb.Hsapiens.v86, gene_names = "NCOA7", 
+                             transcript_ids = c("ENST00000438495", "ENST00000392477"))
+```
+
+For UCSC transcript annotations in TxDb objects, you can use the corresponding _plotTranscriptsFromUCSC_ and _plotCoverageFromUCSC_ functions:
+```{r}
+#Load OrgDb and TxDb objects with UCSC gene annotations
+require("org.Hs.eg.db")
+require("TxDb.Hsapiens.UCSC.hg38.knownGene")
+plotTranscriptsFromUCSC(orgdb = org.Hs.eg.db, txdb = TxDb.Hsapiens.UCSC.hg38.knownGene, 
+                        gene_names = "NCOA7", transcript_ids = c("uc003qae.5", "uc063rdt.2"))
+```
+
+## Downloading transcript annotations from Ensembl
+The easiest way to access reference transcript annotations in R is to download them directly from Ensembl using the _biomaRt_ R package.
+
+### Downloading transcript metadata
+First, we want to download transcript metadata, such as which transcripts belong to which genes and what are their names. We can use the _biomaRt_ package to do that. First, let's define which mart and dataset we want to use. 
+```{r}
+ensembl_mart = useMart("ENSEMBL_MART_ENSEMBL", host = "dec2014.archive.ensembl.org")
+ensembl_dataset = useDataset("hsapiens_gene_ensembl",mart=ensembl_mart)
+ensembl_dataset
+```
+The `host` helps to make sure that we get the annotations from a specific Ensembl version. For example, Ensembl 78 correseponds to `host="dec2014.archive.ensembl.org"`. You can use the Ensembl Archives [website](http://www.ensembl.org/info/website/archives/index.html) to check which host name corresponds to desired Ensembl version. More information using specific ensembl versions with _biomaRt_ can be found in the [biomaRt vignette].
+
+We can see all available attributes with the `listAttributes` command. 
+```{r}
+attributes = listAttributes(ensembl_dataset)
+head(attributes)
+```
+
+Now, let's select gene id, gene name, transcript id and strand from the biomart and download the corresponding columns.
+```{r}
+selected_attributes = c("ensembl_transcript_id", "ensembl_gene_id", 
+                        "external_gene_name", "strand", 
+                        "gene_biotype", "transcript_biotype")
+data = getBM(attributes = selected_attributes, mart = ensembl_dataset)
+head(data)
+```
+
+Finally, we need to rename the columns
+```{r}
+data = dplyr::rename(data, 
+                     transcript_id = ensembl_transcript_id, 
+                     gene_id = ensembl_gene_id, 
+                     gene_name = external_gene_name)
+head(data)
+```
+
+We can now save the metadata into a file to avoid downloading it every time we need to use it.
+```{r}
+temporary_file = tempfile(pattern = "file", tmpdir = tempdir(), fileext = ".rds")
+saveRDS(data, temporary_file)
+```
+
+Next time we need to access the metadata, we can load it directly from disk.
+```{r}
+transcript_metadata = readRDS(temporary_file)
+head(transcript_metadata)
+```
+
+### Downloading the full transcript database from Ensembl
+However, just the transcript metadata is not enought to use _wiggleplotr_, we also need the coordinates for all exons. We can get those using the _GenomicFeatures_ packages. First, we use the _makeTxDbFromBiomart_ function to download the full transcript database corresponding to a sepcifc Ensembl version, in this case Ensembl 78. Please note that as the database is quite large, this can take at least a couple of minutes to run.
+```{r eval=FALSE}
+txdb = makeTxDbFromBiomart(biomart = "ENSEMBL_MART_ENSEMBL", 
+                           dataset = "hsapiens_gene_ensembl", 
+                           host="dec2014.archive.ensembl.org")
+```
+We can save the database to disk to avoid downloading it again every time we want to use it.
+```{r eval=FALSE}
+txdb_file = tempfile(pattern = "file", tmpdir = tempdir(), fileext = ".rds")
+saveDb(txdb, txdb_file)
+```
+And we can load it from disk using the _loadDb_ function.
+```{r, eval=FALSE}
+txdb = loadDb(txdb_file)
+```
+We can extract exon and coding sequence (CDS) coordinates for all annotated transcripts from the database. The following commands will produce a a list of _GRanges_ objects, each element containing the exons or coding sequences of a single transcript.
+```{r, eval=FALSE}
+exons = exonsBy(txdb, by = "tx", use.names = TRUE)
+cdss = cdsBy(txdb, by = "tx", use.names = TRUE)
+```
+
+Finally, we use the newly downloaded annotations to visualise the structure of all protein coding transcripts of NCOA7.
+```{r, eval=FALSE}
+selected_transcripts = transcript_metadata %>%
+  dplyr::filter(gene_name == "NCOA7", transcript_biotype == "protein_coding")
+tx_ids = selected_transcripts$transcript_id
+plotTranscripts(exons[tx_ids], cdss[tx_ids], 
+                transcript_metadata, rescale_introns = TRUE)
+```
+
+[biomaRt vignette]:https://www.bioconductor.org/packages/3.3/bioc/vignettes/biomaRt/inst/doc/biomaRt.pdf
+
+[^1]: Alasoo, Kaur, et al. ["Transcriptional profiling of macrophages derived from monocytes and iPS cells identifies a conserved response to LPS and novel alternative transcription."](http://www.nature.com/articles/srep12524) Scientific reports 5 (2015): 12524.
