@@ -5,11 +5,21 @@ _wiggleplotr_ is a tool to visualise RNA-seq read overage overlapping gene annot
 <img src="PTK2B.png" width="450">
 
 ## Installation
-_wiggleplotr_ is soon going to be submitted to Bioconductor, but in the mean time it can be installed directly from GitHub:
+This repostitory contains the development version of _wiggleplotr_. The latest stable version of can be installed directly from [Bioconductor](https://bioconductor.org/packages/wiggleplotr/):
+```r
+## try http:// if https:// URLs are not supported
+source("https://bioconductor.org/biocLite.R")
+biocLite("wiggleplotr")
+```
+
+Alternatively, you can still install the development version using devtools: 
 ```r
 library("devtools")
 devtools::install_github("kauralasoo/wiggleplotr")
 ```
+However, the stable Bioconductor version is likely to be the best option for most people.
+
+
 ## Getting started
 See the [vignette](https://htmlpreview.github.io/?https://github.com/kauralasoo/wiggleplotr/blob/master/vignettes/wiggleplotr.html) for instructions on how to get started.
 
