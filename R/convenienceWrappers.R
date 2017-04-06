@@ -1,14 +1,14 @@
 extractTranscriptAnnotationsFromEnsembldb <- function(ensembldb, gene_names, transcript_ids){
 
   #Fetch gene metadata
-  gene_filter = ensembldb::GenenameFilter(gene_names)
-  gene_metadata = ensembldb::transcripts(ensembldb, filter = gene_filter) %>%
+  gene_filter = GenenameFilter(gene_names)
+  gene_metadata = transcripts(ensembldb, filter = gene_filter) %>%
     as.data.frame() %>%
     dplyr::transmute(transcript_id = tx_id, gene_name, strand)
   
   #Fetch gene exons and cdss
-  exons = ensembldb::exonsBy(ensembldb, filter = gene_filter)
-  cdss = ensembldb::cdsBy(ensembldb, filter = gene_filter)
+  exons = exonsBy(ensembldb, filter = gene_filter)
+  cdss = cdsBy(ensembldb, filter = gene_filter)
   
   if(!is.null(transcript_ids)){
     gene_metadata = dplyr::filter(gene_metadata, transcript_id %in% transcript_ids)
@@ -52,6 +52,8 @@ extractTranscriptAnnotationsFromUCSC <- function(orgdb, txdb, gene_names, transc
 #' @return ggplot2 object
 #' @export
 #'
+#' @importFrom AnnotationFilter GenenameFilter
+#' @importMethodsFrom ensembldb transcripts exonsBy cdsBy
 #' @examples
 #' require("EnsDb.Hsapiens.v86")
 #' plotTranscriptsFromEnsembldb(EnsDb.Hsapiens.v86, "NCOA7", transcript_ids = c("ENST00000438495", "ENST00000392477"))
