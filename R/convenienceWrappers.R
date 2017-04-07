@@ -1,7 +1,7 @@
 extractTranscriptAnnotationsFromEnsembldb <- function(ensembldb, gene_names, transcript_ids){
 
   #Fetch gene metadata
-  gene_filter = ensembldb::GenenameFilter(gene_names)
+  gene_filter = AnnotationFilter::GenenameFilter(gene_names)
   gene_metadata = ensembldb::transcripts(ensembldb, filter = gene_filter) %>%
     as.data.frame() %>%
     dplyr::transmute(transcript_id = tx_id, gene_name, strand)

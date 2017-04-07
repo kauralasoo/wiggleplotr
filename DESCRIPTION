@@ -1,6 +1,6 @@
 Package: wiggleplotr
 Title: Make read coverage plots from BigWig files
-Version: 0.99.6
+Version: 0.99.7
 Author: Kaur Alasoo [aut, cre]
 Maintainer: Kaur Alasoo <kaur.alasoo@gmail.com>
 Description: Tools to visualise read coverage from sequencing
@@ -16,7 +16,8 @@ LazyData: true
 RoxygenNote: 6.0.1
 Suggests: knitr, rmarkdown, biomaRt, GenomicFeatures, testthat,
         ensembldb, EnsDb.Hsapiens.v86, org.Hs.eg.db,
-        TxDb.Hsapiens.UCSC.hg38.knownGene, AnnotationDbi
+        TxDb.Hsapiens.UCSC.hg38.knownGene, AnnotationDbi,
+        AnnotationFilter
 VignetteBuilder: knitr
 biocViews: Coverage, RNASeq, ChIPSeq, Sequencing, Visualization,
         GeneExpression, Transcription, AlternativeSplicing
