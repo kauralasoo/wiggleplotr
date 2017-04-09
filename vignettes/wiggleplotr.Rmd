@@ -52,7 +52,7 @@ First, the _plotTranscripts_ function allows you to visualise the structucte of 
 * `cdss` - list of GRanges objects containing the start and end coordinates of coding sequence (cds) for each transcript (optional).
 * `annotations` - a data frame with at least the following three columns: transcript_id, gene_name and strand (optional).
 
-To get you started, the _wiggleplotr_ package comes with example annotations for the nine protein coding transcripts of the NCOA7 gene pre-loaded. Please see below to learn how to downloaed those annotations from Ensembl on your own or how to extract them automatically from the _ensembldb_ and _TxDb_ objects. This is what the annotations look like:
+To get you started, the _wiggleplotr_ package comes with example annotations for the nine protein coding transcripts of the NCOA7 gene pre-loaded. Please see below to learn how to download those annotations from Ensembl on your own or how to extract them automatically from the _EnsDb_ and _TxDb_ objects. This is what the annotations look like:
 
 ```{r}
 ncoa7_metadata
