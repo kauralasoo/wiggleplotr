@@ -15,18 +15,12 @@ biocLite("wiggleplotr")
 
 Alternatively, you can still install the development version using devtools: 
 =======
-_wiggleplotr_ is soon going to be submitted to Bioconductor, but in the mean time it can be installed directly from GitHub:
->>>>>>> upstream/master
 ```r
 library("devtools")
 devtools::install_github("kauralasoo/wiggleplotr")
 ```
-<<<<<<< HEAD
 However, the stable Bioconductor version is likely to be the best option for most people.
 
-
-=======
->>>>>>> upstream/master
 ## Getting started
 See the [vignette](https://htmlpreview.github.io/?https://github.com/kauralasoo/wiggleplotr/blob/master/vignettes/wiggleplotr.html) for instructions on how to get started.
 
