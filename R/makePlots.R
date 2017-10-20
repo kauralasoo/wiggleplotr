@@ -76,7 +76,23 @@ makeCoveragePlot <- function(coverage_df, limits, alpha, fill_palette, coverage_
   return(coverage_plot)
 }
 
-makeManhattanPlot <- function(pvalues_df, limits, color_R2 = FALSE, data_track = TRUE){
+#' Make a Manahattan plot of p-values
+#' 
+#' The Manhattan plots is compatible with wiggpleplotr read coverage and transcript strucutre plots. 
+#' Can be appended to those using the cowplot::plot_grid() function. 
+#'
+#' @param pvalues_df Data frame of association p-values (required columns: track_id, p_nominal, pos)
+#' @param region_coords Start and end coordinates of the region to plot. 
+#' @param color_R2 Color the points according to R2 from the lead variant. Require R2 column in the pvalues_df data frame.
+#' @param data_track If TRUE, then remove all information from x-axis. 
+#' Makes it easy to append to read coverage or transcript strcture plots using cowplot::plot_grid(). 
+#'
+#' @return gglot2 object
+#' @examples
+#' data = dplyr::data_frame(track_id = "GWAS", pos = sample(c(1:1000), 200), p_nominal = runif(200, min = 0.0000001, 1))
+#' makeManhattanPlot(data, c(1,1000), data_track = FALSE)
+#' @export
+makeManhattanPlot <- function(pvalues_df, region_coords, color_R2 = FALSE, data_track = TRUE){
   
   #Make assertions
   assertthat::assert_that(assertthat::has_name(pvalues_df, "track_id"))
@@ -98,7 +114,7 @@ makeManhattanPlot <- function(pvalues_df, limits, color_R2 = FALSE, data_track =
     geom_point() + 
     theme_light() + 
     ylab(expression(paste("-",log[10], " p-value"))) +
-    scale_x_continuous(limits = limits, expand = c(0,0))
+    scale_x_continuous(limits = region_coords, expand = c(0,0))
   
   #Apply data track theme so that plots can later be pasted together with cowplot
   if(data_track){
