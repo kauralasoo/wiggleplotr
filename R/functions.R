@@ -161,8 +161,13 @@ subsamplePoints <- function(tx_annotations, plot_fraction){
 #'
 #' @examples
 #' getGenotypePalette()
-getGenotypePalette <- function(){
-  c("#d7191c","#fdae61","#1a9641")
+getGenotypePalette <- function(old = FALSE){
+  if(old){
+    c("#d7191c","#fdae61","#1a9641")
+  } else{
+    #Borrowed from Kumasaka, et al 2015
+    c("#E9181D","#51BEEE","#18354B") 
+  }
 }
 
 #Common theme for all data track plots
