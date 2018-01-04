@@ -7,3 +7,4 @@ vignettes/TranscriptDb_GRCh38_79.db
 
 *.Rproj
 inst/doc
+.DS_Store
