@@ -30,8 +30,8 @@ plotTranscripts <- function(exons, cdss = NULL, transcript_annotations = NULL,
   }
   
   #Check exons and cdss
-  assertthat::assert_that(is.list(exons)|| class(exons) == "GRangesList") #Check that exons and cdss objects are lists
-  assertthat::assert_that(is.list(cdss) || class(exons) == "GRangesList")
+  assertthat::assert_that(is.list(exons)|| is(exons, "GRangesList")) #Check that exons and cdss objects are lists
+  assertthat::assert_that(is.list(cdss) || is(exons, "GRangesList"))
   
   #Join exons together
   joint_exons = joinExons(exons)
@@ -181,8 +181,8 @@ plotCoverage <- function(exons, cdss = NULL, transcript_annotations = NULL, trac
   }
   
   #Check exons and cdss
-  assertthat::assert_that(is.list(exons) || class(exons) == "GRangesList") #Check that exons and cdss objects are lists
-  assertthat::assert_that(is.list(cdss) || class(exons) == "GRangesList")
+  assertthat::assert_that(is.list(exons) || is(exons, "GRangesList")) #Check that exons and cdss objects are lists
+  assertthat::assert_that(is.list(cdss) || is(exons, "GRangesList"))
   #TODO: Check that the names of the exons and cdss list match that of the transcript_annotations data.frame
   
   #Find the start and end cooridinates of the whole region spanning the gene
