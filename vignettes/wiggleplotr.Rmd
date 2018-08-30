@@ -32,8 +32,9 @@ _wiggleplotr_ is a tool to visualise RNA-seq read overage accross annotated exon
 ##Getting started
 To install _wiggleplotr_, start R and enter:
 ```{r, eval = FALSE}
-source("http://www.bioconductor.org/biocLite.R")
-biocLite("wiggleplotr")
+if (!requireNamespace("BiocManager", quietly=TRUE))
+    install.packages("BiocManager")
+BiocManager::install("wiggleplotr")
 ```
 
 To run the code examples shown in this vignette, we need to load the following packages:
