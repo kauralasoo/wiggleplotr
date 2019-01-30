@@ -152,7 +152,7 @@ plotCoverage <- function(exons, cdss = NULL, transcript_annotations = NULL, trac
                         plot_fraction = 0.1, heights = c(0.75, 0.25), alpha = 1,
                         fill_palette = c("#a1dab4","#41b6c4","#225ea8"), mean_only = TRUE, 
                         connect_exons = TRUE, transcript_label = TRUE, return_subplots_list = FALSE,
-                        region_coords = NULL, coverage_type = "area",box=TRUE,main.label=FALSE,label.postion="top",label.size=15,lanel.face="bold"){
+                        region_coords = NULL, coverage_type = "area",box=TRUE,main.label=FALSE,label.postion="top",label.size=15,label.face="bold"){
   
   #IF cdss is not specified then use exons instead on cdss
   if(is.null(cdss)){
@@ -271,7 +271,8 @@ plotCoverage <- function(exons, cdss = NULL, transcript_annotations = NULL, trac
   } else {
     plot = cowplot::plot_grid(coverage_plot, tx_structure, align = "v", rel_heights = heights, ncol = 1)
     if(main.label==TRUE&&transcript_label==FALSE){
-      plot<-annotate_figure(plot,fig.lab=transcript_struct$transcript_label[1],fig.lab.pos = label.postion,fig.lab.size = label.size,fig.lab.face = label.face)
+      label=sub(':.* ',' ',transcript_struct$transcript_label[1])
+      plot<-annotate_figure(plot,fig.lab=label,fig.lab.pos = label.postion,fig.lab.size = label.size,fig.lab.face = label.face)
       } 
     return(plot)
   }
