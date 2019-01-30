@@ -63,6 +63,8 @@ Useful for example for plotting mean coverage stratified by genotype (which is s
 
 \item{region_coords}{Start and end coordinates of the region to plot, overrides flanking_length parameter.}
 
+\item{box}{If FALSE then the box for transcript are ignore. (deault: TRUE).}
+
 \item{coverage_type}{Specifies if the read coverage is represented by either 'line', 'area' or 'both'. 
 The 'both' option tends to give better results for wide regions. (default: area).}
 }
