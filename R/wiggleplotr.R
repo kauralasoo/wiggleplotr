@@ -85,6 +85,7 @@ plotTranscripts <- function(exons, cdss = NULL, transcript_annotations = NULL,
 #' Also supports rescaling introns to constant length. Does not work 
 #' on Windows, because rtracklayer cannot read BigWig files on Windows.
 #' 
+#' @importFrom ggpubr annotate_figure
 #' @param exons list of GRanges objects, each object containing exons for one transcript. 
 #' The list must have names that correspond to transcript_id column in transript_annotations data.frame.
 #' @param cdss list of GRanges objects, each object containing the coding regions (CDS) of a single transcript. 
@@ -121,6 +122,10 @@ plotTranscripts <- function(exons, cdss = NULL, transcript_annotations = NULL,
 #' @param region_coords Start and end coordinates of the region to plot, overrides flanking_length parameter.
 #' @param coverage_type Specifies if the read coverage is represented by either 'line', 'area' or 'both'. 
 #' @param box If FALSE then the box for transcript are ignore. (deault: TRUE)
+#' @param main.label If TRUE plot the transcript label on different position of the figure
+#' @param label.position Position of the main.label, can be one of "top.left", "top", "top.right", "bottom.left", "bottom", "bottom.right". Default is "top.left".
+#' @param label.size optional size of the figure label.
+#' @param label.face optional font face of the figure label. Allowed values include: "plain", "bold", "italic", "bold.italic".
 #' The 'both' option tends to give better results for wide regions. (default: area). 
 #'
 #' @return Either object from cow_plot::plot_grid() function or a list of subplots (if return_subplots_list == TRUE)
@@ -147,7 +152,7 @@ plotCoverage <- function(exons, cdss = NULL, transcript_annotations = NULL, trac
                         plot_fraction = 0.1, heights = c(0.75, 0.25), alpha = 1,
                         fill_palette = c("#a1dab4","#41b6c4","#225ea8"), mean_only = TRUE, 
                         connect_exons = TRUE, transcript_label = TRUE, return_subplots_list = FALSE,
-                        region_coords = NULL, coverage_type = "area",box=TRUE){
+                        region_coords = NULL, coverage_type = "area",box=TRUE,main.label=FALSE,label.postion="top",label.size=15,lanel.face="bold"){
   
   #IF cdss is not specified then use exons instead on cdss
   if(is.null(cdss)){
@@ -265,6 +270,9 @@ plotCoverage <- function(exons, cdss = NULL, transcript_annotations = NULL, trac
     return(plot_list)
   } else {
     plot = cowplot::plot_grid(coverage_plot, tx_structure, align = "v", rel_heights = heights, ncol = 1)
+    if(main.label==TRUE&&transcript.label==FLASE){
+      plot<-annotate_figure(fig.lab=transcript_struct$transcript_label[1],fig.lab.pos = label.postion,fig.lab.size = label.size,fig.lab.face = label.face)
+      } 
     return(plot)
   }
 }
