@@ -146,7 +146,7 @@ plotCoverage <- function(exons, cdss = NULL, transcript_annotations = NULL, trac
                         plot_fraction = 0.1, heights = c(0.75, 0.25), alpha = 1,
                         fill_palette = c("#a1dab4","#41b6c4","#225ea8"), mean_only = TRUE, 
                         connect_exons = TRUE, transcript_label = TRUE, return_subplots_list = FALSE,
-                        region_coords = NULL, coverage_type = "area"){
+                        region_coords = NULL, coverage_type = "area",box=FALSE){
   
   #IF cdss is not specified then use exons instead on cdss
   if(is.null(cdss)){
@@ -250,6 +250,11 @@ plotCoverage <- function(exons, cdss = NULL, transcript_annotations = NULL, trac
   transcript_struct = prepareTranscriptStructureForPlotting(tx_annotations$exon_ranges, 
                        tx_annotations$cds_ranges, plotting_annotations)
   tx_structure = plotTranscriptStructure(transcript_struct, limits, connect_exons, xlabel, transcript_label)
+  if(box==FALSE){
+    tx_structure=tx_structure+
+      theme(panel.border = element_blank(),strip.background  = element_rect(fill = "white"),
+            axis.text.x=element_blank())
+  
   
   coverage_plot = makeCoveragePlot(coverage_df, limits, alpha, fill_palette, coverage_type)
   
