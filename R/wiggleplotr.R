@@ -270,7 +270,7 @@ plotCoverage <- function(exons, cdss = NULL, transcript_annotations = NULL, trac
     return(plot_list)
   } else {
     plot = cowplot::plot_grid(coverage_plot, tx_structure, align = "v", rel_heights = heights, ncol = 1)
-    if(main.label==TRUE&&transcript_label==FLASE){
+    if(main.label==TRUE&&transcript_label==FALSE){
       plot<-annotate_figure(fig.lab=transcript_struct$transcript_label[1],fig.lab.pos = label.postion,fig.lab.size = label.size,fig.lab.face = label.face)
       } 
     return(plot)
