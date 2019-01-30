@@ -255,7 +255,7 @@ plotCoverage <- function(exons, cdss = NULL, transcript_annotations = NULL, trac
     tx_structure=tx_structure+
       theme(panel.border = element_blank(),strip.background  = element_rect(fill = "white"),
             axis.text.x=element_blank())
-  
+  }
   
   coverage_plot = makeCoveragePlot(coverage_df, limits, alpha, fill_palette, coverage_type)
   
