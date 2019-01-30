@@ -120,6 +120,7 @@ plotTranscripts <- function(exons, cdss = NULL, transcript_annotations = NULL,
 #' @param return_subplots_list Instead of a joint plot return a list of subplots that can be joined together manually. 
 #' @param region_coords Start and end coordinates of the region to plot, overrides flanking_length parameter.
 #' @param coverage_type Specifies if the read coverage is represented by either 'line', 'area' or 'both'. 
+#' @param box If TURE then the box for transcript are ignore. (deault: FALSE)
 #' The 'both' option tends to give better results for wide regions. (default: area). 
 #'
 #' @return Either object from cow_plot::plot_grid() function or a list of subplots (if return_subplots_list == TRUE)
