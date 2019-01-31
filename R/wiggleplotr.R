@@ -126,6 +126,7 @@ plotTranscripts <- function(exons, cdss = NULL, transcript_annotations = NULL,
 #' @param label.position Position of the main.label, can be one of "top.left", "top", "top.right", "bottom.left", "bottom", "bottom.right". Default is "top.left".
 #' @param label.size optional size of the figure label.
 #' @param label.face optional font face of the figure label. Allowed values include: "plain", "bold", "italic", "bold.italic".
+#' @param top, bottom, left, right	optional string, or grob (with fig.lab="")
 #' The 'both' option tends to give better results for wide regions. (default: area). 
 #'
 #' @return Either object from cow_plot::plot_grid() function or a list of subplots (if return_subplots_list == TRUE)
@@ -152,7 +153,7 @@ plotCoverage <- function(exons, cdss = NULL, transcript_annotations = NULL, trac
                         plot_fraction = 0.1, heights = c(0.75, 0.25), alpha = 1,
                         fill_palette = c("#a1dab4","#41b6c4","#225ea8"), mean_only = TRUE, 
                         connect_exons = TRUE, transcript_label = TRUE, return_subplots_list = FALSE,
-                        region_coords = NULL, coverage_type = "area",box=TRUE,main.label=FALSE,label.postion="top",label.size=15,label.face="bold"){
+                        region_coords = NULL, coverage_type = "area",box=TRUE,main.label=FALSE,fig.lab=NULL,label.postion="top",label.size=15,label.face="bold",top = NULL, bottom = NULL, left = NULL, right = NULL,...){
   
   #IF cdss is not specified then use exons instead on cdss
   if(is.null(cdss)){
@@ -271,8 +272,12 @@ plotCoverage <- function(exons, cdss = NULL, transcript_annotations = NULL, trac
   } else {
     plot = cowplot::plot_grid(coverage_plot, tx_structure, align = "v", rel_heights = heights, ncol = 1)
     if(main.label==TRUE&&transcript_label==FALSE){
+      if(is.null(fig.lab)){
       label=sub(':.* ',' ',transcript_struct$transcript_label[1])
-      plot<-annotate_figure(plot,fig.lab=label,fig.lab.pos = label.postion,fig.lab.size = label.size,fig.lab.face = label.face)
+      }else{
+       label=fig.lab
+     }
+      plot<-annotate_figure(plot,fig.lab=label,fig.lab.pos = label.postion,fig.lab.size = label.size,fig.lab.face = label.face,top=top,bottom=bottom,left=left,right=right,...)
       } 
     return(plot)
   }
