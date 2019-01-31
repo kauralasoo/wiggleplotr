@@ -4,13 +4,16 @@
 \alias{plotCoverage}
 \title{Plot read coverage across genomic regions}
 \usage{
-plotCoverage(exons, cdss = NULL, transcript_annotations = NULL, track_data,
-  rescale_introns = TRUE, new_intron_length = 50, flanking_length = c(50,
-  50), plot_fraction = 0.1, heights = c(0.75, 0.25), alpha = 1,
-  fill_palette = c("#a1dab4", "#41b6c4", "#225ea8"), mean_only = TRUE,
-  connect_exons = TRUE, transcript_label = TRUE,
+plotCoverage(exons, cdss = NULL, transcript_annotations = NULL,
+  track_data, rescale_introns = TRUE, new_intron_length = 50,
+  flanking_length = c(50, 50), plot_fraction = 0.1, heights = c(0.75,
+  0.25), alpha = 1, fill_palette = c("#a1dab4", "#41b6c4", "#225ea8"),
+  mean_only = TRUE, connect_exons = TRUE, transcript_label = TRUE,
   return_subplots_list = FALSE, region_coords = NULL,
-  coverage_type = "area")
+  coverage_type = "area", box = TRUE, main.label = FALSE,
+  fig.lab = NULL, label.postion = "top", label.size = 15,
+  label.face = "bold", top = NULL, bottom = NULL, left = NULL,
+  right = NULL, ...)
 }
 \arguments{
 \item{exons}{list of GRanges objects, each object containing exons for one transcript. 
@@ -63,10 +66,20 @@ Useful for example for plotting mean coverage stratified by genotype (which is s
 
 \item{region_coords}{Start and end coordinates of the region to plot, overrides flanking_length parameter.}
 
-\item{box}{If FALSE then the box for transcript are ignore. (deault: TRUE).}
+\item{coverage_type}{Specifies if the read coverage is represented by either 'line', 'area' or 'both'.}
 
-\item{coverage_type}{Specifies if the read coverage is represented by either 'line', 'area' or 'both'. 
+\item{box}{If FALSE then the box for transcript are ignore. (deault: TRUE)}
+
+\item{main.label}{If TRUE plot the transcript label on different position of the figure}
+
+\item{label.size}{optional size of the figure label.}
+
+\item{label.face}{optional font face of the figure label. Allowed values include: "plain", "bold", "italic", "bold.italic".}
+
+\item{top, }{bottom, left, right    optional string, or grob (with fig.lab="")
 The 'both' option tends to give better results for wide regions. (default: area).}
+
+\item{label.position}{Position of the main.label, can be one of "top.left", "top", "top.right", "bottom.left", "bottom", "bottom.right". Default is "top.left".}
 }
 \value{
 Either object from cow_plot::plot_grid() function or a list of subplots (if return_subplots_list == TRUE)
