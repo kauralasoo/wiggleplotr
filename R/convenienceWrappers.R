@@ -1,7 +1,7 @@
 extractTranscriptAnnotationsFromEnsembldb <- function(ensembldb, gene_names, transcript_ids){
 
   #Fetch gene metadata
-  gene_filter = AnnotationFilter::GenenameFilter(gene_names)
+  gene_filter = AnnotationFilter::GeneNameFilter(gene_names)
   gene_metadata = ensembldb::transcripts(ensembldb, filter = gene_filter) %>%
     as.data.frame() %>%
     dplyr::transmute(transcript_id = tx_id, gene_name, strand)
@@ -119,7 +119,7 @@ plotCoverageFromEnsembldb <- function(ensembldb, gene_names, transcript_ids = NU
 #' orgdb = org.Hs.eg.db
 #' txdb = TxDb.Hsapiens.UCSC.hg38.knownGene
 #' 
-#' plotTranscriptsFromUCSC(orgdb, txdb, "NCOA7", transcript_ids = c("uc003qae.5", "uc063rdt.2"))
+#' plotTranscriptsFromUCSC(orgdb, txdb, "NCOA7", transcript_ids = c("ENST00000438495.6", "ENST00000392477.6"))
 plotTranscriptsFromUCSC <- function(orgdb, txdb, gene_names, transcript_ids = NULL, ...){
   tx_annot = extractTranscriptAnnotationsFromUCSC(orgdb, txdb, gene_names, transcript_ids)
   plotTranscripts(exons = tx_annot$exons, 
@@ -159,7 +159,7 @@ plotTranscriptsFromUCSC <- function(orgdb, txdb, gene_names, transcript_ids = NU
 #' track_data = dplyr::mutate(sample_data, track_id = condition, colour_group = condition)
 #' \dontrun{
 #' #Note: This example does not work, becasue UCSC and Ensembl use different chromosome names
-#' plotCoverageFromUCSC(orgdb, txdb, "NCOA7", transcript_ids = c("uc003qae.5", "uc063rdt.2"), 
+#' plotCoverageFromUCSC(orgdb, txdb, "NCOA7", transcript_ids = c("ENST00000438495.6", "ENST00000392477.6"), 
 #' track_data, heights = c(2,1), fill_palette = getGenotypePalette())
 #' }
 plotCoverageFromUCSC <- function(orgdb, txdb, gene_names, transcript_ids = NULL, ...){
