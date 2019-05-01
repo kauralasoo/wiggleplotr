@@ -41,7 +41,7 @@ sample_data = dplyr::data_frame(sample_id = c("aipt_A", "aipt_C", "bima_A", "bim
 track_data = dplyr::mutate(sample_data, track_id = condition, colour_group = condition)
 \dontrun{
 #Note: This example does not work, becasue UCSC and Ensembl use different chromosome names
-plotCoverageFromUCSC(orgdb, txdb, "NCOA7", transcript_ids = c("uc003qae.5", "uc063rdt.2"), 
+plotCoverageFromUCSC(orgdb, txdb, "NCOA7", transcript_ids = c("ENST00000438495.6", "ENST00000392477.6"), 
 track_data, heights = c(2,1), fill_palette = getGenotypePalette())
 }
 }

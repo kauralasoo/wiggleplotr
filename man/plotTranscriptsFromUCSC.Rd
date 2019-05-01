@@ -4,7 +4,8 @@
 \alias{plotTranscriptsFromUCSC}
 \title{Plot transcripts directly from UCSC OrgDb and TxDb objects.}
 \usage{
-plotTranscriptsFromUCSC(orgdb, txdb, gene_names, transcript_ids = NULL, ...)
+plotTranscriptsFromUCSC(orgdb, txdb, gene_names, transcript_ids = NULL,
+  ...)
 }
 \arguments{
 \item{orgdb}{UCSC OrgDb object.}
@@ -33,5 +34,5 @@ require("TxDb.Hsapiens.UCSC.hg38.knownGene")
 orgdb = org.Hs.eg.db
 txdb = TxDb.Hsapiens.UCSC.hg38.knownGene
 
-plotTranscriptsFromUCSC(orgdb, txdb, "NCOA7", transcript_ids = c("uc003qae.5", "uc063rdt.2"))
+plotTranscriptsFromUCSC(orgdb, txdb, "NCOA7", transcript_ids = c("ENST00000438495.6", "ENST00000392477.6"))
 }

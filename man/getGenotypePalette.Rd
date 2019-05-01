@@ -4,7 +4,7 @@
 \alias{getGenotypePalette}
 \title{Returns a three-colour palette suitable for visualising read coverage stratified by genotype}
 \usage{
-getGenotypePalette()
+getGenotypePalette(old = FALSE)
 }
 \value{
 Vector of three colours.
