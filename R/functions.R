@@ -156,6 +156,7 @@ subsamplePoints <- function(tx_annotations, plot_fraction){
 
 #' Returns a three-colour palette suitable for visualising read coverage stratified by genotype
 #'
+#' @param old Return old colour palette (now deprecated).
 #' @return Vector of three colours.
 #' @export
 #'

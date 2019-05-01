@@ -6,6 +6,9 @@
 \usage{
 getGenotypePalette(old = FALSE)
 }
+\arguments{
+\item{old}{Return old colour palette (now deprecated).}
+}
 \value{
 Vector of three colours.
 }
