@@ -12,11 +12,10 @@ if (!requireNamespace("BiocManager", quietly=TRUE))
     install.packages("BiocManager")
 BiocManager::install("wiggleplotr")
 ```
-
-Alternatively, you can still install the development version using devtools: 
-```r
+## Since I modified part of the function so you can also download from my github
+```
 library("devtools")
-devtools::install_github("kauralasoo/wiggleplotr")
+devtools::install_github("guokai8/wiggleplotr")
 ```
 However, the stable Bioconductor version is likely to be the best option for most people.
 
