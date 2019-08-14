@@ -24,4 +24,4 @@ However, the stable Bioconductor version is likely to be the best option for mos
 See the [vignette](https://htmlpreview.github.io/?https://github.com/kauralasoo/wiggleplotr/blob/master/vignettes/wiggleplotr.html) for instructions on how to get started.
 
 ## Citation
-If you use this software for research, please cite the following paper in which it was first described: [Transcriptional profiling of macrophages derived from monocytes and iPS cells identifies a conserved response to LPS and novel alternative transcription (Alasoo et al, 2015)](http://www.nature.com/articles/srep12524)
+If you use wiggleplotr for research, please cite the Bioconductor package directly: [Alasoo K (2019). wiggleplotr: Make read coverage plots from BigWig files. R package version 1.8.0.](https://doi.org/doi:10.18129/B9.bioc.wiggleplotr)
