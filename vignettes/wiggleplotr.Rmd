@@ -158,7 +158,7 @@ For UCSC transcript annotations in TxDb objects, you can use the corresponding _
 require("org.Hs.eg.db")
 require("TxDb.Hsapiens.UCSC.hg38.knownGene")
 plotTranscriptsFromUCSC(orgdb = org.Hs.eg.db, txdb = TxDb.Hsapiens.UCSC.hg38.knownGene, 
-                        gene_names = "NCOA7", transcript_ids = c("ENST00000438495.6", "ENST00000392477.6"))
+                        gene_names = "NCOA7", transcript_ids = c("ENST00000438495.6", "ENST00000368357.7"))
 ```
 
 ## Downloading transcript annotations from Ensembl

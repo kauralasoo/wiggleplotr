@@ -34,5 +34,5 @@ require("TxDb.Hsapiens.UCSC.hg38.knownGene")
 orgdb = org.Hs.eg.db
 txdb = TxDb.Hsapiens.UCSC.hg38.knownGene
 
-plotTranscriptsFromUCSC(orgdb, txdb, "NCOA7", transcript_ids = c("ENST00000438495.6", "ENST00000392477.6"))
+plotTranscriptsFromUCSC(orgdb, txdb, "NCOA7", transcript_ids = c("ENST00000438495.6", "ENST00000368357.7"))
 }
