@@ -8,7 +8,7 @@ Description: Tools to visualise read coverage from sequencing
         transcripts, peaks). Introns of long transcripts can be
         rescaled to a fixed length for better visualisation of exonic
         read coverage.
-Depends: R (>= 3.4)
+Depends: R (>= 3.6)
 Imports: dplyr, ggplot2 (>= 2.2.0), GenomicRanges, rtracklayer,
         cowplot, assertthat, purrr, S4Vectors, IRanges, GenomeInfoDb
 License: Apache License 2.0
