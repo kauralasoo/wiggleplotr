@@ -1,5 +1,5 @@
 plotTranscriptStructure <- function(exons_df, limits = NA, connect_exons = TRUE,  
-                                    xlabel = "Distance from gene start (bp)", transcript_label = TRUE){
+                                    xlabel = "Distance from gene start (bp)", transcript_label = TRUE,show_group=TRUE,legend_position="none"){
   
   #Extract the position for plotting transcript name
   transcript_annot = dplyr::group_by_(exons_df, ~transcript_id) %>% 
@@ -18,16 +18,29 @@ plotTranscriptStructure <- function(exons_df, limits = NA, connect_exons = TRUE,
                    ymax = ~transcript_rank + 0.25, 
                    ymin = ~transcript_rank - 0.25, 
                    fill = ~feature_type)) + 
-    theme_light() +
-    theme(plot.margin=unit(c(0,1,1,1),"line"), 
+    theme_light() 
+  if(show_group==FALSE){
+    plot=plot+theme(plot.margin=unit(c(0,1,1,1),"line"), 
           axis.title.y = element_blank(),
           axis.text.y = element_blank(),
           axis.ticks.y = element_blank(),
-          legend.position="none",
+          legend.position=legend_position,
+          panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          strip.text.y = element_blank(),          
+           strip.background = element_blank())          
+                    }else{
+    plot=plot+theme(plot.margin=unit(c(0,1,1,1),"line"), 
+          axis.title.y = element_blank(),
+          axis.text.y = element_blank(),
+          axis.ticks.y = element_blank(),
+          legend.position=legend_position,
           panel.grid.major = element_blank(),
           panel.grid.minor = element_blank(),
           strip.text.y = element_text(colour = "grey10"),
-          strip.background = element_rect(fill = "grey85")) +
+          strip.background = element_rect(fill = "grey85")) 
+    }
+    plot=plot+
     xlab(xlabel) +
     facet_grid(type~.) +
     scale_y_continuous(expand = c(0.2,0.15)) +
