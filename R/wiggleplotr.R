@@ -262,7 +262,7 @@ plotCoverage <- function(exons, cdss = NULL, transcript_annotations = NULL, trac
   if(box==FALSE){
     tx_structure=tx_structure+xlab("")+
       theme(panel.border = element_blank(),strip.background  = element_rect(fill = "white"),
-            axis.text.x=element_blank(),axis.tick.x=element_blank())
+            axis.text.x=element_blank(),axis.ticks.x=element_blank())
   }
   
   coverage_plot = makeCoveragePlot(coverage_df, limits, alpha, fill_palette, coverage_type)
