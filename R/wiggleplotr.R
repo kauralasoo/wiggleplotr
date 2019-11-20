@@ -258,7 +258,7 @@ plotCoverage <- function(exons, cdss = NULL, transcript_annotations = NULL, trac
   limits = c( min(IRanges::start(tx_annotations$new_introns)), max(IRanges::end(tx_annotations$new_introns)))
   transcript_struct = prepareTranscriptStructureForPlotting(tx_annotations$exon_ranges, 
                        tx_annotations$cds_ranges, plotting_annotations)
-  tx_structure = plotTranscriptStructure(transcript_struct, limits, connect_exons, xlabel, transcript_label,show_group=show_group,legend_position=legend.position)
+  tx_structure = plotTranscriptStructure(transcript_struct, limits, connect_exons, xlabel, transcript_label,show_group=show_group,legend_position=legend_position)
   if(box==FALSE){
     tx_structure=tx_structure+xlab("")+
       theme(panel.border = element_blank(),strip.background  = element_rect(fill = "white"),
