@@ -178,8 +178,8 @@ dataTrackTheme <- function(){
                 plot.margin=unit(c(0.1,1,0.1,1),"line"),
                 legend.position="none",
                 panel.grid.major = element_blank(),
-                panel.grid.minor = element_blank(),
-                strip.text.y = element_text(colour = "grey10"),
-                strip.background = element_rect(fill = "grey85"))
+                panel.grid.minor = element_blank()
+               # strip.text.y = element_text(colour = "grey10"),
+               # strip.background = element_rect(fill = "grey85"))
   return(theme)
 }
