@@ -59,7 +59,7 @@ plotTranscriptStructure <- function(exons_df, limits = NA, connect_exons = TRUE,
   return(plot)
 }
 
-makeCoveragePlot <- function(coverage_df, limits, alpha, fill_palette, coverage_type){
+makeCoveragePlot <- function(coverage_df, limits, alpha, fill_palette, coverage_type,showgroup=TRUE){
   #Plot coverage over a region
   coverage_plot = ggplot(coverage_df, aes_(~bins, ~coverage, group = ~sample_id, alpha = ~alpha)) + 
     geom_blank() +
@@ -79,14 +79,36 @@ makeCoveragePlot <- function(coverage_df, limits, alpha, fill_palette, coverage_
     stop("Coverage type not supported.")
   }
   coverage_plot = coverage_plot +
-    facet_grid(track_id~.) +
-    dataTrackTheme() + 
+    facet_grid(track_id~.) 
+  if(show_group==FALSE){
+    plot=coverage_plot+theme(plot.margin=unit(c(0,1,1,1),"line"), 
+          axis.title.y = element_blank(),
+          axis.text.y = element_blank(),
+          axis.ticks.y = element_blank(),
+          legend.position=legend_position,
+          panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          strip.text.y = element_blank(),          
+           strip.background = element_blank())          
+    }else{
+    plot=coverage_plot+theme(plot.margin=unit(c(0,1,1,1),"line"), 
+          axis.title.y = element_blank(),
+          axis.text.y = element_blank(),
+          axis.ticks.y = element_blank(),
+          legend.position=legend_position,
+          panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          strip.text.y = element_text(colour = "grey10"),
+          strip.background = element_rect(fill = "grey85")) 
+    }
+  
+  plot<-plot+
     scale_x_continuous(limits = limits, expand = c(0,0)) +
     scale_y_continuous(expand = c(0,0)) +
     scale_color_manual(values = fill_palette) +
     scale_fill_manual(values = fill_palette) +
     ylab("FPM")
-  return(coverage_plot)
+  return(plot)
 }
 
 #' Make a Manahattan plot of p-values
