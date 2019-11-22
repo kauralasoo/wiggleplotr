@@ -29,7 +29,7 @@ plotTranscriptStructure <- function(exons_df, limits = NA, connect_exons = TRUE,
           panel.grid.minor = element_blank(),
           strip.text.y = element_blank(),          
            strip.background = element_blank())          
-                    }else{
+    }else{
     plot=plot+theme(plot.margin=unit(c(0,1,1,1),"line"), 
           axis.title.y = element_blank(),
           axis.text.y = element_blank(),
