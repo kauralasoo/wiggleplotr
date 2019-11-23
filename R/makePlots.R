@@ -1,7 +1,7 @@
 plotTranscriptStructure <- function(exons_df, limits = NA, connect_exons = TRUE,  
                                     xlabel = "Distance from gene start (bp)", 
                                     transcript_label = TRUE,ylim=NULL,
-                                    show_group=TRUE,legend_position="none"){
+                                    show_group=TRUE){
   
   #Extract the position for plotting transcript name
   transcript_annot = dplyr::group_by_(exons_df, ~transcript_id) %>% 
@@ -26,7 +26,6 @@ plotTranscriptStructure <- function(exons_df, limits = NA, connect_exons = TRUE,
           axis.title.y = element_blank(),
           axis.text.y = element_blank(),
           axis.ticks.y = element_blank(),
-          legend.position=legend_position,
           panel.grid.major = element_blank(),
           panel.grid.minor = element_blank(),
           strip.text.y = element_blank(),          
@@ -36,7 +35,6 @@ plotTranscriptStructure <- function(exons_df, limits = NA, connect_exons = TRUE,
           axis.title.y = element_blank(),
           axis.text.y = element_blank(),
           axis.ticks.y = element_blank(),
-          legend.position=legend_position,
           panel.grid.major = element_blank(),
           panel.grid.minor = element_blank(),
           strip.text.y = element_text(colour = "grey10"),
@@ -94,9 +92,6 @@ makeCoveragePlot <- function(coverage_df, limits, alpha, fill_palette, coverage_
     }
   if(show_group==FALSE){
     plot=coverage_plot+theme(plot.margin=unit(c(0,1,1,1),"line"), 
-          axis.title.y = element_blank(),
-          axis.text.y = element_blank(),
-          axis.ticks.y = element_blank(),
           legend.position=legend_position,
           panel.grid.major = element_blank(),
           panel.grid.minor = element_blank(),
@@ -104,9 +99,6 @@ makeCoveragePlot <- function(coverage_df, limits, alpha, fill_palette, coverage_
            strip.background = element_blank())          
     }else{
     plot=coverage_plot+theme(plot.margin=unit(c(0,1,1,1),"line"), 
-          axis.title.y = element_blank(),
-          axis.text.y = element_blank(),
-          axis.ticks.y = element_blank(),
           legend.position=legend_position,
           panel.grid.major = element_blank(),
           panel.grid.minor = element_blank(),
