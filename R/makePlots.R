@@ -1,7 +1,6 @@
 plotTranscriptStructure <- function(exons_df, limits = NA, connect_exons = TRUE,  
                                     xlabel = "Distance from gene start (bp)", 
-                                    transcript_label = TRUE,ylim=NULL,
-                                    show_group=TRUE){
+                                    transcript_label = TRUE){
   
   #Extract the position for plotting transcript name
   transcript_annot = dplyr::group_by_(exons_df, ~transcript_id) %>% 
@@ -21,16 +20,6 @@ plotTranscriptStructure <- function(exons_df, limits = NA, connect_exons = TRUE,
                    ymin = ~transcript_rank - 0.25, 
                    fill = ~feature_type)) + 
     theme_light() 
-  if(show_group==FALSE){
-    plot=plot+theme(plot.margin=unit(c(0,1,1,1),"line"), 
-          axis.title.y = element_blank(),
-          axis.text.y = element_blank(),
-          axis.ticks.y = element_blank(),
-          panel.grid.major = element_blank(),
-          panel.grid.minor = element_blank(),
-          strip.text.y = element_blank(),          
-           strip.background = element_blank())          
-    }else{
     plot=plot+theme(plot.margin=unit(c(0,1,1,1),"line"), 
           axis.title.y = element_blank(),
           axis.text.y = element_blank(),
@@ -39,15 +28,8 @@ plotTranscriptStructure <- function(exons_df, limits = NA, connect_exons = TRUE,
           panel.grid.minor = element_blank(),
           strip.text.y = element_text(colour = "grey10"),
           strip.background = element_rect(fill = "grey85")) 
-    }
     plot=plot+
-    xlab(xlabel) 
-  if(!is.null(ylim)){
-    plot=plot+
-    facet_grid(type~.,scales = "free_y")+ylim(ylim)
-    }else{
-    plot=plot+facet_grid(type~.)
-    }
+    xlab(xlabel)+facet_grid(type~.)
     plot=plot+scale_y_continuous(expand = c(0.2,0.15)) +
     scale_fill_manual(values = c("#2c7bb6","#abd9e9")) + 
     scale_colour_manual(values = c("#2c7bb6","#abd9e9"))
