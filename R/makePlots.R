@@ -23,14 +23,15 @@ plotTranscriptStructure <- function(exons_df, limits = NA, connect_exons = TRUE,
     plot=plot+theme(plot.margin=unit(c(0,1,1,1),"line"), 
           axis.title.y = element_blank(),
           axis.text.y = element_blank(),
+          legend.position="none",
           axis.ticks.y = element_blank(),
           panel.grid.major = element_blank(),
           panel.grid.minor = element_blank(),
           strip.text.y = element_text(colour = "grey10"),
           strip.background = element_rect(fill = "grey85")) 
     plot=plot+
-    xlab(xlabel)
-    plot=plot+scale_y_continuous(expand = c(0.2,0.15)) +
+    xlab(xlabel)+ facet_grid(type~.) +
+    scale_y_continuous(expand = c(0.2,0.15)) +
     scale_fill_manual(values = c("#2c7bb6","#abd9e9")) + 
     scale_colour_manual(values = c("#2c7bb6","#abd9e9"))
   if(all(!is.na(limits))){
