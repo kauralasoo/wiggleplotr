@@ -69,9 +69,9 @@ makeCoveragePlot <- function(coverage_df, limits, alpha, fill_palette, coverage_
   }
   if(!is.null(ylim)){
     coverage_plot=coverage_plot+
-    facet_grid(track_id~.,scales = "free_y")+scale_y_continuous(limits=c(0,ylim))
+    facet_grid(track_id~.,scales = "free_y")+scale_y_continuous(limits=c(0,ylim),expand=c(0,0))
     }else{
-    coverage_plot=coverage_plot+facet_grid(track_id~.)
+    coverage_plot=coverage_plot+facet_grid(track_id~.)+scale_y_continuous(expand = c(0,0))
     }
   if(show_group==FALSE){
     plot=coverage_plot+theme(plot.margin=unit(c(0,1,1,1),"line"), 
@@ -91,7 +91,6 @@ makeCoveragePlot <- function(coverage_df, limits, alpha, fill_palette, coverage_
   
   plot<-plot+
     scale_x_continuous(limits = limits, expand = c(0,0)) +
-    scale_y_continuous(expand = c(0,0)) +
     scale_color_manual(values = fill_palette) +
     scale_fill_manual(values = fill_palette) +
     ylab("FPM")
