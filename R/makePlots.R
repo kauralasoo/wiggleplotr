@@ -75,6 +75,9 @@ makeCoveragePlot <- function(coverage_df, limits, alpha, fill_palette, coverage_
     }
   if(show_group==FALSE){
     plot=coverage_plot+theme(plot.margin=unit(c(0,1,1,1),"line"), 
+           axis.text.x = element_blank(), 
+           axis.title.x = element_blank(), 
+           axis.ticks.x = element_blank(),                  
           legend.position=legend_position,
           panel.grid.major = element_blank(),
           panel.grid.minor = element_blank(),
@@ -82,6 +85,9 @@ makeCoveragePlot <- function(coverage_df, limits, alpha, fill_palette, coverage_
            strip.background = element_blank())          
     }else{
     plot=coverage_plot+theme(plot.margin=unit(c(0,1,1,1),"line"), 
+          axis.text.x = element_blank(), 
+          axis.title.x = element_blank(), 
+          axis.ticks.x = element_blank(),
           legend.position=legend_position,
           panel.grid.major = element_blank(),
           panel.grid.minor = element_blank(),
