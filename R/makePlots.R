@@ -74,7 +74,7 @@ makeCoveragePlot <- function(coverage_df, limits, alpha, fill_palette, coverage_
     coverage_plot=coverage_plot+facet_grid(track_id~.)+scale_y_continuous(expand = c(0,0))
     }
   if(show_group==FALSE){
-    plot=coverage_plot+theme(plot.margin=unit(c(0,1,1.5,1),"line"), 
+    plot=coverage_plot+theme(plot.margin=unit(c(0.1,0.5,1,1),"line"), 
            axis.text.x = element_blank(), 
            axis.title.x = element_blank(), 
            axis.ticks.x = element_blank(),                  
@@ -84,7 +84,7 @@ makeCoveragePlot <- function(coverage_df, limits, alpha, fill_palette, coverage_
           strip.text.y = element_blank(),          
            strip.background = element_blank())          
     }else{
-    plot=coverage_plot+theme(plot.margin=unit(c(0,1,1.5,1),"line"), 
+    plot=coverage_plot+theme(plot.margin=unit(c(0.1,0.5,1,1),"line"), 
           axis.text.x = element_blank(), 
           axis.title.x = element_blank(), 
           axis.ticks.x = element_blank(),
