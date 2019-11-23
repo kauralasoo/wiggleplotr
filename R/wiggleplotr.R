@@ -154,7 +154,7 @@ plotCoverage <- function(exons, cdss = NULL, transcript_annotations = NULL, trac
                         fill_palette = c("#a1dab4","#41b6c4","#225ea8"), mean_only = TRUE, 
                         connect_exons = TRUE, transcript_label = TRUE, return_subplots_list = FALSE,
                         region_coords = NULL, coverage_type = "area",box=TRUE,main.label=FALSE,fig.lab=NULL,label.postion="top",
-                         show_group=TRUE,legend_position="none",
+                         show_group=TRUE,legend_position="none",ylim=NULL,
                          label.size=15,label.face="bold",top = NULL, bottom = NULL, left = NULL, right = NULL,...){
   
   #IF cdss is not specified then use exons instead on cdss
@@ -258,7 +258,8 @@ plotCoverage <- function(exons, cdss = NULL, transcript_annotations = NULL, trac
   limits = c( min(IRanges::start(tx_annotations$new_introns)), max(IRanges::end(tx_annotations$new_introns)))
   transcript_struct = prepareTranscriptStructureForPlotting(tx_annotations$exon_ranges, 
                        tx_annotations$cds_ranges, plotting_annotations)
-  tx_structure = plotTranscriptStructure(transcript_struct, limits, connect_exons, xlabel, transcript_label,show_group=show_group,legend_position=legend_position)
+  tx_structure = plotTranscriptStructure(transcript_struct, limits, connect_exons, xlabel, transcript_label,
+                                         show_group=show_group,legend_position=legend_position,ylim=ylim)
   if(box==FALSE){
     tx_structure=tx_structure+xlab("")+
       theme(panel.border = element_blank(),strip.background  = element_rect(fill = "white"),
