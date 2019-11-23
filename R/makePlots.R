@@ -69,7 +69,7 @@ makeCoveragePlot <- function(coverage_df, limits, alpha, fill_palette, coverage_
   }
   if(!is.null(ylim)){
     coverage_plot=coverage_plot+
-    facet_grid(track_id~.,scales = "free_y")+scale_y_continuous(limits=c(0,ylim),expand=c(0,0))
+    facet_grid(track_id~.,scales = "free_y")+scale_y_continuous(limits=ylim,expand=c(0,0))
     }else{
     coverage_plot=coverage_plot+facet_grid(track_id~.)+scale_y_continuous(expand = c(0,0))
     }
