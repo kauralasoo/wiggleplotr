@@ -31,7 +31,8 @@ plotTranscriptStructure <- function(exons_df, limits = NA, connect_exons = TRUE,
           strip.background = element_rect(fill = "grey85")) +
     xlab(xlabel) +
     facet_grid(type~.) +
-    scale_y_continuous(expand = c(0.2,0.15)) +
+    #scale_y_continuous(expand = c(0.2,0.15)) +
+   scale_y_continuous(expand = c(0,0)) +
     scale_fill_manual(values = c("#2c7bb6","#abd9e9")) + 
     scale_colour_manual(values = c("#2c7bb6","#abd9e9"))
   if(all(!is.na(limits))){
@@ -69,9 +70,9 @@ makeCoveragePlot <- function(coverage_df, limits, alpha, fill_palette, coverage_
   }
   if(!is.null(ylim)){
     coverage_plot=coverage_plot+
-    facet_grid(track_id~.,scales = "free_y")+scale_y_continuous(limits=ylim,expand=c(0,0))
+    facet_grid(track_id~.,scales = "free_y")+scale_y_continuous(limits=ylim,expand=c(0,0.1))
     }else{
-    coverage_plot=coverage_plot+facet_grid(track_id~.)+scale_y_continuous(expand = c(0,0))
+    coverage_plot=coverage_plot+facet_grid(track_id~.)+scale_y_continuous(expand = c(0,0.1))
     }
   if(show_group==FALSE){
     plot=coverage_plot+theme(plot.margin=unit(c(0,1,1,1),"line"), 
