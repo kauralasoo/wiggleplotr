@@ -66,7 +66,8 @@ plotTranscriptStructure <- function(exons_df, limits = NA, connect_exons = TRUE,
   return(plot)
 }
 
-makeCoveragePlot <- function(coverage_df, limits, alpha, fill_palette, coverage_type,show_group=TRUE,legend_position="none"){
+makeCoveragePlot <- function(coverage_df, limits, alpha, fill_palette, coverage_type,
+                             show_group=TRUE,legend_position="none",ylim=NULL){
   #Plot coverage over a region
   coverage_plot = ggplot(coverage_df, aes_(~bins, ~coverage, group = ~sample_id, alpha = ~alpha)) + 
     geom_blank() +
@@ -85,8 +86,12 @@ makeCoveragePlot <- function(coverage_df, limits, alpha, fill_palette, coverage_
   } else{
     stop("Coverage type not supported.")
   }
-  coverage_plot = coverage_plot +
-    facet_grid(track_id~.) 
+  if(!is.null(ylim)){
+    coverage_plot=coverage_plot+
+    facet_grid(track_id~.,scales = "free_y")+ylim(ylim)
+    }else{
+    coverage_plot=coverage_plot+facet_grid(track_id~.)
+    }
   if(show_group==FALSE){
     plot=coverage_plot+theme(plot.margin=unit(c(0,1,1,1),"line"), 
           axis.title.y = element_blank(),
