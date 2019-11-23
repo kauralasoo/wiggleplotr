@@ -30,7 +30,7 @@ plotTranscriptStructure <- function(exons_df, limits = NA, connect_exons = TRUE,
           strip.text.y = element_text(colour = "grey10"),
           strip.background = element_rect(fill = "grey85")) 
     plot=plot+
-    xlab(xlabel)+ facet_grid(type~.) +
+    xlab(xlabel)+
     scale_y_continuous(expand = c(0.2,0.15)) +
     scale_fill_manual(values = c("#2c7bb6","#abd9e9")) + 
     scale_colour_manual(values = c("#2c7bb6","#abd9e9"))
