@@ -259,14 +259,14 @@ plotCoverage <- function(exons, cdss = NULL, transcript_annotations = NULL, trac
   transcript_struct = prepareTranscriptStructureForPlotting(tx_annotations$exon_ranges, 
                        tx_annotations$cds_ranges, plotting_annotations)
   tx_structure = plotTranscriptStructure(transcript_struct, limits, connect_exons, xlabel, transcript_label,
-                                         show_group=show_group,legend_position=legend_position,ylim=ylim)
+                                         show_group=show_group)
   if(box==FALSE){
     tx_structure=tx_structure+xlab("")+
       theme(panel.border = element_blank(),strip.background  = element_rect(fill = "white"),
             axis.text.x=element_blank(),axis.ticks.x=element_blank())
   }
   
-  coverage_plot = makeCoveragePlot(coverage_df, limits, alpha, fill_palette, coverage_type,show_group=show_group,legend_position=legend_position)
+  coverage_plot = makeCoveragePlot(coverage_df, limits, alpha, fill_palette, coverage_type,show_group=show_group,legend_position=legend_position,ylim=ylim)
   
   #Choose between returning plot list or a joint plot using plot_grid
   if(return_subplots_list){
