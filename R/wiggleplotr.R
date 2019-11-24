@@ -266,7 +266,7 @@ plotCoverage <- function(exons, cdss = NULL, transcript_annotations = NULL, trac
   }
   
   coverage_plot = makeCoveragePlot(coverage_df, limits, alpha, fill_palette, coverage_type,show_group=show_group,
-                                   legend_position=legend_position,ylim=ylim,RNA=FALSE)
+                                   legend_position=legend_position,ylim=ylim,RNA=RNA)
   
   #Choose between returning plot list or a joint plot using plot_grid
   if(return_subplots_list){
