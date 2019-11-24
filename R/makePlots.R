@@ -1,6 +1,6 @@
 plotTranscriptStructure <- function(exons_df, limits = NA, connect_exons = TRUE,  
                                     xlabel = "Distance from gene start (bp)", 
-                                    transcript_label = TRUE){
+                                    transcript_label = TRUE,RNA=FALSE){
   
   #Extract the position for plotting transcript name
   transcript_annot = dplyr::group_by_(exons_df, ~transcript_id) %>% 
@@ -98,8 +98,13 @@ makeCoveragePlot <- function(coverage_df, limits, alpha, fill_palette, coverage_
   plot<-plot+
     scale_x_continuous(limits = limits, expand = c(0,0)) +
     scale_color_manual(values = fill_palette) +
-    scale_fill_manual(values = fill_palette) +
-    ylab("FPM")
+    scale_fill_manual(values = fill_palette) 
+  if(isTRUE(RNA)){
+    ###should change the scaling factor based on the bw file your generated
+    plot<-plot+ylab('FPKM')
+    }else{
+    plot<-plot+ylab("FPM")
+    }
   return(plot)
 }
 
