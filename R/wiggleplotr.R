@@ -154,7 +154,7 @@ plotCoverage <- function(exons, cdss = NULL, transcript_annotations = NULL, trac
                         fill_palette = c("#a1dab4","#41b6c4","#225ea8"), mean_only = TRUE, 
                         connect_exons = TRUE, transcript_label = TRUE, return_subplots_list = FALSE,
                         region_coords = NULL, coverage_type = "area",box=TRUE,main.label=FALSE,fig.lab=NULL,label.postion="top",
-                         show_group=TRUE,legend_position="none",ylim=NULL,
+                         show_group=TRUE,legend_position="none",ylim=NULL,RNA=FALSE,
                          label.size=15,label.face="bold",top = NULL, bottom = NULL, left = NULL, right = NULL,...){
   
   #IF cdss is not specified then use exons instead on cdss
@@ -265,7 +265,8 @@ plotCoverage <- function(exons, cdss = NULL, transcript_annotations = NULL, trac
             axis.text.x=element_blank(),axis.ticks.x=element_blank())
   }
   
-  coverage_plot = makeCoveragePlot(coverage_df, limits, alpha, fill_palette, coverage_type,show_group=show_group,legend_position=legend_position,ylim=ylim)
+  coverage_plot = makeCoveragePlot(coverage_df, limits, alpha, fill_palette, coverage_type,show_group=show_group,
+                                   legend_position=legend_position,ylim=ylim,RNA=FALSE)
   
   #Choose between returning plot list or a joint plot using plot_grid
   if(return_subplots_list){
