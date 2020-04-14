@@ -34,7 +34,8 @@ plotTranscriptStructure <- function(exons_df, limits = NA, connect_exons = TRUE,
     scale_fill_manual(values = c("#2c7bb6","#abd9e9")) + 
     scale_colour_manual(values = c("#2c7bb6","#abd9e9"))
   if(all(!is.na(limits))){
-    plot = plot + scale_x_continuous(limits = limits, expand = c(0,0))
+    plot = plot + scale_x_continuous(expand = c(0,0)) +
+      coord_cartesian(xlim = limits)
   }
   if(transcript_label){
     plot = plot + geom_text(aes_(x = ~start, 
@@ -68,8 +69,9 @@ makeCoveragePlot <- function(coverage_df, limits, alpha, fill_palette, coverage_
   coverage_plot = coverage_plot +
     facet_grid(track_id~.) +
     dataTrackTheme() + 
-    scale_x_continuous(limits = limits, expand = c(0,0)) +
+    scale_x_continuous(expand = c(0,0)) +
     scale_y_continuous(expand = c(0,0)) +
+    coord_cartesian(xlim = limits) +
     scale_color_manual(values = fill_palette) +
     scale_fill_manual(values = fill_palette) +
     ylab("FPM")
@@ -114,7 +116,8 @@ makeManhattanPlot <- function(pvalues_df, region_coords, color_R2 = FALSE, data_
     geom_point() + 
     theme_light() + 
     ylab(expression(paste("-",log[10], " p-value"))) +
-    scale_x_continuous(limits = region_coords, expand = c(0,0))
+    scale_x_continuous(expand = c(0,0)) +
+    coord_cartesian(xlim = region_coords)
   
   #Apply data track theme so that plots can later be pasted together with cowplot
   if(data_track){
