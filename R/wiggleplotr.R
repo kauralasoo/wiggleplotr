@@ -64,7 +64,7 @@ plotTranscripts <- function(exons, cdss = NULL, transcript_annotations = NULL,
   
   #If transcript annotations are not supplied then construct them manually from the GRanges list
   if(is.null(transcript_annotations)){
-    plotting_annotations = dplyr::data_frame(transcript_id = names(exons),
+    plotting_annotations = dplyr::tibble(transcript_id = names(exons),
                                              strand = extractStrandsFromGrangesList(exons)) %>%
       prepareTranscriptAnnotations()
   } else{
