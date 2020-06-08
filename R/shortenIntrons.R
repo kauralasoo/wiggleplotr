@@ -23,8 +23,8 @@ shrinkIntronsCoverage <- function(coverage, old_introns, new_introns){
   coverage = S4Vectors::as.vector.Rle(coverage, mode = "double")
 
   #Calculate full annotations
-  old_annot = sort(c(old_introns, IRanges::gaps(old_introns)))
-  new_annot = sort(c(new_introns, IRanges::gaps(new_introns)))
+  old_annot = S4Vectors::sort(c(old_introns, IRanges::gaps(old_introns)))
+  new_annot = S4Vectors::sort(c(new_introns, IRanges::gaps(new_introns)))
   
   #If new and old annotations are identical then return coverage as data frame
   if(all(IRanges::width(old_annot) == IRanges::width(new_annot))){

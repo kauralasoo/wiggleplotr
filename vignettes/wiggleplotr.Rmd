@@ -167,7 +167,7 @@ The easiest way to access reference transcript annotations in R is to download t
 ### Downloading transcript metadata
 First, we want to download transcript metadata, such as which transcripts belong to which genes and what are their names. We can use the _biomaRt_ package to do that. First, let's define which mart and dataset we want to use. 
 ```{r}
-ensembl_mart = useMart("ENSEMBL_MART_ENSEMBL", host = "dec2014.archive.ensembl.org")
+ensembl_mart = useMart("ENSEMBL_MART_ENSEMBL", host = "jan2020.archive.ensembl.org")
 ensembl_dataset = useDataset("hsapiens_gene_ensembl",mart=ensembl_mart)
 ensembl_dataset
 ```
@@ -214,7 +214,7 @@ However, just the transcript metadata is not enought to use _wiggleplotr_, we al
 ```{r eval=FALSE}
 txdb = makeTxDbFromBiomart(biomart = "ENSEMBL_MART_ENSEMBL", 
                            dataset = "hsapiens_gene_ensembl", 
-                           host="dec2014.archive.ensembl.org")
+                           host="jan2020.archive.ensembl.org")
 ```
 We can save the database to disk to avoid downloading it again every time we want to use it.
 ```{r eval=FALSE}
