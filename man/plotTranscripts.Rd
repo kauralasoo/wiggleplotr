@@ -4,10 +4,17 @@
 \alias{plotTranscripts}
 \title{Quickly plot transcript structure without read coverage tracks}
 \usage{
-plotTranscripts(exons, cdss = NULL, transcript_annotations = NULL,
-  rescale_introns = TRUE, new_intron_length = 50,
-  flanking_length = c(50, 50), connect_exons = TRUE,
-  transcript_label = TRUE, region_coords = NULL)
+plotTranscripts(
+  exons,
+  cdss = NULL,
+  transcript_annotations = NULL,
+  rescale_introns = TRUE,
+  new_intron_length = 50,
+  flanking_length = c(50, 50),
+  connect_exons = TRUE,
+  transcript_label = TRUE,
+  region_coords = NULL
+)
 }
 \arguments{
 \item{exons}{list of GRanges objects, each object containing exons for one transcript.

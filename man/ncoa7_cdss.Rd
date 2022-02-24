@@ -4,11 +4,13 @@
 \name{ncoa7_cdss}
 \alias{ncoa7_cdss}
 \title{Coding sequences from 9 protein coding transcripts of NCOA7}
-\format{A GRangesList object with 9 elements:
+\format{
+A GRangesList object with 9 elements:
 \describe{
   \item{element}{CDS start and end coordinates for a single transcript (GRanges object)}
   ...
-}}
+}
+}
 \source{
 \url{http://www.ensembl.org/}
 }
