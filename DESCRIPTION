@@ -13,7 +13,7 @@ Imports: dplyr, ggplot2 (>= 2.2.0), GenomicRanges, rtracklayer,
         cowplot, assertthat, purrr, S4Vectors, IRanges, GenomeInfoDb
 License: Apache License 2.0
 LazyData: true
-RoxygenNote: 6.1.1
+RoxygenNote: 7.1.1
 Suggests: knitr, rmarkdown, biomaRt, GenomicFeatures, testthat,
         ensembldb, EnsDb.Hsapiens.v86, org.Hs.eg.db,
         TxDb.Hsapiens.UCSC.hg38.knownGene, AnnotationDbi,

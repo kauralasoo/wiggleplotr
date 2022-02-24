@@ -4,8 +4,7 @@
 \alias{plotCoverageFromEnsembldb}
 \title{Plot read coverage directly from ensembldb object.}
 \usage{
-plotCoverageFromEnsembldb(ensembldb, gene_names, transcript_ids = NULL,
-  ...)
+plotCoverageFromEnsembldb(ensembldb, gene_names, transcript_ids = NULL, ...)
 }
 \arguments{
 \item{ensembldb}{ensembldb object.}

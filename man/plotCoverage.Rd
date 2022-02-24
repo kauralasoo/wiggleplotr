@@ -4,13 +4,26 @@
 \alias{plotCoverage}
 \title{Plot read coverage across genomic regions}
 \usage{
-plotCoverage(exons, cdss = NULL, transcript_annotations = NULL,
-  track_data, rescale_introns = TRUE, new_intron_length = 50,
-  flanking_length = c(50, 50), plot_fraction = 0.1, heights = c(0.75,
-  0.25), alpha = 1, fill_palette = c("#a1dab4", "#41b6c4", "#225ea8"),
-  mean_only = TRUE, connect_exons = TRUE, transcript_label = TRUE,
-  return_subplots_list = FALSE, region_coords = NULL,
-  coverage_type = "area")
+plotCoverage(
+  exons,
+  cdss = NULL,
+  transcript_annotations = NULL,
+  track_data,
+  rescale_introns = TRUE,
+  new_intron_length = 50,
+  flanking_length = c(50, 50),
+  plot_fraction = 0.1,
+  heights = c(0.75, 0.25),
+  alpha = 1,
+  fill_palette = c("#a1dab4", "#41b6c4", "#225ea8"),
+  mean_only = TRUE,
+  connect_exons = TRUE,
+  transcript_label = TRUE,
+  return_subplots_list = FALSE,
+  region_coords = NULL,
+  coverage_type = "area",
+  show_genotype_legend = FALSE
+)
 }
 \arguments{
 \item{exons}{list of GRanges objects, each object containing exons for one transcript. 

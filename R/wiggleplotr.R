@@ -146,7 +146,7 @@ plotCoverage <- function(exons, cdss = NULL, transcript_annotations = NULL, trac
                         plot_fraction = 0.1, heights = c(0.75, 0.25), alpha = 1,
                         fill_palette = c("#a1dab4","#41b6c4","#225ea8"), mean_only = TRUE, 
                         connect_exons = TRUE, transcript_label = TRUE, return_subplots_list = FALSE,
-                        region_coords = NULL, coverage_type = "area"){
+                        region_coords = NULL, coverage_type = "area", show_genotype_legend = FALSE){
   
   #IF cdss is not specified then use exons instead on cdss
   if(is.null(cdss)){
@@ -251,14 +251,14 @@ plotCoverage <- function(exons, cdss = NULL, transcript_annotations = NULL, trac
                        tx_annotations$cds_ranges, plotting_annotations)
   tx_structure = plotTranscriptStructure(transcript_struct, limits, connect_exons, xlabel, transcript_label)
   
-  coverage_plot = makeCoveragePlot(coverage_df, limits, alpha, fill_palette, coverage_type)
+  coverage_plot = makeCoveragePlot(coverage_df, limits, alpha, fill_palette, coverage_type, show_genotype_legend)
   
   #Choose between returning plot list or a joint plot using plot_grid
   if(return_subplots_list){
     plot_list = list(coverage_plot = coverage_plot, tx_structure = tx_structure)
     return(plot_list)
   } else {
-    plot = cowplot::plot_grid(coverage_plot, tx_structure, align = "v", rel_heights = heights, ncol = 1)
+    plot = cowplot::plot_grid(coverage_plot, tx_structure, align = "v", axis = "lr", rel_heights = heights, ncol = 1)
     return(plot)
   }
 }

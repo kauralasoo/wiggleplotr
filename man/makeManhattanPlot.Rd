@@ -4,8 +4,12 @@
 \alias{makeManhattanPlot}
 \title{Make a Manahattan plot of p-values}
 \usage{
-makeManhattanPlot(pvalues_df, region_coords, color_R2 = FALSE,
-  data_track = TRUE)
+makeManhattanPlot(
+  pvalues_df,
+  region_coords,
+  color_R2 = FALSE,
+  data_track = TRUE
+)
 }
 \arguments{
 \item{pvalues_df}{Data frame of association p-values (required columns: track_id, p_nominal, pos)}
