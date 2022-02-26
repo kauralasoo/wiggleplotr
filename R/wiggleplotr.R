@@ -399,3 +399,101 @@ generateCoveragePlotData <- function(exons, cdss = NULL, track_data, rescale_int
   limits = c( min(IRanges::start(tx_annotations$new_introns)), max(IRanges::end(tx_annotations$new_introns)))
   return(list(coverage_df = coverage_df, limits = limits))
 }
+
+
+
+#' Plot read coverage across genomic regions
+#' 
+#' Also supports rescaling introns to constant length. Does not work 
+#' on Windows, because rtracklayer cannot read BigWig files on Windows.
+#' 
+#' @param exons list of GRanges objects, each object containing exons for one transcript. 
+#' The list must have names that correspond to transcript_id column in transript_annotations data.frame.
+#' @param cdss list of GRanges objects, each object containing the coding regions (CDS) of a single transcript. 
+#' The list must have names that correspond to transcript_id column in transript_annotations data.frame. 
+#' If cdss is not specified then exons list will be used for both arguments. (default: NULL).
+#' @param transcript_annotations Data frame with at least three columns: transcript_id, gene_name, strand. 
+#' Used to construct transcript labels. (default: NULL)
+#' @param rescale_introns Specifies if the introns should be scaled to fixed length or not. (default: TRUE)
+#' @param new_intron_length length (bp) of introns after scaling. (default: 50)
+#' @param flanking_length Lengths of the flanking regions upstream and downstream of the gene. (default: c(50,50))
+#' @param region_coords Start and end coordinates of the region to plot, overrides flanking_length parameter.
+#'
+#' @return list of two objects 1) dataFrame 'transcript_struct_df' 2) vector 'limits' with length of 2
+#' @examples
+#' require("dplyr")
+#' require("GenomicRanges")
+#' 
+#' selected_transcripts = c("ENST00000438495", "ENST00000392477") #Plot only two transcripts of the gens
+#' \dontrun{
+#' tx_plot_data = generateTxStructurePlotData(ncoa7_exons[selected_transcripts], ncoa7_cdss[selected_transcripts])
+#' # then the returned data can be plotted like
+#' plotTranscriptStructure(exons_df = tx_plot_data$transcript_struct_df, limits = tx_plot_data$limits)
+#' }
+#' 
+#' @export
+generateTxStructurePlotData <- function(exons, 
+                                        cdss = NULL, 
+                                        transcript_annotations = NULL, 
+                                        rescale_introns = TRUE,
+                                        new_intron_length = 50, 
+                                        flanking_length = c(50,50),
+                                        region_coords = NULL){
+  
+  #IF cdss is not specified then use exons instead on cdss
+  if(is.null(cdss)){
+    cdss = exons
+  }
+  
+  #Check transcript annotation
+  #If transcript annotations are not supplied then construct them manually from the GRanges list
+  if(is.null(transcript_annotations)){
+    plotting_annotations = dplyr::data_frame(transcript_id = names(exons),
+                                             strand = extractStrandsFromGrangesList(exons)) %>%
+      prepareTranscriptAnnotations()
+  } else{
+    assertthat::assert_that(assertthat::has_name(transcript_annotations, "transcript_id"))
+    assertthat::assert_that(assertthat::has_name(transcript_annotations, "gene_name"))
+    assertthat::assert_that(assertthat::has_name(transcript_annotations, "strand"))
+    plotting_annotations = prepareTranscriptAnnotations(transcript_annotations)
+  }
+  
+  #Check exons and cdss
+  assertthat::assert_that(is.list(exons) || is(exons, "GRangesList")) #Check that exons and cdss objects are lists
+  assertthat::assert_that(is.list(cdss) || is(exons, "GRangesList"))
+  #TODO: Check that the names of the exons and cdss list match that of the transcript_annotations data.frame
+  
+  #Find the start and end cooridinates of the whole region spanning the gene
+  joint_exons = joinExons(exons)
+  
+  #If region_coords is specificed, then ignore the flanking_length attrbute and compute
+  # flanking_length form region_coords
+  if(!is.null(region_coords)){
+    gene_range = constructGeneRange(joint_exons, c(0,0))
+    min_start = min(GenomicRanges::start(gene_range))
+    max_end = max(GenomicRanges::end(gene_range))
+    flanking_length = c(min_start - region_coords[1], region_coords[2] - max_end)
+  } 
+  assertthat::assert_that(length(flanking_length) == 2) #flanking_length is a vector of two elements
+  
+  #Shorten introns and translate exons into the new introns
+  if(rescale_introns){
+    #Recale transcript annotations
+    tx_annotations = rescaleIntrons(exons, cdss, joint_exons, 
+                                    new_intron_length = new_intron_length, flanking_length = flanking_length)
+  } else { #Do not rescale transcript annotationn
+    #Need to calculate joint intron coordinates for transcript annotations
+    old_introns = intronsFromJointExonRanges(GenomicRanges::ranges(joint_exons), flanking_length = flanking_length)
+    tx_annotations = list(exon_ranges = lapply(exons, GenomicRanges::ranges), cds_ranges = lapply(cdss, GenomicRanges::ranges),
+                          old_introns = old_introns, new_introns = old_introns)
+  }
+  
+  #Construct transcript structure data.frame from ranges lists
+  limits = c( min(IRanges::start(tx_annotations$new_introns)), max(IRanges::end(tx_annotations$new_introns)))
+  transcript_struct = prepareTranscriptStructureForPlotting(tx_annotations$exon_ranges, 
+                                                            tx_annotations$cds_ranges, plotting_annotations)
+  
+  return(list(transcript_struct_df = transcript_struct, limits = limits))
+}
+
+
