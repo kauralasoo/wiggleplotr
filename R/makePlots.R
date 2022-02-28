@@ -1,3 +1,20 @@
+#' Make a Transcript structure plot 
+#' 
+#' The transcript structure plots is compatible with wiggpleplotr read coverage and manhattan plots. 
+#' Can be appended to those using the cowplot::plot_grid() function. 
+#'
+#' @param exons_df the dataframe. Result of generateTxStructurePlotData function
+#' @param limits The cevtor of limits. Result of generateTxStructurePlotData function (default: NA)
+#' @param connect_exons Print lines that connect exons together. Set to FALSE when plotting peaks (default: TRUE).
+#' @param xlabel Label to be shown in X-axis (default: "Distance from gene start (bp)"). 
+#' @param transcript_label If TRUE then transcript labels are printed above each transcript. (default: TRUE). 
+#'
+#' @return gglot2 object
+#' @examples
+#' exon_plot_data <- wiggleplotr::generateTxStructurePlotData(..)
+#' exon_plot <- wiggleplotr::plotTranscriptStructure(exons_df = exon_plot_data$transcript_struct_df, limits = exon_plot_data$limits)
+#'
+#' @export
 plotTranscriptStructure <- function(exons_df, limits = NA, connect_exons = TRUE,  
                                     xlabel = "Distance from gene start (bp)", transcript_label = TRUE){
   
@@ -47,7 +64,32 @@ plotTranscriptStructure <- function(exons_df, limits = NA, connect_exons = TRUE,
   return(plot)
 }
 
-makeCoveragePlot <- function(coverage_df, limits, alpha, fill_palette, coverage_type, show_genotype_legend = FALSE){
+#' Make a Coverage plot of the region
+#' 
+#' The coverage plot is compatible with wiggpleplotr Manhattan and transcript strucutre plots. 
+#' Can be appended to those using the cowplot::plot_grid() function. 
+#'
+#' @param coverage_df the dataframe. Result of generateCoveragePlotData function
+#' @param limits The cevtor of limits. Result of generateCoveragePlotData function
+#' @param alpha Transparency (alpha) value for the read coverage tracks. 
+#' Useful to set to something < 1 when overlaying multiple tracks (see track_id). (default: 1)
+#' @param fill_palette Vector of fill colours used for the coverage tracks. Length must be equal to the number of 
+#' unique values in track_data$colour_group column.
+#' @param coverage_type Specifies if the read coverage is represented by either 'line', 'area' or 'both'. 
+#' The 'both' option tends to give better results for wide regions. (default: area). 
+#' @param show_genotype_legend If TRUE, shows the legend of genotypes on the right of the plot. (default: false)
+#'
+#' @return gglot2 object
+#' @examples
+#' coverage_plot_data = wiggleplotr::generateCoveragePlotData(...)
+#'   coverage_plot = wiggleplotr::makeCoveragePlot(coverage_df = coverage_plot_data$coverage_df, 
+#'                                                 limits = coverage_plot_data$limits, 
+#'                                                 alpha = 1, 
+#'                                                 fill_palette = wiggleplotr::getGenotypePalette(), 
+#'                                                 coverage_type = "line", 
+#'                                                 show_genotype_legend = TRUE)
+#' @export
+makeCoveragePlot <- function(coverage_df, limits,  alpha = 1, fill_palette = c("#a1dab4","#41b6c4","#225ea8"), coverage_type = "area", show_genotype_legend = FALSE){
   #Plot coverage over a region
   coverage_plot = ggplot(coverage_df, aes_(~bins, ~coverage, group = ~sample_id, alpha = ~alpha)) + 
     geom_blank() +
