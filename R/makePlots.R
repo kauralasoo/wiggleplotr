@@ -108,11 +108,14 @@ makeCoveragePlot <- function(coverage_df, limits,  alpha = 1, fill_palette = c("
   } else{
     stop("Coverage type not supported.")
   }
+  
+  coverage_df <- coverage_df %>% dplyr::filter(!is.na(coverage))
+  coverage_max_y = max(coverage_df$coverage) + max(coverage_df$coverage) * 0.05
   coverage_plot = coverage_plot +
     facet_grid(track_id~.) +
     dataTrackTheme() + 
     scale_x_continuous(expand = c(0,0)) +
-    scale_y_continuous(expand = c(0,0)) +
+    scale_y_continuous(expand = c(0,0), limits = c(0, coverage_max_y)) +
     coord_cartesian(xlim = limits) +
     scale_color_manual(values = fill_palette) +
     scale_fill_manual(values = fill_palette) +
