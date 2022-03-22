@@ -25,7 +25,7 @@ plotTranscripts <- function(exons, cdss = NULL, transcript_annotations = NULL,
                             transcript_label = TRUE, region_coords = NULL){
   
   #IF cdss is not specified then use exons instead on cdss
-  if(is.null(cdss) || length(ccds) == 0){
+  if(is.null(cdss) || length(cdss) == 0){
     cdss = exons
   }
   
@@ -126,7 +126,7 @@ plotTranscripts <- function(exons, cdss = NULL, transcript_annotations = NULL,
 #' @examples
 #' require("dplyr")
 #' require("GenomicRanges")
-#' sample_data = dplyr::data_frame(sample_id = c("aipt_A", "aipt_C", "bima_A", "bima_C"), 
+#' sample_data = dplyr::tibble(sample_id = c("aipt_A", "aipt_C", "bima_A", "bima_C"), 
 #'     condition = factor(c("Naive", "LPS", "Naive", "LPS"), levels = c("Naive", "LPS")), 
 #'     scaling_factor = 1) %>%
 #'     dplyr::mutate(bigWig = system.file("extdata",  paste0(sample_id, ".str2.bw"), package = "wiggleplotr"))
