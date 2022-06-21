@@ -4,14 +4,16 @@
 \name{ncoa7_metadata}
 \alias{ncoa7_metadata}
 \title{Gene metadata for NCOA7}
-\format{A data.frame object with 4 columns:
+\format{
+A data.frame object with 4 columns:
 \describe{
   \item{transcript_id}{Ensembl transcript id.}
   \item{gene_id}{Ensembl gene id.}
   \item{gene_name}{Human readable gene name.}
   \item{strand}{Strand of the transcript (either +1 or -1).}
   ...
-}}
+}
+}
 \source{
 \url{http://www.ensembl.org/}
 }
