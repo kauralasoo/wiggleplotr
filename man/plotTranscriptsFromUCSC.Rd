@@ -4,8 +4,7 @@
 \alias{plotTranscriptsFromUCSC}
 \title{Plot transcripts directly from UCSC OrgDb and TxDb objects.}
 \usage{
-plotTranscriptsFromUCSC(orgdb, txdb, gene_names, transcript_ids = NULL,
-  ...)
+plotTranscriptsFromUCSC(orgdb, txdb, gene_names, transcript_ids = NULL, ...)
 }
 \arguments{
 \item{orgdb}{UCSC OrgDb object.}

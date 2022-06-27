@@ -80,10 +80,12 @@ plotTranscripts <- function(exons, cdss = NULL, transcript_annotations = NULL,
   return(plot)
 }
 
-#' Plot read coverage across genomic regions
+#' Plot read coverage across a genomic region
 #' 
-#' Also supports rescaling introns to constant length. Does not work 
-#' on Windows, because rtracklayer cannot read BigWig files on Windows.
+#' Also supports rescaling introns to constant length. Extracts read coverage from bigWig files with 
+#' extractCoverageData and plots it with plotCoverageData. Custom visualisations can be created by 
+#' modifying the plotCoverageData function. Does not work on Windows, because rtracklayer cannot 
+#' read BigWig files on Windows.
 #' 
 #' @param exons list of GRanges objects, each object containing exons for one transcript. 
 #' The list must have names that correspond to transcript_id column in transript_annotations data.frame.
@@ -120,7 +122,8 @@ plotTranscripts <- function(exons, cdss = NULL, transcript_annotations = NULL,
 #' @param return_subplots_list Instead of a joint plot return a list of subplots that can be joined together manually. 
 #' @param region_coords Start and end coordinates of the region to plot, overrides flanking_length parameter.
 #' @param coverage_type Specifies if the read coverage is represented by either 'line', 'area' or 'both'. 
-#' The 'both' option tends to give better results for wide regions. (default: area). 
+#' The 'both' option tends to give better results for wide regions. (default: area).
+#' @param show_legend display legend for the colour_group next to the read coverage plot (default: FALSE).
 #'
 #' @return Either object from cow_plot::plot_grid() function or a list of subplots (if return_subplots_list == TRUE)
 #' @examples
@@ -146,7 +149,69 @@ plotCoverage <- function(exons, cdss = NULL, transcript_annotations = NULL, trac
                         plot_fraction = 0.1, heights = c(0.75, 0.25), alpha = 1,
                         fill_palette = c("#a1dab4","#41b6c4","#225ea8"), mean_only = TRUE, 
                         connect_exons = TRUE, transcript_label = TRUE, return_subplots_list = FALSE,
-                        region_coords = NULL, coverage_type = "area"){
+                        region_coords = NULL, coverage_type = "area", show_legend = FALSE){
+  
+  #Extract coverage data from bigWig files (and rescale introns)
+  coverage_data_list = extractCoverageData(exons, cdss, transcript_annotations, track_data, rescale_introns,
+                                           new_intron_length, flanking_length, plot_fraction, mean_only, region_coords)
+  
+  plot = plotCoverageData(coverage_data_list, heights, alpha,fill_palette,
+                          connect_exons, transcript_label, return_subplots_list, coverage_type, show_legend)
+  return(plot)
+  
+}
+
+#' Extract read coverage data from the bigWig files
+#' 
+#' Does not work on Windows, because rtracklayer cannot read BigWig files on Windows.
+#' 
+#' @param exons list of GRanges objects, each object containing exons for one transcript. 
+#' The list must have names that correspond to transcript_id column in transcript_annotations data.frame.
+#' @param cdss list of GRanges objects, each object containing the coding regions (CDS) of a single transcript. 
+#' The list must have names that correspond to transcript_id column in trancsript_annotations data.frame. 
+#' If cdss is not specified then exons list will be used for both arguments. (default: NULL).
+#' @param transcript_annotations Data frame with at least three columns: transcript_id, gene_name, strand. 
+#' Used to construct transcript labels. (default: NULL)
+#' @param track_data data.frame with the metadata for the bigWig read coverage files. Must contain the following columns:
+#' \itemize{
+#'  \item sample_id - unique id for each sample.
+#'  \item track_id - if multiple samples (bigWig files) have the same track_id they will be overlayed on the same 
+#' plot, track_id is also used as the facet label on the right.
+#'  \item bigWig - path to the bigWig file.
+#'  \item scaling_factor - normalisation factor for each sample, useful if different samples sequenced to different 
+#' depth and bigWig files not normalised for that.
+#'  \item colour_group - additional column to group samples into, is used as the colour of the coverage track.
+#' }
+#' @param rescale_introns Specifies if the introns should be scaled to fixed length or not. (default: TRUE)
+#' @param new_intron_length length (bp) of introns after scaling. (default: 50)
+#' @param flanking_length Lengths of the flanking regions upstream and downstream of the gene. (default: c(50,50))
+#' @param plot_fraction Size of the random sub-sample of points used to plot coverage (between 0 and 1). 
+#' Smaller values make plotting significantly faster. (default: 0.1)
+#' @param mean_only Plot only mean coverage within each combination of track_id and colour_group values. 
+#' Useful for example for plotting mean coverage stratified by genotype (which is specified in the colour_group column) (default: TRUE).
+#' @param region_coords Start and end coordinates of the region to plot, overrides flanking_length parameter.
+#' The 'both' option tends to give better results for wide regions. (default: area). 
+#'
+#' @return List containing all of the necessary data for the plotCoverageData function ()
+#' @examples
+#' require("dplyr")
+#' require("GenomicRanges")
+#' sample_data = dplyr::data_frame(sample_id = c("aipt_A", "aipt_C", "bima_A", "bima_C"), 
+#'     condition = factor(c("Naive", "LPS", "Naive", "LPS"), levels = c("Naive", "LPS")), 
+#'     scaling_factor = 1) %>%
+#'     dplyr::mutate(bigWig = system.file("extdata",  paste0(sample_id, ".str2.bw"), package = "wiggleplotr"))
+#' 
+#' track_data = dplyr::mutate(sample_data, track_id = condition, colour_group = condition)
+#' 
+#' selected_transcripts = c("ENST00000438495", "ENST00000392477") #Plot only two transcripts of the gens
+#' \dontrun{
+#' extractCoverageData(ncoa7_exons[selected_transcripts], ncoa7_cdss[selected_transcripts], ncoa7_metadata, track_data)
+#' }
+#' 
+#' @export
+extractCoverageData <- function(exons, cdss = NULL, transcript_annotations = NULL, track_data, rescale_introns = TRUE,
+                                new_intron_length = 50, flanking_length = c(50,50),
+                                plot_fraction = 0.1, mean_only = TRUE, region_coords = NULL){
   
   #IF cdss is not specified then use exons instead on cdss
   if(is.null(cdss)){
@@ -185,10 +250,10 @@ plotCoverage <- function(exons, cdss = NULL, transcript_annotations = NULL, trac
   assertthat::assert_that(is.list(cdss) || is(exons, "GRangesList"))
   #TODO: Check that the names of the exons and cdss list match that of the transcript_annotations data.frame
   
-  #Find the start and end cooridinates of the whole region spanning the gene
+  #Find the start and end coordinates of the whole region spanning the gene
   joint_exons = joinExons(exons)
   
-  #If region_coords is specificed, then ignore the flanking_length attrbute and compute
+  #If region_coords is specified, then ignore the flanking_length attribute and compute
   # flanking_length form region_coords
   if(!is.null(region_coords)){
     gene_range = constructGeneRange(joint_exons, c(0,0))
@@ -201,15 +266,15 @@ plotCoverage <- function(exons, cdss = NULL, transcript_annotations = NULL, trac
     gene_range = constructGeneRange(joint_exons, flanking_length)
   }
   assertthat::assert_that(length(flanking_length) == 2) #flanking_length is a vector of two elements
-
+  
   #Extract chromosome name
   chromosome_name = as.vector(GenomicRanges::seqnames(gene_range)[1])
-
+  
   #Read coverage tracks from BigWig file
   sample_list = as.list(track_data$bigWig)
   names(sample_list) = track_data$sample_id
   coverage_list = lapply(sample_list, readCoverageFromBigWig, gene_range)
-
+  
   #Shorten introns and translate exons into the new introns
   if(rescale_introns){
     #Recale transcript annotations
@@ -229,37 +294,99 @@ plotCoverage <- function(exons, cdss = NULL, transcript_annotations = NULL, trac
   }
   #Shrink intron coverage and convert coverage vectors into data frames
   coverage_list = lapply(coverage_list, shrinkIntronsCoverage, tx_annotations$old_introns, tx_annotations$new_introns)
-
+  
   #Take a subsample of points that is easier to plot
   points = subsamplePoints(tx_annotations, plot_fraction)
   coverage_list = lapply(coverage_list, function(x) {x[points,]} )
-
+  
   #Convert to data frame and plot
   coverage_df = purrr::map_df(coverage_list, identity, .id = "sample_id") %>% 
     as.data.frame() %>%
     dplyr::mutate_(.dots = stats::setNames(list(~as.character(sample_id)), c("sample_id")) ) #Convert factor to character
   coverage_df = dplyr::left_join(coverage_df, track_data, by = "sample_id") %>%
     dplyr::mutate_(.dots = stats::setNames(list(~coverage/scaling_factor), c("coverage")) ) #Normalize by library size
-
+  
   #Calculate mean coverage within each track and colour group
   if(mean_only){  coverage_df = meanCoverage(coverage_df) }
   
+  #Extract plot limits
+  limits = c( min(IRanges::start(tx_annotations$new_introns)), max(IRanges::end(tx_annotations$new_introns)))
+  
+  #Make a result list
+  result = list(exons = exons, cdss = cdss,
+                tx_annotations = tx_annotations,
+                plotting_annotations = plotting_annotations,
+                xlabel = xlabel,
+                coverage_df = coverage_df,
+                limits = limits)
+}
+
+#' Plot read coverage across a genomic region
+#' 
+#' Does not work on Windows, because rtracklayer cannot read BigWig files on Windows.
+#' 
+#' @param coverage_data_list List of required from the extractCoverageData function:
+#' \itemize{
+#'  \item exons - list of GRanges objects, each object containing exons for one transcript.
+#'  \item cdss - list of GRanges objects, each object containing the coding regions (CDS) of a single transcript. 
+#'  \item plotting_annotations - Transcript labels for plotting.
+#'  \item tx_annotations - Transcript coordinates for plotting.
+#'  \item xlabel - Label of the x-axis.
+#'  \item coverage_df - Read coverage data frame.
+#'  \item limits - x-axis limits.
+#' }
+#' @param heights  Specifies the proportion of the height that is dedicated to coverage plots (first value) 
+#' relative to transcript annotations (second value). (default: c(0.75,0.25))
+#' @param alpha Transparency (alpha) value for the read coverage tracks. 
+#' Useful to set to something < 1 when overlaying multiple tracks (see track_id). (default: 1)
+#' @param fill_palette Vector of fill colours used for the coverage tracks. Length must be equal to the number of 
+#' unique values in track_data$colour_group column.
+#' @param connect_exons Print lines that connect exons together. Set to FALSE when plotting peaks (default: TRUE).
+#' @param transcript_label If TRUE then transcript labels are printed above each transcript. (default: TRUE). 
+#' @param return_subplots_list Instead of a joint plot return a list of subplots that can be joined together manually. 
+#' @param coverage_type Specifies if the read coverage is represented by either 'line', 'area' or 'both'. 
+#' The 'both' option tends to give better results for wide regions. (default: area). 
+#' @param show_legend display legend for the colour_group next to the read coverage plot (default: FALSE).
+#'
+#' @return Either object from cow_plot::plot_grid() function or a list of subplots (if return_subplots_list == TRUE)
+#' @examples
+#' require("dplyr")
+#' require("GenomicRanges")
+#' sample_data = dplyr::data_frame(sample_id = c("aipt_A", "aipt_C", "bima_A", "bima_C"), 
+#'     condition = factor(c("Naive", "LPS", "Naive", "LPS"), levels = c("Naive", "LPS")), 
+#'     scaling_factor = 1) %>%
+#'     dplyr::mutate(bigWig = system.file("extdata",  paste0(sample_id, ".str2.bw"), package = "wiggleplotr"))
+#' 
+#' track_data = dplyr::mutate(sample_data, track_id = condition, colour_group = condition)
+#' 
+#' selected_transcripts = c("ENST00000438495", "ENST00000392477") #Plot only two transcripts of the gens
+#' \dontrun{
+#' cov_data = extractCoverageData(ncoa7_exons[selected_transcripts], ncoa7_cdss[selected_transcripts], ncoa7_metadata, track_data)
+#' plotCoverageData(cov_data, heights = c(2,1), fill_palette = getGenotypePalette())
+#' }
+#' 
+#' @export
+plotCoverageData <- function(coverage_data_list, heights = c(0.75, 0.25), alpha = 1,
+                             fill_palette = c("#a1dab4","#41b6c4","#225ea8"),
+                             connect_exons = TRUE, transcript_label = TRUE, 
+                             return_subplots_list = FALSE, coverage_type = "area", 
+                             show_legend = FALSE){
+  
   #Make plots
   #Construct transcript structure data.frame from ranges lists
-  limits = c( min(IRanges::start(tx_annotations$new_introns)), max(IRanges::end(tx_annotations$new_introns)))
-  transcript_struct = prepareTranscriptStructureForPlotting(tx_annotations$exon_ranges, 
-                       tx_annotations$cds_ranges, plotting_annotations)
-  tx_structure = plotTranscriptStructure(transcript_struct, limits, connect_exons, xlabel, transcript_label)
+  transcript_struct = prepareTranscriptStructureForPlotting(coverage_data_list$tx_annotations$exon_ranges, 
+                                                            coverage_data_list$tx_annotations$cds_ranges, coverage_data_list$plotting_annotations)
+  tx_structure = plotTranscriptStructure(transcript_struct, coverage_data_list$limits, connect_exons, coverage_data_list$xlabel, transcript_label)
   
-  coverage_plot = makeCoveragePlot(coverage_df, limits, alpha, fill_palette, coverage_type)
+  coverage_plot = makeCoveragePlot(coverage_data_list$coverage_df, coverage_data_list$limits, alpha, fill_palette, coverage_type, show_legend)
   
   #Choose between returning plot list or a joint plot using plot_grid
   if(return_subplots_list){
     plot_list = list(coverage_plot = coverage_plot, tx_structure = tx_structure)
     return(plot_list)
   } else {
-    plot = cowplot::plot_grid(coverage_plot, tx_structure, align = "v", rel_heights = heights, ncol = 1)
+    plot = cowplot::plot_grid(coverage_plot, tx_structure, align = "v", 
+                              axis = "lr", rel_heights = heights, ncol = 1)
     return(plot)
   }
 }
-  

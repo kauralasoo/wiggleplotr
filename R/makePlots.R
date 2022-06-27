@@ -47,7 +47,7 @@ plotTranscriptStructure <- function(exons_df, limits = NA, connect_exons = TRUE,
   return(plot)
 }
 
-makeCoveragePlot <- function(coverage_df, limits, alpha, fill_palette, coverage_type){
+makeCoveragePlot <- function(coverage_df, limits, alpha, fill_palette, coverage_type, show_legend = FALSE){
   #Plot coverage over a region
   coverage_plot = ggplot(coverage_df, aes_(~bins, ~coverage, group = ~sample_id, alpha = ~alpha)) + 
     geom_blank() +
@@ -75,6 +75,18 @@ makeCoveragePlot <- function(coverage_df, limits, alpha, fill_palette, coverage_
     scale_color_manual(values = fill_palette) +
     scale_fill_manual(values = fill_palette) +
     ylab("FPM")
+  
+  if(show_legend) {
+    coverage_plot = coverage_plot + 
+      labs(colour = NULL) +
+      theme(legend.justification = c(1, 1), 
+            legend.position = "right", 
+            legend.direction = "vertical", 
+            legend.title.align = 0, legend.box = "vertical",
+            legend.key = element_rect(colour = "transparent", fill = "white"),
+            legend.margin = margin(t=0, r=0, b=0, l=0))  
+  }
+  
   return(coverage_plot)
 }
 

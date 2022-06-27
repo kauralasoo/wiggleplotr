@@ -4,8 +4,7 @@
 \alias{plotTranscriptsFromEnsembldb}
 \title{Plot transcripts directly from ensembldb object.}
 \usage{
-plotTranscriptsFromEnsembldb(ensembldb, gene_names,
-  transcript_ids = NULL, ...)
+plotTranscriptsFromEnsembldb(ensembldb, gene_names, transcript_ids = NULL, ...)
 }
 \arguments{
 \item{ensembldb}{ensembldb object.}
