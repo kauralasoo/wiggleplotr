@@ -2,9 +2,9 @@ plotTranscriptStructure <- function(exons_df, limits = NA, connect_exons = TRUE,
                                     xlabel = "Distance from gene start (bp)", transcript_label = TRUE){
   
   #Extract the position for plotting transcript name
-  transcript_annot = dplyr::group_by_(exons_df, ~transcript_id) %>% 
-    dplyr::filter_(~feature_type == "exon") %>%
-    dplyr::arrange_('transcript_id', 'start') %>%
+  transcript_annot = dplyr::group_by(exons_df, ~transcript_id) %>% 
+    dplyr::filter(~feature_type == "exon") %>%
+    dplyr::arrange('transcript_id', 'start') %>%
     dplyr::filter(row_number() == 1)
 
   #Create a plot of transcript structure
