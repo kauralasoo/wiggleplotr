@@ -122,7 +122,8 @@ plotTranscripts <- function(exons, cdss = NULL, transcript_annotations = NULL,
 #' @param return_subplots_list Instead of a joint plot return a list of subplots that can be joined together manually. 
 #' @param region_coords Start and end coordinates of the region to plot, overrides flanking_length parameter.
 #' @param coverage_type Specifies if the read coverage is represented by either 'line', 'area' or 'both'. 
-#' The 'both' option tends to give better results for wide regions. (default: area). 
+#' The 'both' option tends to give better results for wide regions. (default: area).
+#' @param show_legend display legend for the colour_group next to the read coverage plot (default: FALSE).
 #'
 #' @return Either object from cow_plot::plot_grid() function or a list of subplots (if return_subplots_list == TRUE)
 #' @examples
@@ -148,14 +149,14 @@ plotCoverage <- function(exons, cdss = NULL, transcript_annotations = NULL, trac
                         plot_fraction = 0.1, heights = c(0.75, 0.25), alpha = 1,
                         fill_palette = c("#a1dab4","#41b6c4","#225ea8"), mean_only = TRUE, 
                         connect_exons = TRUE, transcript_label = TRUE, return_subplots_list = FALSE,
-                        region_coords = NULL, coverage_type = "area"){
+                        region_coords = NULL, coverage_type = "area", show_legend = FALSE){
   
   #Extract coverage data from bigWig files (and rescale introns)
   coverage_data_list = extractCoverageData(exons, cdss, transcript_annotations, track_data, rescale_introns,
                                            new_intron_length, flanking_length, plot_fraction, mean_only, region_coords)
   
   plot = plotCoverageData(coverage_data_list, heights, alpha,fill_palette,
-                          connect_exons, transcript_label, return_subplots_list, coverage_type)
+                          connect_exons, transcript_label, return_subplots_list, coverage_type, show_legend)
   return(plot)
   
 }
@@ -345,6 +346,7 @@ extractCoverageData <- function(exons, cdss = NULL, transcript_annotations = NUL
 #' @param return_subplots_list Instead of a joint plot return a list of subplots that can be joined together manually. 
 #' @param coverage_type Specifies if the read coverage is represented by either 'line', 'area' or 'both'. 
 #' The 'both' option tends to give better results for wide regions. (default: area). 
+#' @param show_legend display legend for the colour_group next to the read coverage plot (default: FALSE).
 #'
 #' @return Either object from cow_plot::plot_grid() function or a list of subplots (if return_subplots_list == TRUE)
 #' @examples

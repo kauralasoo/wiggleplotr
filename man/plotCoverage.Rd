@@ -21,7 +21,8 @@ plotCoverage(
   transcript_label = TRUE,
   return_subplots_list = FALSE,
   region_coords = NULL,
-  coverage_type = "area"
+  coverage_type = "area",
+  show_legend = FALSE
 )
 }
 \arguments{
@@ -77,6 +78,8 @@ Useful for example for plotting mean coverage stratified by genotype (which is s
 
 \item{coverage_type}{Specifies if the read coverage is represented by either 'line', 'area' or 'both'. 
 The 'both' option tends to give better results for wide regions. (default: area).}
+
+\item{show_legend}{display legend for the colour_group next to the read coverage plot (default: FALSE).}
 }
 \value{
 Either object from cow_plot::plot_grid() function or a list of subplots (if return_subplots_list == TRUE)
