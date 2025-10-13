@@ -25,7 +25,7 @@ plotTranscripts <- function(exons, cdss = NULL, transcript_annotations = NULL,
                             transcript_label = TRUE, region_coords = NULL){
   
   #IF cdss is not specified then use exons instead on cdss
-  if(is.null(cdss) || length(ccds) == 0){
+  if(is.null(cdss) || length(cdss) == 0){
     cdss = exons
   }
   
