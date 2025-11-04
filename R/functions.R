@@ -7,6 +7,10 @@ readCoverageFromBigWig <- function(bigwig_path, gene_range){
   GenomeInfoDb::seqlevels(coverage_ranges) = S4Vectors::as.vector.Rle(GenomicRanges::seqnames(gene_range), mode = "character")
   coverage_rle = GenomicRanges::coverage(coverage_ranges, weight = GenomicRanges::score(coverage_ranges))[[1]]
   coverage_rle = coverage_rle[(GenomicRanges::start(gene_range)):(GenomicRanges::end(gene_range))] #Keep the region of interest
+  
+  #Covert coverage vector from Rle to normal vector
+  coverage = S4Vectors::as.vector.Rle(coverage_rle, mode = "double")
+  return(coverage)
 }
 
 joinExons <- function(exons) {

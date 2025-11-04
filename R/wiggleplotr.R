@@ -149,13 +149,13 @@ plotCoverage <- function(exons, cdss = NULL, transcript_annotations = NULL, trac
                         plot_fraction = 0.1, heights = c(0.75, 0.25), alpha = 1,
                         fill_palette = c("#a1dab4","#41b6c4","#225ea8"), mean_only = TRUE, 
                         connect_exons = TRUE, transcript_label = TRUE, return_subplots_list = FALSE,
-                        region_coords = NULL, coverage_type = "area", show_legend = FALSE){
+                        region_coords = NULL, coverage_type = "area", coverage_ranges_df = NULL, show_legend = FALSE){
   
   #Extract coverage data from bigWig files (and rescale introns)
   coverage_data_list = extractCoverageData(exons, cdss, transcript_annotations, track_data, rescale_introns,
-                                           new_intron_length, flanking_length, plot_fraction, mean_only, region_coords)
+                                           new_intron_length, flanking_length, plot_fraction, mean_only, region_coords, coverage_ranges_df)
   
-  plot = plotCoverageData(coverage_data_list, heights, alpha,fill_palette,
+  plot = plotCoverageData(coverage_data_list, heights, alpha, fill_palette,
                           connect_exons, transcript_label, return_subplots_list, coverage_type, show_legend)
   return(plot)
   
@@ -211,7 +211,7 @@ plotCoverage <- function(exons, cdss = NULL, transcript_annotations = NULL, trac
 #' @export
 extractCoverageData <- function(exons, cdss = NULL, transcript_annotations = NULL, track_data, rescale_introns = TRUE,
                                 new_intron_length = 50, flanking_length = c(50,50),
-                                plot_fraction = 0.1, mean_only = TRUE, region_coords = NULL){
+                                plot_fraction = 0.1, mean_only = TRUE, region_coords = NULL, coverage_ranges_df = NULL){
   
   #IF cdss is not specified then use exons instead on cdss
   if(is.null(cdss)){
@@ -270,11 +270,22 @@ extractCoverageData <- function(exons, cdss = NULL, transcript_annotations = NUL
   #Extract chromosome name
   chromosome_name = as.vector(GenomicRanges::seqnames(gene_range)[1])
   
-  #Read coverage tracks from BigWig file
-  sample_list = as.list(track_data$bigWig)
-  names(sample_list) = track_data$sample_id
-  coverage_list = lapply(sample_list, readCoverageFromBigWig, gene_range)
-  
+  if(is.null(coverage_ranges_df)){
+    #Read coverage tracks from BigWig file
+    sample_list = as.list(track_data$bigWig)
+    names(sample_list) = track_data$sample_id
+    coverage_list = lapply(sample_list, readCoverageFromBigWig, gene_range)
+  } else{
+    #Convert coverage data frame into a list of GRanges objects
+    granges_list = coverageParquetToGRangesList(coverage_ranges_df, gene_range)
+    
+    #Keep only those sample_ids present in track_data
+    granges_list = granges_list[track_data$sample_id]
+    
+    #Convert GRanges to coverage Rle list
+    coverage_list = purrr::map(granges_list, ~convertGRangesToCoverageRle(.,gene_range))
+  }
+
   #Shorten introns and translate exons into the new introns
   if(rescale_introns){
     #Recale transcript annotations
