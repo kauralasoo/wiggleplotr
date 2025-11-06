@@ -18,12 +18,18 @@ convertGRangesToCoverageRle <- function(granges_object, gene_range){
   return(coverage_vector)
 }
 
-coverageParquetToGRangesList <- function(coverage_ranges_df, gene_range){
-  #Keep ranges from a single region
-  coverage_df = dplyr::filter(coverage_ranges_df, 
-                              seqnames == as.character(GenomicRanges::seqnames(gene_range)), 
-                              end > GenomicRanges::start(gene_range), 
-                              start <= GenomicRanges::end(gene_range))
+coverageParquetToGRangesList <- function(coverage_ranges_pq, gene_range){
+  
+  #Set filter values
+  filter_seqnames = as.character(GenomicRanges::seqnames(gene_range))
+  filter_start = GenomicRanges::start(gene_range)
+  filter_end = GenomicRanges::end(gene_range)
+  
+  #Read the required region directly from parquet file
+  pq_file = arrow::open_dataset(coverage_ranges_pq)
+  coverage_df = dplyr::filter(pq_file, seqnames == filter_seqnames,
+                            end > filter_start,
+                            start <= filter_end) %>% collect()
   
   #Group coverage by sample ids and make GRanges
   grouped_df = dplyr::group_by(coverage_df, sample_id)
