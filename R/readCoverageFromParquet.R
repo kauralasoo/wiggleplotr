@@ -29,8 +29,10 @@ coverageParquetToGRangesList <- function(coverage_ranges_pq, gene_range){
   pq_file = arrow::open_dataset(coverage_ranges_pq)
   coverage_df = dplyr::filter(pq_file, seqnames == filter_seqnames,
                             end > filter_start,
-                            start <= filter_end) %>% collect()
-  
+                            start <= filter_end) %>% 
+    dplyr::collect() %>%
+    dplyr::arrange(seqnames, start, end)
+
   #Group coverage by sample ids and make GRanges
   grouped_df = dplyr::group_by(coverage_df, sample_id)
   sample_ids = dplyr::group_keys(grouped_df)$sample_id
