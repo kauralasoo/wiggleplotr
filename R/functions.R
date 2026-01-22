@@ -52,7 +52,7 @@ prepareTranscriptAnnotations <- function(transcript_annotations){
   
   #Add transcript label
   if(assertthat::has_name(transcript_annotations, "gene_name")){
-    transcript_annotations = dplyr::select_(transcript_annotations, "transcript_id", "gene_name", "strand") %>% 
+    transcript_annotations = dplyr::select(transcript_annotations, "transcript_id", "gene_name", "strand") %>% 
       dplyr::mutate(transcript_label = ifelse(strand == 1, 
                     paste(paste(gene_name, transcript_id, sep = ":")," >",sep =""), 
                     paste("< ",paste(gene_name, transcript_id, sep = ":"),sep ="")))
@@ -125,7 +125,7 @@ pasteFactors <- function(factor1, factor2){
 
 # Calculate mean coverage within each track_id and colour_group
 meanCoverage <- function(coverage_df){
-  coverage_df = dplyr::group_by_(coverage_df, "track_id", "colour_group", "bins") %>% 
+  coverage_df = dplyr::group_by(coverage_df, "track_id", "colour_group", "bins") %>% 
     dplyr::summarise_(.dots = stats::setNames(list(~mean(coverage)), c("coverage"))) %>%
     dplyr::ungroup() %>% # It's important to do ungroup before mutate, or you get unexpected factor results
     dplyr::mutate_(.dots = stats::setNames(list(~pasteFactors(as.factor(track_id), as.factor(colour_group))),c("sample_id")) ) #Construct a new sample id for mean vector
