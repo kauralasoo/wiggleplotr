@@ -311,12 +311,12 @@ extractCoverageData <- function(exons, cdss = NULL, transcript_annotations = NUL
   coverage_list = lapply(coverage_list, function(x) {x[points,]} )
   
   #Convert to data frame and plot
-  coverage_df = purrr::map_df(coverage_list, identity, .id = "sample_id") %>% 
+  coverage_df <- purrr::map_df(coverage_list, identity, .id = "sample_id") %>% 
     as.data.frame() %>%
-    dplyr::mutate_(.dots = stats::setNames(list(~as.character(sample_id)), c("sample_id")) ) #Convert factor to character
-  coverage_df = dplyr::left_join(coverage_df, track_data, by = "sample_id") %>%
-    dplyr::mutate_(.dots = stats::setNames(list(~coverage/scaling_factor), c("coverage")) ) #Normalize by library size
-  
+    dplyr::mutate(sample_id = as.character(sample_id)) %>% #Convert factor to character
+    dplyr::left_join(track_data, by = "sample_id") %>%
+    dplyr::mutate(coverage = coverage / scaling_factor) #Normalize by library size
+
   #Calculate mean coverage within each track and colour group
   if(mean_only){  coverage_df = meanCoverage(coverage_df) }
   
