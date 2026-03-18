@@ -19,12 +19,12 @@ vignette: >
 library("wiggleplotr")
 library("GenomicRanges")
 library("dplyr")
-library("biomaRt")
 library("GenomicFeatures")
 library("ensembldb")
 library("EnsDb.Hsapiens.v86")
 library("org.Hs.eg.db")
 library("TxDb.Hsapiens.UCSC.hg38.knownGene")
+library("arrow")
 ```
 
 _wiggleplotr_ is a tool to visualise RNA-seq read overage accross annotated exons. A key feature of _wiggleplotr_ is that it is able rescale all introns of a gene to fixed length, making it easier to see differences in read coverage between neighbouring exons that can otherwise be too far away. Since _wiggleplotr_ takes standard BigWig files as input, it can also be used to visualise read overage from other sequencing-based assays such as ATAC-seq and ChIP-seq.
@@ -43,7 +43,6 @@ library("wiggleplotr")
 library("dplyr")
 library("GenomicRanges")
 library("GenomicFeatures")
-library("biomaRt")
 ```
 
 ##Visualizing transcript annotations
@@ -86,7 +85,7 @@ We used the NCOA7 example above, because we discovered recently that this gene u
 First, you need to create a data frame containing sample metadata. In our case we have four samples, two from the naive condition and two after LPS stimulation: 
 
 ```{r}
-sample_data = dplyr::data_frame(
+sample_data = dplyr::tibble(
   sample_id = c("aipt_A", "aipt_C", "bima_A", "bima_C"), 
   condition = factor(c("Naive", "LPS", "Naive", "LPS"), levels = c("Naive", "LPS")), 
   scaling_factor = 1)
@@ -119,6 +118,20 @@ plotCoverage(ncoa7_exons[selected_transcripts], ncoa7_cdss[selected_transcripts]
 ```
 
 It is clear from both plots that the short transcript skipping the first 11 exons of the gene is only expressed after LPS stimulation.
+
+### Extract read coverage from parquet files instead of bigWig files
+_wiggleplotr_ can now also extract read coverage from parquet files instead of bigWig files. This should substantially reduce I/O demands for datasets with a large number of bigWig files. See this example below:
+
+```{r}
+require("arrow")
+parquet_path = system.file("extdata", "example_coverage.parquet", package = "wiggleplotr")
+plotCoverage(ncoa7_exons[selected_transcripts], ncoa7_cdss[selected_transcripts], 
+             ncoa7_metadata, track_data,
+             heights = c(2,1), fill_palette = getGenotypePalette(), 
+             coverage_ranges_pq = parquet_path, rescale_introns = T)
+
+```
+
 
 ### Overlaying multiple conditions
 Finally, we can overlay the two conditions in different colours by assigning all of the samples to a single track. This approach can we very useful for visualising eQTLs and splice QTLs. Setting `coverage_type = "line"` allows us to see both signals even if one overlaps the other:
@@ -160,5 +173,6 @@ require("TxDb.Hsapiens.UCSC.hg38.knownGene")
 plotTranscriptsFromUCSC(orgdb = org.Hs.eg.db, txdb = TxDb.Hsapiens.UCSC.hg38.knownGene, 
                         gene_names = "NCOA7", transcript_ids = c("ENST00000438495.6", "ENST00000368357.7"))
 ```
+
 
 [^1]: Alasoo, Kaur, et al. ["Transcriptional profiling of macrophages derived from monocytes and iPS cells identifies a conserved response to LPS and novel alternative transcription."](http://www.nature.com/articles/srep12524) Scientific reports 5 (2015): 12524.

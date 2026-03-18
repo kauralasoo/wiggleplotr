@@ -1,8 +1,9 @@
 Package: wiggleplotr
 Title: Make read coverage plots from BigWig files
 Version: 1.33.2
-Author: Kaur Alasoo [aut, cre]
-Maintainer: Kaur Alasoo <kaur.alasoo@gmail.com>
+Authors@R: person("Kaur", "Alasoo", 
+                  email = "kaur.alasoo@gmail.com", 
+                  role = c("aut", "cre"))
 Description: Tools to visualise read coverage from sequencing
         experiments together with genomic annotations (genes,
         transcripts, peaks). Introns of long transcripts can be

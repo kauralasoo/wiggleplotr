@@ -2,22 +2,22 @@ plotTranscriptStructure <- function(exons_df, limits = NA, connect_exons = TRUE,
                                     xlabel = "Distance from gene start (bp)", transcript_label = TRUE){
   
   #Extract the position for plotting transcript name
-  transcript_annot = dplyr::group_by_(exons_df, ~transcript_id) %>% 
-    dplyr::filter_(~feature_type == "exon") %>%
-    dplyr::arrange_('transcript_id', 'start') %>%
+  transcript_annot = dplyr::group_by(exons_df, transcript_id) %>% 
+    dplyr::filter(feature_type == "exon") %>%
+    dplyr::arrange(transcript_id, start) %>%
     dplyr::filter(row_number() == 1)
 
   #Create a plot of transcript structure
   plot = ggplot(exons_df) + geom_blank()
   if(connect_exons){ #Print line connecting exons
-    plot = plot + geom_line(aes_(x = ~start, y = ~transcript_rank, group = ~transcript_rank, color = ~feature_type))
+    plot = plot + geom_line(aes(x = start, y = transcript_rank, group = transcript_rank, color = feature_type))
   }
   plot = plot + 
-    geom_rect(aes_(xmin = ~start, 
-                   xmax = ~end, 
-                   ymax = ~transcript_rank + 0.25, 
-                   ymin = ~transcript_rank - 0.25, 
-                   fill = ~feature_type)) + 
+    geom_rect(aes(xmin = start, 
+                   xmax = end, 
+                   ymax = transcript_rank + 0.25, 
+                   ymin = transcript_rank - 0.25, 
+                   fill = feature_type)) + 
     theme_light() +
     theme(plot.margin=unit(c(0,1,1,1),"line"), 
           axis.title.y = element_blank(),
@@ -38,9 +38,9 @@ plotTranscriptStructure <- function(exons_df, limits = NA, connect_exons = TRUE,
       coord_cartesian(xlim = limits)
   }
   if(transcript_label){
-    plot = plot + geom_text(aes_(x = ~start, 
-                                 y = ~transcript_rank + 0.30, 
-                                 label = ~transcript_label), 
+    plot = plot + geom_text(aes(x = start, 
+                                 y = transcript_rank + 0.30, 
+                                 label = transcript_label), 
                             data = transcript_annot, hjust = 0, vjust = 0, size = 4)
 
   }
@@ -49,20 +49,20 @@ plotTranscriptStructure <- function(exons_df, limits = NA, connect_exons = TRUE,
 
 makeCoveragePlot <- function(coverage_df, limits, alpha, fill_palette, coverage_type, show_legend = FALSE){
   #Plot coverage over a region
-  coverage_plot = ggplot(coverage_df, aes_(~bins, ~coverage, group = ~sample_id, alpha = ~alpha)) + 
+  coverage_plot = ggplot(coverage_df, aes(bins, coverage, group = sample_id)) + 
     geom_blank() +
     theme_light()
   #Choose between plotting a line and plotting area
   if(coverage_type == "line"){
     coverage_plot = coverage_plot + 
-      geom_line(aes_(colour = ~colour_group), alpha = alpha, position = "identity") 
+      geom_line(aes(colour = colour_group), alpha = alpha, position = "identity") 
   } else if (coverage_type == "area"){
     coverage_plot = coverage_plot + 
-      geom_area(aes_(fill = ~colour_group), alpha = alpha, position = "identity")
+      geom_area(aes(fill = colour_group), alpha = alpha, position = "identity")
   } else if (coverage_type == "both"){
     coverage_plot = coverage_plot + 
-      geom_area(aes_(fill = ~colour_group), alpha = alpha, position = "identity") +
-      geom_line(aes_(colour = ~colour_group), alpha = alpha, position = "identity") 
+      geom_area(aes(fill = colour_group), alpha = alpha, position = "identity") +
+      geom_line(aes(colour = colour_group), alpha = alpha, position = "identity") 
   } else{
     stop("Coverage type not supported.")
   }
@@ -116,10 +116,10 @@ makeManhattanPlot <- function(pvalues_df, region_coords, color_R2 = FALSE, data_
   #If R2 is specified
   if(color_R2){
     assertthat::assert_that(assertthat::has_name(pvalues_df, "R2"))
-    plot_base = ggplot(pvalues_df, aes_(x = ~pos, y = ~-log(p_nominal, 10), colour = ~R2)) + geom_blank()
+    plot_base = ggplot(pvalues_df, aes(x = pos, y = -log(p_nominal, 10), colour = R2)) + geom_blank()
   } else{
     #Else do not colour
-    plot_base = ggplot(pvalues_df, aes_(x = ~pos, y = ~-log(p_nominal, 10))) + geom_blank()
+    plot_base = ggplot(pvalues_df, aes(x = pos, y = -log(p_nominal, 10))) + geom_blank()
   }
   
   #Make the rest of the plot
