@@ -1,6 +1,6 @@
 Package: wiggleplotr
 Title: Make read coverage plots from BigWig files
-Version: 1.35.1
+Version: 1.35.2
 Authors@R: person("Kaur", "Alasoo", 
                   email = "kaur.alasoo@gmail.com", 
                   role = c("aut", "cre"))
@@ -19,7 +19,7 @@ Encoding: UTF-8
 Suggests: knitr, rmarkdown, biomaRt, GenomicFeatures, testthat,
         ensembldb, EnsDb.Hsapiens.v86, org.Hs.eg.db,
         TxDb.Hsapiens.UCSC.hg38.knownGene, AnnotationDbi,
-        AnnotationFilter
+        AnnotationFilter, arrow
 VignetteBuilder: knitr
 biocViews: ImmunoOncology, Coverage, RNASeq, ChIPSeq, Sequencing, Visualization,
         GeneExpression, Transcription, AlternativeSplicing
