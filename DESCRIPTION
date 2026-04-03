@@ -1,6 +1,6 @@
 Package: wiggleplotr
 Title: Make read coverage plots from BigWig files
-Version: 1.35.2
+Version: 1.34.1
 Authors@R: person("Kaur", "Alasoo", 
                   email = "kaur.alasoo@gmail.com", 
                   role = c("aut", "cre"))
